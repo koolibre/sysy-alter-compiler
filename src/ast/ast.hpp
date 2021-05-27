@@ -9,12 +9,12 @@
   #undef NDEBUG
 #endif
 
-#include <cassert> // use assert()
+#include <cassert>      // use assert()
 
-#include <iostream> // use std::cout
-#include <string> // use std::string
-#include <list> // use std::list
-#include <vector> // use std::vector
+#include <iostream>     // use std::cout
+#include <string>       // use std::string
+#include <list>         // use std::list
+#include <vector>       // use std::vector
 
 // node type
 enum class NodeType {
@@ -64,6 +64,7 @@ enum class BasicType {
 
 // all the nodes below are use as pure data storage,
 // so we use struct instead of class,
+// and there is no need to use smart pointer...
 
 // Node
 // base struct type 
@@ -494,7 +495,7 @@ class UnaryExpNode : public Node {
 };
 
 // LvalPrimaryExpNode
-// left value, ident[a][b] .. or ident
+// left value, ident[a][b] .. or identifier
 class LValPrimaryExpNode : public Node {
  public:
   // ctor
