@@ -43,6 +43,11 @@ inline void test_output(const char *type) {
 %}
 
 %%
+
+<<EOF>> {
+  return 0;
+}
+
 {comment_typetwo} {
   test_output("comment_typetwo");
 } /* comment_typetwo */
