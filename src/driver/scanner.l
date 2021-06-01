@@ -2,25 +2,21 @@ character [a-zA-Z]
 digit [0-9]
 Ident {character}({character}|"_"|{digit})*
 IntConst [+-]?{digit}+
-floatConst [+-]?({digit}+\.{digit}* | {digit}*\.{digit}+)
+floatConst [+-]?({digit}+\.{digit}*|({digit}*\.{digit}+))
 CharConst '{character}'
 StringConst \"[^\"]*\"
 comment_typeone "//"
 comment_typetwo "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"
-symbol1 [","";""[""]""{""}""+""-""!""*""/""%""<"">""="]
-keyword "const" | "int" | "float" | "char" | "void" | "if" | "else" | "while" | "break" | "continue" | "return"
+symbol [,;\[\]{}+\-!\*/\%<>=\(\)]
 
 %option yylineno
 
 %{
-#define DEBUG
 #ifndef DEBUG
   #define NDEBUG
 #else
   #undef NDEBUG
 #endif
-
-#include "driver/parser.hpp" // generated from parser.y
 
 #include <cassert> // use assert()
 #include <cstdlib> // use atoi() atof()
@@ -30,14 +26,16 @@ keyword "const" | "int" | "float" | "char" | "void" | "if" | "else" | "while" | 
 #include <string> // use std::string
 
 #include "ast/ast.hpp" // use nodes
+#define YYSTYPE Node*
+#include "driver/parser.hpp" // generated from parser.y
 
 // yyerror was defined in parser.cpp
-extern void yyerror(char *);
+void yyerror(const char *);
 
 // for unit test, output scanning result
 inline void test_output(const char *type) {
 #ifdef DEBUG
-  std::cout << std::string(type) << ": ~" << std::string(yytext) << "~"  << std::endl;
+  fprintf(yyout, "%s: ~%s~\n", type, yytext);
 #endif
 }
 %}
@@ -52,16 +50,15 @@ inline void test_output(const char *type) {
   test_output("comment_typetwo");
 } /* comment_typetwo */
 
-{comment_typeone} {
-  std::cout << "comment_typeone: ~//";
-  char c = input();
-  std::cout << c;
-  while (c != '\n' || c != EOF) {
-    std::cout << c;
-    c = input();
-  }
-  std::cout << "~" << std::endl;
+{comment_typeone}.* {
+  test_output("comment_typeone");
 } /* comment_typeone*/
+
+"def" {
+  test_output("keyword");
+  yylval = nullptr;
+  return DEF;
+}
 
 "const" {
   test_output("keyword");
@@ -129,45 +126,45 @@ inline void test_output(const char *type) {
   return RETURN;
 } /* keyword */
 
-{symbol1} {
+{symbol} {
   test_output("symbol1");
-  yyval = nullptr;
-  return *dynamic_cast<char*>(yytext);
+  yylval = nullptr;
+  return *(char*)(yytext);
 } /* symbol with one character */
 
 "<=" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return LEEQ;
 } /* symbol with two characters */
 
 ">=" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return GEEQ;
 } /* symbol with two characters */
 
 "==" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return EQ;
 } /* symbol with two characters */
 
 "!=" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return UNEQ;
 } /* symbol with two characters */
 
 "&&" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return AND;
 } /* symbol with two characters */
 
 "||" {
   test_output("symbol2");
-  yyval = nullptr;
+  yylval = nullptr;
   return OR;  
 } /* symbol with two characters */
 
@@ -179,13 +176,11 @@ inline void test_output(const char *type) {
   return IDENT;
 } /* identifier */
 
-[\t\n]+ /* eat up white space */
+[ \t\n]+ /* eat up white space */
 
 {IntConst} {
   test_output("IntConst");
-  Node* new_node = new ValuePrimaryExpNode<int>(
-      NodeType::INT_PRIMARY_EXP,
-      atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode<int>(NodeType::INT_PRIMARY_EXP, atoi(yytext));
   assert(new_node != nullptr);
   yylval = new_node;
   return INT_CONST;
@@ -193,9 +188,7 @@ inline void test_output(const char *type) {
 
 {floatConst} {
   test_output("floatConst");
-  Node* new_node = new ValuePrimaryExpNode<float>(
-      NodeType::FLOAT_PRIMARY_EXP,
-      atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode<float>(NodeType::FLOAT_PRIMARY_EXP, atof(yytext));
   assert(new_node != nullptr);
   yylval = new_node;
   return FLOAT_CONST;
@@ -203,9 +196,7 @@ inline void test_output(const char *type) {
 
 {CharConst} {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode<char>(
-      NodeType::CHAR_PRIMARY_EXP,
-      atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode<char>(NodeType::CHAR_PRIMARY_EXP, *(char*)yytext);
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;
@@ -217,9 +208,7 @@ inline void test_output(const char *type) {
     yymore();
   } else {
     test_output("StringConst");
-    Node* new_node = new ValuePrimaryExpNode<std::string>(
-        NodeType::STRING_PRIMARY_EXP,
-        std::string(yytext));
+    Node* new_node = new ValuePrimaryExpNode<std::string>(NodeType::STRING_PRIMARY_EXP, std::string(yytext));
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
@@ -229,7 +218,7 @@ inline void test_output(const char *type) {
 
 . {
 #ifdef DEBUG
-  yyerror("unknown symbol");
+  fprintf(yyout, "unknown symbol: ~%s~\n", yytext);
 #endif
   // return ERROR;
 }/* error */
@@ -238,4 +227,9 @@ inline void test_output(const char *type) {
 
 int yywrap() {
   return 1;
+}
+
+void yyerror(const char *str) {
+  assert(str != nullptr);
+  fprintf(yyout,"%s", str);
 }

@@ -1,5 +1,4 @@
 %{
-#define DEBUG
 #ifndef DEBUG
   #define NDEBUG
 #else
@@ -15,8 +14,8 @@
 
 #define YYSTYPE Node*
 // output error message
-// used in scanner.cpp
-void yyerror(char *str);
+// defined in scanner.cpp
+extern void yyerror(const char *str);
 
 // defined in scanner.cpp
 extern int yylex();
@@ -24,7 +23,7 @@ extern int yylex();
 
 // token definition
 // keyword
-%token CONST INT FLOAT CHAR VOID IF ELSE WHILE BREAK CONTINUE RETURN
+%token CONST INT FLOAT CHAR VOID IF ELSE WHILE BREAK CONTINUE RETURN DEF
 // idenifier
 %token IDENT
 // literial
@@ -42,11 +41,11 @@ extern int yylex();
 
 CompUnit:
   CompUnit Decl {
-    $1->AddNode($2);
+    dynamic_cast<RootNode*>($1)->AddNode($2);
     $$ = $1;
   } |
   CompUnit FuncDef {
-    $1->AddNode($2);
+    dynamic_cast<RootNode*>($1)->AddNode($2);
     $$ = $1;    
   } |
   Decl {
@@ -70,7 +69,7 @@ Decl:
 
 ConstDecl:
   CONST BType ConstDefList ';' {
-    $3->SetBasicType();
+    dynamic_cast<DeclNode*>($3)->SetBasicType();
     $$ = $3;
   }
   ;
@@ -82,26 +81,26 @@ ConstDefList:
     $$ = new_decl_node;
   } |
   ConstDefList ',' ConstDef {
-    $1->AddDecl();
+    dynamic_cast<DeclNode*>($1)->AddDecl();
     $$ = $1;   
   }
   ;
 
 ConstDef:
   IDENT ConstDefDimensionList '=' ConstInitVal {
-    DeclNode::tmp_ident_ = $1->GetIdent();
-    DeclNode::tmp_init_val_ = $4;
+    declnode_tmp_ident = dynamic_cast<IdentNode*>($1)->GetIdent();
+    declnode_tmp_init_val = $4;
     $$ = nullptr;
   }
   ;
 
 ConstDefDimensionList:
   /* empty */ {
-    DeclNode::tmp_array_dimension_array_.resize(0);
+    declnode_tmp_array_dimension_array.resize(0);
     $$ = nullptr;
   } |
   ConstDefDimensionList '[' ConstExp ']' {
-    DeclNode::tmp_array_dimension_array_.push_back($3);
+    declnode_tmp_array_dimension_array.push_back($3);
     $$ = $1;
   }
   ;
@@ -120,7 +119,7 @@ ConstInitVal:
 
 ConstInitValList:
   ConstInitValList ',' ConstInitVal {
-    $1->AddInitVal($3);
+    dynamic_cast<InitValNode*>($1)->AddInitVal($3);
     $$ = $1;
   } |
   ConstInitVal {
@@ -132,7 +131,7 @@ ConstInitValList:
 
 VarDecl:
   BType VarDefList ';' {
-    $3->SetBasicType();
+    dynamic_cast<DeclNode*>($3)->SetBasicType();
     $$ = $3;
   }
   ;
@@ -144,26 +143,26 @@ VarDefList:
     $$ = new_decl_node;
   } |
   VarDefList ','  VarDef {
-    $1->AddDecl();
+    dynamic_cast<DeclNode*>($1)->AddDecl();
     $$ = $1;
   }
   ;
 
 VarDef:
   IDENT VarDefDimensionList '=' VarInitVal {
-    DeclNode::tmp_ident_ = $1->GetIdent();
-    DeclNode::tmp_init_val_ = $4;
+    declnode_tmp_ident = dynamic_cast<IdentNode*>($1)->GetIdent();
+    declnode_tmp_init_val = $4;
     $$ = nullptr; 
   }
   ;
 
 VarDefDimensionList:
   /* empty */ {
-    DeclNode::tmp_array_dimension_array_.resize(0);
+    declnode_tmp_array_dimension_array.resize(0);
     $$ = nullptr;
   } |
   VarDefDimensionList '[' VarExp ']' {
-    DeclNode::tmp_array_dimension_array_.push_back($3);
+    declnode_tmp_array_dimension_array.push_back($3);
     $$ = $1;
   }
   ;
@@ -182,7 +181,7 @@ VarInitVal:
 
 VarInitValList:
   VarInitValList ',' VarInitVal {
-    $1->AddInitVal($3);
+    dynamic_cast<InitValNode*>($1)->AddInitVal($3);
     $$ = $1;
   } |
   VarInitVal {
@@ -194,26 +193,26 @@ VarInitValList:
 
 VarDef:
   IDENT VarDefDimensionList {
-    DeclNode::tmp_ident_ = $1->GetIdent();
-    DeclNode::tmp_init_val_ = nullptr;
+    declnode_tmp_ident = dynamic_cast<IdentNode*>($1)->GetIdent();
+    declnode_tmp_init_val = nullptr;
     $$ = nullptr;
   }
   ;
 
 BType:
   INT {
-    DeclNode::basic_type_ = BasicType::INT;
-    FuncDefNode::tmp_fparam_basic_type_ = BasicType::INT;
+    declnode_tmp_basic_type = BasicType::INT;
+    funcdefnode_tmp_fparam_basic_type = BasicType::INT;
     $$ = nullptr;
   } |
   FLOAT {
-    DeclNode::basic_type_ = BasicType::FLOAT;
-    FuncDefNode::tmp_fparam_basic_type_ = BasicType::FLOAT;
+    declnode_tmp_basic_type = BasicType::FLOAT;
+    funcdefnode_tmp_fparam_basic_type = BasicType::FLOAT;
     $$ = nullptr;
   } |
   CHAR {
-    DeclNode::basic_type_ = BasicType::CHAR;
-    FuncDefNode::tmp_fparam_basic_type_ = BasicType::CHAR;
+    declnode_tmp_basic_type = BasicType::CHAR;
+    funcdefnode_tmp_fparam_basic_type = BasicType::CHAR;
     $$ = nullptr;
   }
   ;
@@ -229,7 +228,7 @@ BlockItemList:
     $$ = new BlockNode;
   } |
   BlockItemList BlockItem {
-    $1->AddNode($2);
+    dynamic_cast<BlockNode*>($1)->AddNode($2);
     $$ = $1;
   }
   ;
@@ -302,7 +301,7 @@ Exp:
 
 LVal:
   IDENT IndexList {
-    LvalPrimaryExpNode* tmp_node = new LvalPrimaryExpNode($1);
+    LValPrimaryExpNode* tmp_node = new LValPrimaryExpNode(dynamic_cast<IdentNode*>($1));
     tmp_node->AddLVal();
     $$ = tmp_node;
   }
@@ -310,11 +309,11 @@ LVal:
 
 IndexList:
   /* empty */ {
-    LValPrimaryExpNode::tmp_index_array_.resize(0);
+    lvalprimaryexpnode_tmp_index_array.resize(0);
     $$ = nullptr;
   } |
   IndexList '[' Exp ']' {
-    LValPrimaryExpNode::tmp_index_array_.push_back($3);
+    lvalprimaryexpnode_tmp_index_array.push_back($3);
     $$ = nullptr;
   }
   ;
@@ -369,16 +368,16 @@ UnaryExp:
     $$ = $1;
   } |
   IDENT '(' FuncRParamList ')' {
-    $3->SetIdent($1);
+    dynamic_cast<FuncCallExpNode*>($3)->SetIdent(dynamic_cast<IdentNode*>($1));
     $$ = $3;
   } |
   IDENT '(' ')' {
     FuncCallExpNode* new_node = new FuncCallExpNode;
-    new_node->SetIdent($1);
+    new_node->SetIdent(dynamic_cast<IdentNode*>($1));
     $$ = new_node;
   } |
   UnaryOp UnaryExp {
-    $1->SetExp($2);
+    dynamic_cast<UnaryExpNode*>($1)->SetExp($2);
     $$ = $1;
   }
   ;
@@ -389,7 +388,7 @@ FuncRParamList:
     $$ = new_node;
   } |
   FuncRParamList ',' Exp {
-    $1->AddParam($3);
+    dynamic_cast<FuncCallExpNode*>($1)->AddParam($3);
   }
   ;
 
@@ -413,8 +412,8 @@ MulExp:
     $$ = $1;
   } |
   MulExp MulOp UnaryExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2;
   }
   ;
@@ -439,8 +438,8 @@ AddExp:
     $$ = $1;
   } |
   AddExp AddOp MulExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2; 
   }
   ;
@@ -458,8 +457,8 @@ AddOp:
 
 RelExp:
   RelExp RelOp AddExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2;
   } |
   AddExp {
@@ -491,8 +490,8 @@ EqExp:
     $$ = $1;
   } |
   EqExp EqOp RelExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2;
   }
   ;
@@ -513,8 +512,8 @@ LAndExp:
     $$ = $1;
   } |
   LAndExp LAndOp EqExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2;
   }
   ;
@@ -531,8 +530,8 @@ LOrExp:
     $$ = $1;
   } |
   LOrExp LOrOp LAndExp {
-    $2->SetLeftExp($1);
-    $2->SetRightExp($3);
+    dynamic_cast<BinaryExpNode*>($2)->SetLeftExp($1);
+    dynamic_cast<BinaryExpNode*>($2)->SetRightExp($3);
     $$ = $2;
   }
   ;
@@ -550,26 +549,32 @@ ConstExp:
   }
   ;
 
+VarExp:
+  AddExp {
+    $$ = $1;
+  }
+  ;
+
 FuncDef:
-  FuncType IDENT '(' FuncFParamList ')' Block {
-    $1->SetIdent($2);
-    $1->SetBlock($6);
-    $$ = FuncDefNode::tmp_func_def_node_;
+  DEF FuncType IDENT '(' FuncFParamList ')' Block {
+    dynamic_cast<FuncDefNode*>($2)->SetIdent(dynamic_cast<IdentNode*>($3));
+    dynamic_cast<FuncDefNode*>($2)->SetBlock($7);
+    $$ = funcdefnode_tmp_func_def_node;
   } |
-  FuncType IDENT '(' ')' Block {
-    $1->SetIdent($2);
-    $1->SetBlock($6);
-    $$ = FuncDefNode::tmp_func_def_node_;
+  DEF FuncType IDENT '(' ')' Block {
+    dynamic_cast<FuncDefNode*>($2)->SetIdent(dynamic_cast<IdentNode*>($3));
+    dynamic_cast<FuncDefNode*>($2)->SetBlock($6);
+    $$ = funcdefnode_tmp_func_def_node;
   }
   ;
 
 FuncFParamList:
   FuncFParam {
-    FuncDefNode::tmp_func_def_node_->AddParam($1);
+    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($1));
     $$ = nullptr;
   } |
   FuncFParamList ',' FuncFParam {
-    FuncDefNode::tmp_func_def_node_->AddParam($1);
+    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($1));
     $$ = nullptr;
   }
   ;
@@ -585,12 +590,12 @@ FuncFParam:
 
 FuncFParamIndexList:
   /* empty */ {
-    FuncDefNode::tmp_param_index_list_.resize(0);
-    FuncDefNode::tmp_param_index_list_.push_back(nullptr);
+    funcdefnode_tmp_fparam_index_list.resize(0);
+    funcdefnode_tmp_fparam_index_list.push_back(nullptr);
     $$ = nullptr;
   } |
   FuncFParamIndexList '[' Exp ']' {
-    FuncDefNode::tmp_param_index_list_.push_back($3);
+    funcdefnode_tmp_fparam_index_list.push_back($3);
     $$ = nullptr;
   }
   ;
@@ -598,29 +603,24 @@ FuncFParamIndexList:
 FuncType:
   VOID {
     FuncDefNode *new_node = new FuncDefNode(BasicType::VOID);
-    FuncDefNode::tmp_func_def_node_ = new_node;
+    funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   INT {
     FuncDefNode *new_node = new FuncDefNode(BasicType::INT);
-    FuncDefNode::tmp_func_def_node_ = new_node;
+    funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   FLOAT {
     FuncDefNode *new_node = new FuncDefNode(BasicType::FLOAT);
-    FuncDefNode::tmp_func_def_node_ = new_node;
+    funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   CHAR {
     FuncDefNode *new_node = new FuncDefNode(BasicType::CHAR);
-    FuncDefNode::tmp_func_def_node_ = new_node;
+    funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   }
   ;
 
 %%
-
-void yyerror(char *str) {
-  assert(str != nullptr);
-  std::cout << std::string(str);
-}

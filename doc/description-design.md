@@ -74,27 +74,27 @@ keyword "const" | "int" | "float" | "char" | "void" | "if" | "else" | "while" | 
 virtual design:
 Node
    |-DeclNode
-	 |-FucDefNode
-	 |-BlockNode
-	 |-(StmtNode)
-	 | |-AssignStmtNode
-	 | |-IfStmtNode
-	 | |-WhileStmtNode
-	 | |-BreakStmtNode
-	 | |-ContinueStmtNode
-	 | |-ReturnStmtNode
-	 |-InitValNode
-	 |-IdentNode
-	 |-(ExpNode)
-	 |-FuncCallExpNode
-	 |-BinaryExpNode
-	 |-UnaryExpNode
+   |-FucDefNode
+   |-BlockNode
+   |-(StmtNode)
+   | |-AssignStmtNode
+   | |-IfStmtNode
+   | |-WhileStmtNode
+   | |-BreakStmtNode
+   | |-ContinueStmtNode
+   | |-ReturnStmtNode
+   |-InitValNode
+   |-IdentNode
+   |-(ExpNode)
+   |-FuncCallExpNode
+   |-BinaryExpNode
+   |-UnaryExpNode
    |-(PrimaryExpNode)
-	 |-LvalPrimaryExpNode (represent all LVal)
-   |-IntPrimaryExpNode
-	 |-FloatPrimaryExpNode
-	 |-CharPrimaryExpNode
-	 |-StringPrimaryExpNode
+     |-LvalPrimaryExpNode (represent all LVal)
+     |-IntPrimaryExpNode
+     |-FloatPrimaryExpNode
+     |-CharPrimaryExpNode
+     |-StringPrimaryExpNode
 implementation design:
 	all inherit from class Node, "( )" means that class will not be implemented.
 ```

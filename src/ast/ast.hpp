@@ -1,8 +1,6 @@
 #ifndef SYSY_ALTER_COMPILER_AST_AST_DATA_HPP_
 #define SYSY_ALTER_COMPILER_AST_AST_DATA_HPP_
 
-#define DEBUG
-
 #ifndef DEBUG
   #define NDEBUG
 #else
@@ -30,7 +28,7 @@ enum class NodeType {
     // expression node
     FUNC_CALL_EXP, BINARY_EXP, UNARY_EXP,
     LVAL_PRIMARY_EXP, INT_PRIMARY_EXP, FLOAT_PRIMARY_EXP,
-    CHAR_PAIMARY_EXP, STRING_PRIMARY_EXP,
+    CHAR_PRIMARY_EXP, STRING_PRIMARY_EXP,
     // initialization value node
     INIT_VAL,
     // identifier node
@@ -114,7 +112,14 @@ struct RootNode : public Node {
   // member
   std::list<Node*> decl_funcdef_list_;
 };
+// global RootNode
+extern RootNode *root;
 
+// global variable for DeclNode
+extern std::vector<Node*> declnode_tmp_array_dimension_array;
+extern std::string declnode_tmp_ident;
+extern Node* declnode_tmp_init_val;
+extern BasicType declnode_tmp_basic_type;
 // DeclNode
 // variable declaration and const value declaration
 struct DeclNode : public Node {
@@ -133,17 +138,15 @@ struct DeclNode : public Node {
   // other
   inline void SetBasicType() {
     // TODO(kolibre) : error check
-    basic_type_ = tmp_basic_type_;
+    basic_type_ = declnode_tmp_basic_type;
   }
-  inline void AddDecl();
+  void AddDecl();
+  inline void SetTmpIdent(std::string &tmp_ident) {
+    declnode_tmp_ident = tmp_ident;
+  }
 #ifdef DEBUG
   void Print(int indentation) const override;
 #endif
-  // member
-  static std::vector<Node*> tmp_array_dimension_array_;
-  static std::string tmp_ident_;
-  static Node* tmp_init_val_;
-  static BasicType tmp_basic_type_;
 
  private:
   // member
@@ -178,6 +181,9 @@ struct IdentNode : public Node {
   std::string ident_;
 };
 
+// global variable for FuncDefNode
+extern BasicType funcdefnode_tmp_fparam_basic_type;
+extern std::vector<Node*> funcdefnode_tmp_fparam_index_list;
 // FuncDefNode
 // function definition
 struct FuncDefNode : public Node {
@@ -208,10 +214,6 @@ struct FuncDefNode : public Node {
 #ifdef DEBUG
   void Print(int indentation) const override;
 #endif
-  // member
-  static BasicType tmp_fparam_basic_type_;
-  static std::vector<Node*> tmp_fparam_index_list_;
-  static FuncDefNode* tmp_func_def_node_;
 
  private:
 	// member
@@ -222,6 +224,7 @@ struct FuncDefNode : public Node {
   std::vector<std::string> fparam_ident_array_;
   Node *block_;
 };
+extern FuncDefNode* funcdefnode_tmp_func_def_node;
 
 // BlockNode
 // block := {}
@@ -494,6 +497,8 @@ class UnaryExpNode : public Node {
   Node *exp_;
 };
 
+// global variable for LValPrimaryExpNode
+extern std::vector<Node*> lvalprimaryexpnode_tmp_index_array;
 // LvalPrimaryExpNode
 // left value, ident[a][b] .. or identifier
 class LValPrimaryExpNode : public Node {
@@ -533,19 +538,28 @@ template <typename T>
 struct ValuePrimaryExpNode : public Node {
  public:
   // ctor
-  ValuePrimaryExpNode(NodeType node_type, T &value) :
+  ValuePrimaryExpNode(NodeType node_type, T value) :
       Node(node_type),
       value_(value) {}
   // default dtor
   // other
-  inline void SetValue(T &value) {
+  inline void SetValue(T value) {
     value_ = value;
   }
   inline T GetValue() const {
     return value_;
   }
 #ifdef DEBUG
-  void Print(int indentation) const override;
+  void Print(int indentation) const override {
+    // print node name
+    for (int i = 0; i < indentation; i++)
+      std::cout << " ";
+    std::cout << "[ValuePrimaryExpNode]" << std::endl;
+    // print value
+    for (int i = 0; i < indentation+1; i++)
+      std::cout << " ";
+    std::cout << "-value_: " << value_ << std::endl;
+  }
 #endif
 
  private:

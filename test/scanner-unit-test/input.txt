@@ -1,0 +1,53 @@
+/*this is a comment*/
+
+// a function 
+def int main(int a, int b) {
+  c = a + b;
+  d = e + f;
+  a[3][4] = "this is a string";
+  j[3] = 'a';
+  j[4] = 'd';
+  /* this
+   * is
+   * a
+   * complex
+   * comment
+
+
+
+   */
+  q = 3.1415926;
+  e = 3;
+  f = 001234.132140;
+  x = .3;
+  z = 4.;
+  y = 5.0;
+  
+  // worst name for an identifier ever
+  ghi3_2_3 = {"this is "};
+
+  if (a != b || b == c ||
+      e <= f || g >= h &&
+      j < k && l > m || !e)
+      a = c * d;
+  else {
+    e = f / h ;
+    z = x % y;
+    p = q - t;
+  }
+}
+
+// meaningless function
+def void func2_3(char c, float d) {
+  const int a = 3;
+  while (a != 3) {
+    t = t * z;
+    break;
+    return;
+    continue;
+  }
+
+  ^^
+  
+  @ & ###
+}

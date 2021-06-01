@@ -1,0 +1,192 @@
+comment_typetwo: ~/*this is a comment*/~
+comment_typeone: ~// a function ~
+keyword: ~def~
+keyword: ~int~
+Ident: ~main~
+symbol1: ~(~
+keyword: ~int~
+Ident: ~a~
+symbol1: ~,~
+keyword: ~int~
+Ident: ~b~
+symbol1: ~)~
+symbol1: ~{~
+Ident: ~c~
+symbol1: ~=~
+Ident: ~a~
+symbol1: ~+~
+Ident: ~b~
+symbol1: ~;~
+Ident: ~d~
+symbol1: ~=~
+Ident: ~e~
+symbol1: ~+~
+Ident: ~f~
+symbol1: ~;~
+Ident: ~a~
+symbol1: ~[~
+IntConst: ~3~
+symbol1: ~]~
+symbol1: ~[~
+IntConst: ~4~
+symbol1: ~]~
+symbol1: ~=~
+StringConst: ~"this is a string"~
+symbol1: ~;~
+Ident: ~j~
+symbol1: ~[~
+IntConst: ~3~
+symbol1: ~]~
+symbol1: ~=~
+CharConst: ~'a'~
+symbol1: ~;~
+Ident: ~j~
+symbol1: ~[~
+IntConst: ~4~
+symbol1: ~]~
+symbol1: ~=~
+CharConst: ~'d'~
+symbol1: ~;~
+comment_typetwo: ~/* this
+   * is
+   * a
+   * complex
+   * comment
+
+
+
+   */~
+Ident: ~q~
+symbol1: ~=~
+floatConst: ~3.1415926~
+symbol1: ~;~
+Ident: ~e~
+symbol1: ~=~
+IntConst: ~3~
+symbol1: ~;~
+Ident: ~f~
+symbol1: ~=~
+floatConst: ~001234.132140~
+symbol1: ~;~
+Ident: ~x~
+symbol1: ~=~
+floatConst: ~.3~
+symbol1: ~;~
+Ident: ~z~
+symbol1: ~=~
+floatConst: ~4.~
+symbol1: ~;~
+Ident: ~y~
+symbol1: ~=~
+floatConst: ~5.0~
+symbol1: ~;~
+comment_typeone: ~// worst name for an identifier ever~
+Ident: ~ghi3_2_3~
+symbol1: ~=~
+symbol1: ~{~
+StringConst: ~"this is "~
+symbol1: ~}~
+symbol1: ~;~
+keyword: ~if~
+symbol1: ~(~
+Ident: ~a~
+symbol2: ~!=~
+Ident: ~b~
+symbol2: ~||~
+Ident: ~b~
+symbol2: ~==~
+Ident: ~c~
+symbol2: ~||~
+Ident: ~e~
+symbol2: ~<=~
+Ident: ~f~
+symbol2: ~||~
+Ident: ~g~
+symbol2: ~>=~
+Ident: ~h~
+symbol2: ~&&~
+Ident: ~j~
+symbol1: ~<~
+Ident: ~k~
+symbol2: ~&&~
+Ident: ~l~
+symbol1: ~>~
+Ident: ~m~
+symbol2: ~||~
+symbol1: ~!~
+Ident: ~e~
+symbol1: ~)~
+Ident: ~a~
+symbol1: ~=~
+Ident: ~c~
+symbol1: ~*~
+Ident: ~d~
+symbol1: ~;~
+keyword: ~else~
+symbol1: ~{~
+Ident: ~e~
+symbol1: ~=~
+Ident: ~f~
+symbol1: ~/~
+Ident: ~h~
+symbol1: ~;~
+Ident: ~z~
+symbol1: ~=~
+Ident: ~x~
+symbol1: ~%~
+Ident: ~y~
+symbol1: ~;~
+Ident: ~p~
+symbol1: ~=~
+Ident: ~q~
+symbol1: ~-~
+Ident: ~t~
+symbol1: ~;~
+symbol1: ~}~
+symbol1: ~}~
+comment_typeone: ~// meaningless function~
+keyword: ~def~
+keyword: ~void~
+Ident: ~func2_3~
+symbol1: ~(~
+keyword: ~char~
+Ident: ~c~
+symbol1: ~,~
+keyword: ~float~
+Ident: ~d~
+symbol1: ~)~
+symbol1: ~{~
+keyword: ~const~
+keyword: ~int~
+Ident: ~a~
+symbol1: ~=~
+IntConst: ~3~
+symbol1: ~;~
+keyword: ~while~
+symbol1: ~(~
+Ident: ~a~
+symbol2: ~!=~
+IntConst: ~3~
+symbol1: ~)~
+symbol1: ~{~
+Ident: ~t~
+symbol1: ~=~
+Ident: ~t~
+symbol1: ~*~
+Ident: ~z~
+symbol1: ~;~
+keyword: ~break~
+symbol1: ~;~
+keyword: ~return~
+symbol1: ~;~
+keyword: ~continue~
+symbol1: ~;~
+symbol1: ~}~
+unknown symbol: ~^~
+unknown symbol: ~^~
+unknown symbol: ~@~
+unknown symbol: ~&~
+unknown symbol: ~#~
+unknown symbol: ~#~
+unknown symbol: ~#~
+symbol1: ~}~
