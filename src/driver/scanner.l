@@ -35,7 +35,9 @@ void yyerror(const char *);
 // for unit test, output scanning result
 inline void test_output(const char *type) {
 #ifdef DEBUG
+#ifdef SCANNER_DEBUG
   fprintf(yyout, "%s: ~%s~\n", type, yytext);
+#endif
 #endif
 }
 %}
@@ -218,7 +220,9 @@ inline void test_output(const char *type) {
 
 . {
 #ifdef DEBUG
+#ifdef SCANNER_DEBUG
   fprintf(yyout, "unknown symbol: ~%s~\n", yytext);
+#endif
 #endif
   // return ERROR;
 }/* error */

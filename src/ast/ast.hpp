@@ -77,7 +77,9 @@ struct Node {
     return node_type_ == node_type;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   virtual void Print(int indentation) const = 0;
+#endif
 #endif
 
  private:
@@ -105,7 +107,9 @@ struct RootNode : public Node {
     decl_funcdef_list_.push_back(new_node);
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -145,7 +149,9 @@ struct DeclNode : public Node {
     declnode_tmp_ident = tmp_ident;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -173,7 +179,9 @@ struct IdentNode : public Node {
     return ident_;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -212,7 +220,9 @@ struct FuncDefNode : public Node {
   }
   void AddParam(IdentNode *ident);
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -245,7 +255,9 @@ struct BlockNode : public Node {
 	  decl_stmt_list_.push_back(new_node);
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -274,7 +286,9 @@ struct InitValNode : public Node {
     init_val_list_.push_back(init_val);
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -297,7 +311,9 @@ struct AssignStmtNode : public Node {
   }
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -325,7 +341,9 @@ struct IfStmtNode : public Node {
   }
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -348,7 +366,9 @@ struct WhileStmtNode : public Node {
   }
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -365,7 +385,9 @@ struct BreakStmtNode : public Node {
   // default dtor
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 };
 
@@ -378,7 +400,9 @@ struct ContinueStmtNode : public Node {
   // default dtor
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 };
 
@@ -392,7 +416,9 @@ struct ReturnStmtNode : public Node {
   // default dtor
   // other
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
   private:
@@ -423,7 +449,9 @@ struct FuncCallExpNode : public Node {
     rparam_array_.push_back(rparam);
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -459,7 +487,9 @@ struct BinaryExpNode : public Node {
     rexp_ = rexp;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -488,7 +518,9 @@ class UnaryExpNode : public Node {
     exp_ = exp;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
 
  private:
@@ -520,7 +552,9 @@ class LValPrimaryExpNode : public Node {
   // }
   void AddLVal();
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override;
+#endif
 #endif
   // member
   static std::vector<Node*> tmp_index_array_;
@@ -550,6 +584,7 @@ struct ValuePrimaryExpNode : public Node {
     return value_;
   }
 #ifdef DEBUG
+#ifdef AST_DEBUG
   void Print(int indentation) const override {
     // print node name
     for (int i = 0; i < indentation; i++)
@@ -560,6 +595,7 @@ struct ValuePrimaryExpNode : public Node {
       std::cout << " ";
     std::cout << "-value_: " << value_ << std::endl;
   }
+#endif
 #endif
 
  private:

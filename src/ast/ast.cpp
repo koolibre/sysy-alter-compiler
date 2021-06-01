@@ -24,6 +24,7 @@ RootNode *root = new RootNode;
 
 // all nodes' Print()
 #ifdef DEBUG
+#ifdef AST_DEBUG
 // the increase in indentation of each recursion
 constexpr int kIndentationIncrease = 1;
 
@@ -378,6 +379,7 @@ void LValPrimaryExpNode::Print(int indentation) const {
     itr->Print(indentation+2);
   }
 }
+#endif
 #endif
 
 // DeclNode
