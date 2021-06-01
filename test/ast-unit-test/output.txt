@@ -1,0 +1,114 @@
+[RootNode]
+ [FuncDefNode]
+  -func_type_: int
+  -func_ident_: a_simple_function
+  -fparam_basic_type_array_[0]: int
+  -fparam_ident_array_[0]: x
+  -fparam_index_list_array_[0]:
+  -fparam_basic_type_array_[1]: int
+  -fparam_ident_array_[1]: y
+  -fparam_index_list_array_[1]:
+  -fparam_basic_type_array_[2]: int
+  -fparam_ident_array_[2]: z
+  -fparam_index_list_array_[2]:
+  -fparam_basic_type_array_[3]: float
+  -fparam_ident_array_[3]: t
+  -fparam_index_list_array_[3]:
+  -block_:
+   [BlockNode]
+    [ReturnStmtNode]
+     [BinaryExpNode]
+      -binary_op_type_: +
+      -lexp_:
+       [LvalPrimaryExpNode]
+        -ident_: x
+      -rexp_:
+       [BinaryExpNode]
+        -binary_op_type_: /
+        -lexp_:
+         [BinaryExpNode]
+          -binary_op_type_: *
+          -lexp_:
+           [LvalPrimaryExpNode]
+            -ident_: y
+          -rexp_:
+           [LvalPrimaryExpNode]
+            -ident_: z
+        -rexp_:
+         [LvalPrimaryExpNode]
+          -ident_: t
+
+ [FuncDefNode]
+  -func_type_: float
+  -func_ident_: function_b
+  -block_:
+   [BlockNode]
+    [ReturnStmtNode]
+     [BinaryExpNode]
+      -binary_op_type_: +
+      -lexp_:
+       [BinaryExpNode]
+        -binary_op_type_: *
+        -lexp_:
+         [ValuePrimaryExpNode]
+          -value_: 1.32
+        -rexp_:
+         [ValuePrimaryExpNode]
+          -value_: 0.4
+      -rexp_:
+       [BinaryExpNode]
+        -binary_op_type_: /
+        -lexp_:
+         [ValuePrimaryExpNode]
+          -value_: 5
+        -rexp_:
+         [ValuePrimaryExpNode]
+          -value_: 123.242
+
+ [FuncDefNode]
+  -func_type_: void
+  -func_ident_: a_void_function
+  -block_:
+   [BlockNode]
+
+ [FuncDefNode]
+  -func_type_: int
+  -func_ident_: main
+  -fparam_basic_type_array_[0]: int
+  -fparam_ident_array_[0]: a
+  -fparam_index_list_array_[0]:
+  -fparam_basic_type_array_[1]: char
+  -fparam_ident_array_[1]: b
+  -fparam_index_list_array_[1]:
+  -fparam_basic_type_array_[2]: float
+  -fparam_ident_array_[2]: c
+  -fparam_index_list_array_[2]:
+  -fparam_basic_type_array_[3]: int
+  -fparam_ident_array_[3]: ident_123_234
+  -fparam_index_list_array_[3]:
+   [ValuePrimaryExpNode]
+    -value_: 5
+  -block_:
+   [BlockNode]
+    [DeclNode]
+     -basic_type_:int
+     -array_dimension_list_list_[0]:
+     -indent_list_[0]: tmp_a
+     -init_val_list_[0]:
+      [ValuePrimaryExpNode]
+       -value_: 3
+    [DeclNode]
+     -basic_type_:char
+     -array_dimension_list_list_[0]:
+     -indent_list_[0]: tmp_b
+     -init_val_list_[0]:
+      [ValuePrimaryExpNode]
+       -value_: 5
+     -array_dimension_list_list_[1]:
+     -indent_list_[1]: tmp_e
+     -init_val_list_[1]:
+      [ValuePrimaryExpNode]
+       -value_: '
+     -array_dimension_list_list_[2]:
+     -indent_list_[2]: tmp_f
+     -init_val_list_[2]:
