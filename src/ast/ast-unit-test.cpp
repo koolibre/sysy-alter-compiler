@@ -14,12 +14,12 @@ int main(int argc, char **argv) {
   using namespace std;
   streambuf *cout_buf = cout.rdbuf();
   ofstream output_stream(argv[2]);
-  streambuf *file_buf = of.rdbuf();
+  streambuf *file_buf = output_stream.rdbuf();
   cout.rdbuf(file_buf);
   yyparse();
   assert(root != nullptr);
 #ifdef AST_DEBUG
-  root->Print();
+  root->Print(0);
 #endif
   output_stream.flush();
   output_stream.close();
