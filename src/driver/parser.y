@@ -32,8 +32,8 @@ extern int yylex();
 // %token '+' '-' '*' '/' '%' '[' ']' '{' '}' ',' ';' '!' '<' '>'
 // two-character symbol
 %token LEEQ GEEQ EQ UNEQ AND OR
-// TODO(kolibre) : finish error token
-// %token ERROR
+// error
+%token ERROR
 
 %start CompUnit
 

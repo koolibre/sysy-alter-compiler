@@ -32,7 +32,9 @@ enum class NodeType {
     // initialization value node
     INIT_VAL,
     // identifier node
-    IDENT
+    IDENT,
+    // for error check
+    ERROR
 };
 
 // unary operation type
@@ -111,6 +113,12 @@ struct RootNode : public Node {
     decl_funcdef_list_.push_back(new_node);
   }
   void Accept(NodeVisitor *visitor) override;
+  inline void SetIfError(bool if_error) {
+    if_error_ = if_error;
+  }
+  inline bool GetIfError() const {
+    return if_error_;
+  }
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
@@ -120,6 +128,7 @@ struct RootNode : public Node {
  private:
   // member
   std::list<Node*> decl_funcdef_list_;
+  bool if_error_;
 };
 // global RootNode
 extern RootNode *root;
@@ -669,5 +678,13 @@ struct ValuePrimaryExpNode : public Node {
   char char_value_;
   float float_value_;
   std::string string_value_;
+};
+
+// ErrorNode
+// support error check
+struct ErrorNode : public Node {
+ public:
+  ErrorNode() :
+      Node(NodeType::ERROR) {}
 };
 #endif

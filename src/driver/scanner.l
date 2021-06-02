@@ -225,7 +225,7 @@ inline void test_output(const char *type) {
   fprintf(yyout, "unknown symbol: ~%s~\n", yytext);
 #endif
 #endif
-  // return ERROR;
+  return ERROR;
 }/* error */
 
 %%
