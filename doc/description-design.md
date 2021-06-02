@@ -28,7 +28,7 @@
 ​	表达式 Exp → AddExp
 ​	条件表达式 Cond → LOrExp
 ​	左值表达式 LVal → **Ident** {'**[**' Exp '**]**'}
-​	基本表达式 PrimaryExp → '**(**' Exp '**)**' | LVal | IntNumber | FloatNumber | 		  Character | String
+​	基本表达式 PrimaryExp → '**(**' LOrExp '**)**' | LVal | IntNumber | FloatNumber | 		  Character | String
 ​	// 整数数值 IntNumber → **IntConst** 
 ​	// 浮点数数值 FloatNumber → **FloatConst**
 ​	// 字符 Character → **CharConst**
@@ -56,8 +56,8 @@
 character [a-zA-Z]
 digit [0-9]
 Ident {character}({character}|"_"|{digit})*
-IntConst [+-]?{digit}+
-floatConst [+-]?({digit}+\.{digit}* | {digit}*\.{digit}+)
+IntConst {digit}+
+floatConst ({digit}+\.{digit}* | {digit}*\.{digit}+)
 CharConst '{character}'
 StringConst \"[^\"]*\"
 comment_typeone "//"
@@ -86,15 +86,15 @@ Node
    |-InitValNode
    |-IdentNode
    |-(ExpNode)
-   |-FuncCallExpNode
-   |-BinaryExpNode
-   |-UnaryExpNode
-   |-(PrimaryExpNode)
-     |-LvalPrimaryExpNode (represent all LVal)
-     |-IntPrimaryExpNode
-     |-FloatPrimaryExpNode
-     |-CharPrimaryExpNode
-     |-StringPrimaryExpNode
+     |-FuncCallExpNode
+     |-BinaryExpNode
+     |-UnaryExpNode
+     |-(PrimaryExpNode)
+        |-LvalPrimaryExpNode (represent all LVal)
+        |-IntPrimaryExpNode
+        |-FloatPrimaryExpNode
+        |-CharPrimaryExpNode
+        |-StringPrimaryExpNode
 implementation design:
 	all inherit from class Node, "( )" means that class will not be implemented.
 ```

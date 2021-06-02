@@ -7,12 +7,12 @@
   #undef NDEBUG
 #endif
 
-#include <cassert>      // use assert()
+#include <cassert>        // use assert()
 
-#include <iostream>     // use std::cout
-#include <string>       // use std::string
-#include <list>         // use std::list
-#include <vector>       // use std::vector
+#include <iostream>       // use std::cout
+#include <string>         // use std::string
+#include <list>           // use std::list
+#include <vector>         // use std::vector
 
 // node type
 enum class NodeType {

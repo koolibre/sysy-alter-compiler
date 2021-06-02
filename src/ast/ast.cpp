@@ -1,11 +1,11 @@
 #include "ast/ast.hpp"
 
-#include <cassert>      // use assert()
+#include <cassert>        // use assert()
 
-#include <iostream>     // use std::cout
-#include <string>       // use std::string
-#include <list>         // use std::list
-#include <vector>       // use std::vector
+#include <iostream>       // use std::cout
+#include <string>         // use std::string
+#include <list>           // use std::list
+#include <vector>         // use std::vector
 
 // global variable definition
 // DeclNode
@@ -47,9 +47,11 @@ auto PrintBasicType = [](BasicType basic_type) {
     }
     case BasicType::FLOAT : {
       std::cout << "float" << std::endl;
+      break;
     }
     case BasicType::VOID : {
-      std::cout << "VOID" << std::endl;
+      std::cout << "void" << std::endl;
+      break;
     }
     default : {
       assert(0);
@@ -140,7 +142,7 @@ auto PrintUnaryOp = [](UnaryOpType unary_op_type) {
 
 void RootNode::Print(int indentation) const {
   PrintIndentation(indentation);
-  std::cout << "[RootNode]:" << std::endl;
+  std::cout << "[RootNode]" << std::endl;
   for (auto itr : decl_funcdef_list_) {
     assert(itr != nullptr);
     itr->Print(indentation + kIndentationIncrease);
@@ -150,7 +152,7 @@ void RootNode::Print(int indentation) const {
 void DeclNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[DeclNode]:" << std::endl;
+  std::cout << "[DeclNode]" << std::endl;
   // print basic_type
   PrintIndentation(indentation+1);
   std::cout << "-basic_type_:";
@@ -174,8 +176,8 @@ void DeclNode::Print(int indentation) const {
     // print init_val_list_
     PrintIndentation(indentation+1);
     std::cout << "-init_val_list_" << "[" << count << "]:" << std::endl;
-    assert(*itr3 != nullptr);
-    (*itr3)->Print(indentation+2);
+    if (*itr3 != nullptr)
+      (*itr3)->Print(indentation+2);
   }
 }
 
@@ -187,11 +189,14 @@ void IdentNode::Print(int indentation) const {
 void FuncDefNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[FuncDefNode]:" << std::endl;
+  std::cout << "[FuncDefNode]" << std::endl;
   // print func_type
   PrintIndentation(indentation+1);
   std::cout << "-func_type_: ";
   PrintBasicType(func_type_);
+  // print func_ident
+  PrintIndentation(indentation+1);
+  std::cout << "-func_ident_: " << func_ident_ << std::endl;
   // print list
   auto itr1 = fparam_basic_type_array_.begin();
   auto itr2 = fparam_index_list_array_.begin();
@@ -209,8 +214,8 @@ void FuncDefNode::Print(int indentation) const {
     PrintIndentation(indentation+1);
     std::cout << "-fparam_index_list_array_" << "[" << count << "]:" << std::endl;
     for (auto itr : **itr2) {
-      assert(itr != nullptr);
-      itr->Print(indentation+2);
+      if (itr != nullptr)
+        itr->Print(indentation+2);
     }
   }
   // print block
@@ -218,12 +223,13 @@ void FuncDefNode::Print(int indentation) const {
   std::cout << "-block_:" << std::endl;
   assert(block_ != nullptr);
   block_->Print(indentation+2);
+  std::cout << std::endl;
 }
 
 void BlockNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[BlockNode]:" << std::endl;
+  std::cout << "[BlockNode]" << std::endl;
   // print all component
   for (auto itr : decl_stmt_list_) {
     assert(itr != nullptr);
@@ -234,7 +240,7 @@ void BlockNode::Print(int indentation) const {
 void InitValNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[InitValNode]:" << std::endl;
+  std::cout << "[InitValNode]" << std::endl;
   // print all component
   for (auto itr : init_val_list_) {
     assert(itr != nullptr);
@@ -245,7 +251,7 @@ void InitValNode::Print(int indentation) const {
 void AssignStmtNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[AssignStmtNode]:" << std::endl;
+  std::cout << "[AssignStmtNode]" << std::endl;
   // lval
   PrintIndentation(indentation+1);
   std::cout << "-lval_:" << std::endl;
@@ -261,7 +267,7 @@ void AssignStmtNode::Print(int indentation) const {
 void IfStmtNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[IfStmtNode]:" << std::endl;
+  std::cout << "[IfStmtNode]" << std::endl;
   // cond
   PrintIndentation(indentation+1);
   std::cout << "-cond_:" << std::endl;
@@ -283,7 +289,7 @@ void IfStmtNode::Print(int indentation) const {
 void WhileStmtNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
-  std::cout << "[WhileStmtNode]:" << std::endl;
+  std::cout << "[WhileStmtNode]" << std::endl;
   // cond
   PrintIndentation(indentation+1);
   std::cout << "-cond_:" << std::endl;
@@ -312,6 +318,9 @@ void ReturnStmtNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
   std::cout << "[ReturnStmtNode]" << std::endl;
+  // print exp_
+  if (exp_ != nullptr)
+    exp_->Print(indentation+1);
 }
 
 void FuncCallExpNode::Print(int indentation) const {
@@ -395,7 +404,6 @@ void DeclNode::AddDecl() {
     (*itr)->push_back(itr1); // use tmp_array_dimension_array_ to fill the new list<Node*>
   }
   ident_list_.push_back(declnode_tmp_ident);
-  assert(declnode_tmp_init_val != nullptr);
   init_val_list_.push_back(declnode_tmp_init_val);
 }
 
@@ -411,7 +419,6 @@ void FuncDefNode::AddParam(IdentNode *ident) {
   auto itr = fparam_index_list_array_.rbegin();
   for (auto itr1 : funcdefnode_tmp_fparam_index_list) {
     assert(*itr != nullptr);
-    assert(itr1 != nullptr);
     (*itr)->push_back(itr1);
   }
   fparam_basic_type_array_.push_back(funcdefnode_tmp_fparam_basic_type);

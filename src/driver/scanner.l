@@ -1,8 +1,8 @@
 character [a-zA-Z]
 digit [0-9]
 Ident {character}({character}|"_"|{digit})*
-IntConst [+-]?{digit}+
-floatConst [+-]?({digit}+\.{digit}*|({digit}*\.{digit}+))
+IntConst {digit}+
+floatConst ({digit}+\.{digit}*|({digit}*\.{digit}+))
 CharConst '{character}'
 StringConst \"[^\"]*\"
 comment_typeone "//"
@@ -18,16 +18,16 @@ symbol [,;\[\]{}+\-!\*/\%<>=\(\)]
   #undef NDEBUG
 #endif
 
-#include <cassert> // use assert()
-#include <cstdlib> // use atoi() atof()
-#include <cstdio> // use fopen()
+#include <cassert>            // use assert()
+#include <cstdlib>            // use atoi() atof()
+#include <cstdio>             // use fopen()
 
-#include <iostream> // use std::cout
-#include <string> // use std::string
+#include <iostream>           // use std::cout
+#include <string>             // use std::string
 
-#include "ast/ast.hpp" // use nodes
+#include "ast/ast.hpp"        // use nodes
 #define YYSTYPE Node*
-#include "driver/parser.hpp" // generated from parser.y
+#include "driver/parser.hpp"  // generated from parser.y
 
 // yyerror was defined in parser.cpp
 void yyerror(const char *);
@@ -198,7 +198,7 @@ inline void test_output(const char *type) {
 
 {CharConst} {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode<char>(NodeType::CHAR_PRIMARY_EXP, *(char*)yytext);
+  Node* new_node = new ValuePrimaryExpNode<char>(NodeType::CHAR_PRIMARY_EXP, *((char*)yytext + 1));
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;

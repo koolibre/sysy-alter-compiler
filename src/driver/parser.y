@@ -5,10 +5,10 @@
   #undef NDEBUG
 #endif
 
-#include <cassert> // use assert()
+#include <cassert>     // use assert()
 
-#include <iostream> // use std::cout
-#include <string> // use std::string
+#include <iostream>    // use std::cout
+#include <string>      // use std::string
 
 #include "ast/ast.hpp" // use struct Node
 
@@ -41,18 +41,24 @@ extern int yylex();
 
 CompUnit:
   CompUnit Decl {
-    dynamic_cast<RootNode*>($1)->AddNode($2);
+    RootNode *tmp_root = dynamic_cast<RootNode*>($1);
+    assert(tmp_root != nullptr);
+    tmp_root->AddNode($2);
     $$ = $1;
   } |
   CompUnit FuncDef {
-    dynamic_cast<RootNode*>($1)->AddNode($2);
+    RootNode *tmp_root = dynamic_cast<RootNode*>($1);
+    assert(tmp_root != nullptr);
+    tmp_root->AddNode($2);
     $$ = $1;    
   } |
   Decl {
+    assert(root != nullptr);
     root->AddNode($1);
     $$ = root;
   } |
   FuncDef {
+    assert(root != nullptr);
     root->AddNode($1);
     $$ = root;    
   }
@@ -69,7 +75,9 @@ Decl:
 
 ConstDecl:
   CONST BType ConstDefList ';' {
-    dynamic_cast<DeclNode*>($3)->SetBasicType();
+    DeclNode *tmp_decl_node = dynamic_cast<DeclNode*>($3);
+    assert(tmp_decl_node != nullptr);
+    tmp_decl_node->SetBasicType();
     $$ = $3;
   }
   ;
@@ -77,11 +85,14 @@ ConstDecl:
 ConstDefList:
   ConstDef {
     DeclNode* new_decl_node = new DeclNode(NodeType::CONST_DECL);
+    assert(new_decl_node != nullptr);
     new_decl_node->AddDecl();
     $$ = new_decl_node;
   } |
   ConstDefList ',' ConstDef {
-    dynamic_cast<DeclNode*>($1)->AddDecl();
+    DeclNode* tmp_decl_node = dynamic_cast<DeclNode*>($1);
+    assert(tmp_decl_node != nullptr);
+    tmp_decl_node->AddDecl();
     $$ = $1;   
   }
   ;
@@ -131,8 +142,10 @@ ConstInitValList:
 
 VarDecl:
   BType VarDefList ';' {
-    dynamic_cast<DeclNode*>($3)->SetBasicType();
-    $$ = $3;
+    DeclNode *tmp_decl_node = dynamic_cast<DeclNode*>($2); 
+    assert(tmp_decl_node != nullptr);
+    tmp_decl_node->SetBasicType();
+    $$ = $2;
   }
   ;
 
@@ -226,9 +239,12 @@ Block:
 BlockItemList:
   /* empty */ {
     $$ = new BlockNode;
+    assert($$ != nullptr);
   } |
   BlockItemList BlockItem {
-    dynamic_cast<BlockNode*>($1)->AddNode($2);
+    BlockNode *tmp_block_node = dynamic_cast<BlockNode*>($1); 
+    assert(tmp_block_node != nullptr);
+    tmp_block_node->AddNode($2);
     $$ = $1;
   }
   ;
@@ -319,7 +335,7 @@ IndexList:
   ;
 
 PrimaryExp:
-  '(' Exp ')' {
+  '(' LOrExp ')' {
     $$ = $2;
   } |
   LVal {
@@ -389,6 +405,7 @@ FuncRParamList:
   } |
   FuncRParamList ',' Exp {
     dynamic_cast<FuncCallExpNode*>($1)->AddParam($3);
+    $$ = $1;
   }
   ;
 
@@ -574,7 +591,7 @@ FuncFParamList:
     $$ = nullptr;
   } |
   FuncFParamList ',' FuncFParam {
-    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($1));
+    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($3));
     $$ = nullptr;
   }
   ;

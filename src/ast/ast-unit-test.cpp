@@ -5,19 +5,20 @@
 
 #include "ast/ast.hpp"   // use RootNode
 
-extern RootNode* root;
 extern void yyparse();
-extern FILE *yyin, *yyout;
+extern RootNode* root;
+extern FILE *yyin;
 
 int main(int argc, char **argv) {
 #ifdef DEBUG
   using namespace std;
+  yyin = fopen(argv[1], "r");
   streambuf *cout_buf = cout.rdbuf();
-  ofstream output_stream(argv[2]);
-  streambuf *file_buf = output_stream.rdbuf();
+  ofstream output(argv[2]);
+  streambuf *file_buf = output.rdbuf();
   cout.rdbuf(file_buf);
-  yyparse();
   assert(root != nullptr);
+  yyparse();
 #ifdef AST_DEBUG
   root->Print(0);
 #endif

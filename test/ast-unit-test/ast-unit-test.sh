@@ -1,6 +1,5 @@
 #!/bin/bash
 
-var=$(pwd)
 
 flex -o ../../src/driver/scanner.cpp ../../src/driver/scanner.l
 bison -o ../../src/driver/parser.cpp -d ../../src/driver/parser.y -v
