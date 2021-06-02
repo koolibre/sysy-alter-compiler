@@ -103,12 +103,226 @@
      -indent_list_[0]: tmp_b
      -init_val_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: 5
+       -value_: p
      -array_dimension_list_list_[1]:
      -indent_list_[1]: tmp_e
      -init_val_list_[1]:
       [ValuePrimaryExpNode]
-       -value_: '
+       -value_: s
      -array_dimension_list_list_[2]:
      -indent_list_[2]: tmp_f
      -init_val_list_[2]:
+    [DeclNode]
+     -basic_type_:int
+     -array_dimension_list_list_[0]:
+      [ValuePrimaryExpNode]
+       -value_: 2
+      [ValuePrimaryExpNode]
+       -value_: 2
+     -indent_list_[0]: a
+     -init_val_list_[0]:
+      [InitValNode]
+       [InitValNode]
+        [ValuePrimaryExpNode]
+         -value_: 3
+        [ValuePrimaryExpNode]
+         -value_: 4
+       [InitValNode]
+        [ValuePrimaryExpNode]
+         -value_: 5
+        [ValuePrimaryExpNode]
+         -value_: 6
+    [DeclNode]
+     -basic_type_:char
+     -array_dimension_list_list_[0]:
+      [ValuePrimaryExpNode]
+       -value_: 4
+     -indent_list_[0]: f
+     -init_val_list_[0]:
+      [ValuePrimaryExpNode]
+       -value_: "hel"
+    [FuncCallExpNode]
+     -ident_: a_void_function
+    [IfStmtNode]
+     -cond_:
+      [BinaryExpNode]
+       -binary_op_type_: ||
+       -lexp_:
+        [BinaryExpNode]
+         -binary_op_type_: >
+         -lexp_:
+          [LvalPrimaryExpNode]
+           -ident_: a
+         -rexp_:
+          [ValuePrimaryExpNode]
+           -value_: 2
+       -rexp_:
+        [BinaryExpNode]
+         -binary_op_type_: &&
+         -lexp_:
+          [BinaryExpNode]
+           -binary_op_type_: &&
+           -lexp_:
+            [BinaryExpNode]
+             -binary_op_type_: !=
+             -lexp_:
+              [LvalPrimaryExpNode]
+               -ident_: b
+             -rexp_:
+              [ValuePrimaryExpNode]
+               -value_: c
+           -rexp_:
+            [UnaryExpNode]
+             -unary_op_type_: !
+             -exp_:
+              [BinaryExpNode]
+               -binary_op_type_: ==
+               -lexp_:
+                [LvalPrimaryExpNode]
+                 -ident_: c
+               -rexp_:
+                [ValuePrimaryExpNode]
+                 -value_: 4
+         -rexp_:
+          [BinaryExpNode]
+           -binary_op_type_: <=
+           -lexp_:
+            [LvalPrimaryExpNode]
+             -ident_: ident_123_234
+             -index_list_[1]:
+              [BinaryExpNode]
+               -binary_op_type_: -
+               -lexp_:
+                [BinaryExpNode]
+                 -binary_op_type_: +
+                 -lexp_:
+                  [BinaryExpNode]
+                   -binary_op_type_: +
+                   -lexp_:
+                    [UnaryExpNode]
+                     -unary_op_type_: -
+                     -exp_:
+                      [ValuePrimaryExpNode]
+                       -value_: 1
+                   -rexp_:
+                    [LvalPrimaryExpNode]
+                     -ident_: tmp_a
+                 -rexp_:
+                  [BinaryExpNode]
+                   -binary_op_type_: /
+                   -lexp_:
+                    [ValuePrimaryExpNode]
+                     -value_: 5
+                   -rexp_:
+                    [ValuePrimaryExpNode]
+                     -value_: 2
+               -rexp_:
+                [ValuePrimaryExpNode]
+                 -value_: 3
+           -rexp_:
+            [ValuePrimaryExpNode]
+             -value_: 4
+     -if_stmt_:
+      [BlockNode]
+       [BlockNode]
+        [DeclNode]
+         -basic_type_:int
+         -array_dimension_list_list_[0]:
+         -indent_list_[0]: tmp_a
+         -init_val_list_[0]:
+          [ValuePrimaryExpNode]
+           -value_: 4
+       [BlockNode]
+        [DeclNode]
+         -basic_type_:int
+         -array_dimension_list_list_[0]:
+         -indent_list_[0]: tmp_a
+         -init_val_list_[0]:
+          [ValuePrimaryExpNode]
+           -value_: 5
+     -else_stmt_:
+      [BlockNode]
+       [WhileStmtNode]
+        -cond_:
+         [BinaryExpNode]
+          -binary_op_type_: !=
+          -lexp_:
+           [LvalPrimaryExpNode]
+            -ident_: a
+            -index_list_[1]:
+             [ValuePrimaryExpNode]
+              -value_: 1
+            -index_list_[2]:
+             [BinaryExpNode]
+              -binary_op_type_: +
+              -lexp_:
+               [ValuePrimaryExpNode]
+                -value_: 3
+              -rexp_:
+               [UnaryExpNode]
+                -unary_op_type_: -
+                -exp_:
+                 [ValuePrimaryExpNode]
+                  -value_: 2
+          -rexp_:
+           [ValuePrimaryExpNode]
+            -value_: 3
+        -stmt_:
+         [BlockNode]
+          [IfStmtNode]
+           -cond_:
+            [BinaryExpNode]
+             -binary_op_type_: ==
+             -lexp_:
+              [LvalPrimaryExpNode]
+               -ident_: tmp_e
+             -rexp_:
+              [ValuePrimaryExpNode]
+               -value_: f
+           -if_stmt_:
+            [BlockNode]
+             [BreakStmtNode]
+           -else_stmt_:
+            [ContinueStmtNode]
+    [AssignStmtNode]
+     -lval_:
+      [LvalPrimaryExpNode]
+       -ident_: tmp_f
+     -rexp_:
+      [FuncCallExpNode]
+       -ident_: a_simple_function
+       -rparam_array[1]:
+        [ValuePrimaryExpNode]
+         -value_: 2
+       -rparam_array[2]:
+        [BinaryExpNode]
+         -binary_op_type_: *
+         -lexp_:
+          [LvalPrimaryExpNode]
+           -ident_: tmp_a
+         -rexp_:
+          [LvalPrimaryExpNode]
+           -ident_: a
+           -index_list_[1]:
+            [ValuePrimaryExpNode]
+             -value_: 1
+           -index_list_[2]:
+            [ValuePrimaryExpNode]
+             -value_: 0
+       -rparam_array[3]:
+        [FuncCallExpNode]
+         -ident_: function_b
+    [ReturnStmtNode]
+     [LvalPrimaryExpNode]
+      -ident_: f
+      -index_list_[1]:
+       [ValuePrimaryExpNode]
+        -value_: 3
+
+ [DeclNode]
+  -basic_type_:int
+  -array_dimension_list_list_[0]:
+  -indent_list_[0]: a
+  -init_val_list_[0]:
+   [ValuePrimaryExpNode]
+    -value_: 2
