@@ -14,8 +14,8 @@ int main(int argc, char **argv) {
   using namespace std;
   yyin = fopen(argv[1], "r");
   streambuf *cout_buf = cout.rdbuf();
-  ofstream output(argv[2]);
-  streambuf *file_buf = output.rdbuf();
+  ofstream output_stream(argv[2]);
+  streambuf *file_buf = output_stream.rdbuf();
   cout.rdbuf(file_buf);
   assert(root != nullptr);
   yyparse();
