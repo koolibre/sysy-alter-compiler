@@ -51,19 +51,19 @@
         -binary_op_type_: *
         -lexp_:
          [ValuePrimaryExpNode]
-          -value_: 1.32
+          -float_value_: 1.32
         -rexp_:
          [ValuePrimaryExpNode]
-          -value_: 0.4
+          -float_value_: 0.4
       -rexp_:
        [BinaryExpNode]
         -binary_op_type_: /
         -lexp_:
          [ValuePrimaryExpNode]
-          -value_: 5
+          -float_value_: 5
         -rexp_:
          [ValuePrimaryExpNode]
-          -value_: 123.242
+          -float_value_: 123.242
 
  [FuncDefNode]
   -func_type_: void
@@ -87,7 +87,7 @@
   -fparam_ident_array_[3]: ident_123_234
   -fparam_index_list_array_[3]:
    [ValuePrimaryExpNode]
-    -value_: 5
+    -int_value_: 5
   -block_:
    [BlockNode]
     [DeclNode]
@@ -96,19 +96,19 @@
      -indent_list_[0]: tmp_a
      -init_val_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: 3
+       -int_value_: 3
     [DeclNode]
      -basic_type_:char
      -array_dimension_list_list_[0]:
      -indent_list_[0]: tmp_b
      -init_val_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: p
+       -char_value_: p
      -array_dimension_list_list_[1]:
      -indent_list_[1]: tmp_e
      -init_val_list_[1]:
       [ValuePrimaryExpNode]
-       -value_: s
+       -char_value_: s
      -array_dimension_list_list_[2]:
      -indent_list_[2]: tmp_f
      -init_val_list_[2]:
@@ -116,31 +116,31 @@
      -basic_type_:int
      -array_dimension_list_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: 2
+       -int_value_: 2
       [ValuePrimaryExpNode]
-       -value_: 2
+       -int_value_: 2
      -indent_list_[0]: a
      -init_val_list_[0]:
       [InitValNode]
        [InitValNode]
         [ValuePrimaryExpNode]
-         -value_: 3
+         -int_value_: 3
         [ValuePrimaryExpNode]
-         -value_: 4
+         -int_value_: 4
        [InitValNode]
         [ValuePrimaryExpNode]
-         -value_: 5
+         -int_value_: 5
         [ValuePrimaryExpNode]
-         -value_: 6
+         -int_value_: 6
     [DeclNode]
      -basic_type_:char
      -array_dimension_list_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: 4
+       -int_value_: 4
      -indent_list_[0]: f
      -init_val_list_[0]:
       [ValuePrimaryExpNode]
-       -value_: "hel"
+       -string_value_: "hel"
     [FuncCallExpNode]
      -ident_: a_void_function
     [IfStmtNode]
@@ -155,7 +155,7 @@
            -ident_: a
          -rexp_:
           [ValuePrimaryExpNode]
-           -value_: 2
+           -int_value_: 2
        -rexp_:
         [BinaryExpNode]
          -binary_op_type_: &&
@@ -170,7 +170,7 @@
                -ident_: b
              -rexp_:
               [ValuePrimaryExpNode]
-               -value_: c
+               -char_value_: c
            -rexp_:
             [UnaryExpNode]
              -unary_op_type_: !
@@ -182,7 +182,7 @@
                  -ident_: c
                -rexp_:
                 [ValuePrimaryExpNode]
-                 -value_: 4
+                 -int_value_: 4
          -rexp_:
           [BinaryExpNode]
            -binary_op_type_: <=
@@ -203,7 +203,7 @@
                      -unary_op_type_: -
                      -exp_:
                       [ValuePrimaryExpNode]
-                       -value_: 1
+                       -int_value_: 1
                    -rexp_:
                     [LvalPrimaryExpNode]
                      -ident_: tmp_a
@@ -212,16 +212,16 @@
                    -binary_op_type_: /
                    -lexp_:
                     [ValuePrimaryExpNode]
-                     -value_: 5
+                     -int_value_: 5
                    -rexp_:
                     [ValuePrimaryExpNode]
-                     -value_: 2
+                     -int_value_: 2
                -rexp_:
                 [ValuePrimaryExpNode]
-                 -value_: 3
+                 -int_value_: 3
            -rexp_:
             [ValuePrimaryExpNode]
-             -value_: 4
+             -int_value_: 4
      -if_stmt_:
       [BlockNode]
        [BlockNode]
@@ -231,7 +231,7 @@
          -indent_list_[0]: tmp_a
          -init_val_list_[0]:
           [ValuePrimaryExpNode]
-           -value_: 4
+           -int_value_: 4
        [BlockNode]
         [DeclNode]
          -basic_type_:int
@@ -239,7 +239,7 @@
          -indent_list_[0]: tmp_a
          -init_val_list_[0]:
           [ValuePrimaryExpNode]
-           -value_: 5
+           -int_value_: 5
      -else_stmt_:
       [BlockNode]
        [WhileStmtNode]
@@ -251,22 +251,22 @@
             -ident_: a
             -index_list_[1]:
              [ValuePrimaryExpNode]
-              -value_: 1
+              -int_value_: 1
             -index_list_[2]:
              [BinaryExpNode]
               -binary_op_type_: +
               -lexp_:
                [ValuePrimaryExpNode]
-                -value_: 3
+                -int_value_: 3
               -rexp_:
                [UnaryExpNode]
                 -unary_op_type_: -
                 -exp_:
                  [ValuePrimaryExpNode]
-                  -value_: 2
+                  -int_value_: 2
           -rexp_:
            [ValuePrimaryExpNode]
-            -value_: 3
+            -int_value_: 3
         -stmt_:
          [BlockNode]
           [IfStmtNode]
@@ -278,7 +278,7 @@
                -ident_: tmp_e
              -rexp_:
               [ValuePrimaryExpNode]
-               -value_: f
+               -char_value_: f
            -if_stmt_:
             [BlockNode]
              [BreakStmtNode]
@@ -293,7 +293,7 @@
        -ident_: a_simple_function
        -rparam_array[1]:
         [ValuePrimaryExpNode]
-         -value_: 2
+         -int_value_: 2
        -rparam_array[2]:
         [BinaryExpNode]
          -binary_op_type_: *
@@ -305,10 +305,10 @@
            -ident_: a
            -index_list_[1]:
             [ValuePrimaryExpNode]
-             -value_: 1
+             -int_value_: 1
            -index_list_[2]:
             [ValuePrimaryExpNode]
-             -value_: 0
+             -int_value_: 0
        -rparam_array[3]:
         [FuncCallExpNode]
          -ident_: function_b
@@ -317,7 +317,7 @@
       -ident_: f
       -index_list_[1]:
        [ValuePrimaryExpNode]
-        -value_: 3
+        -int_value_: 3
 
  [DeclNode]
   -basic_type_:int
@@ -325,4 +325,4 @@
   -indent_list_[0]: a
   -init_val_list_[0]:
    [ValuePrimaryExpNode]
-    -value_: 2
+    -int_value_: 2

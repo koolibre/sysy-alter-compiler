@@ -182,7 +182,7 @@ inline void test_output(const char *type) {
 
 {IntConst} {
   test_output("IntConst");
-  Node* new_node = new ValuePrimaryExpNode<int>(NodeType::INT_PRIMARY_EXP, atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode(atoi(yytext));
   assert(new_node != nullptr);
   yylval = new_node;
   return INT_CONST;
@@ -190,7 +190,7 @@ inline void test_output(const char *type) {
 
 {floatConst} {
   test_output("floatConst");
-  Node* new_node = new ValuePrimaryExpNode<float>(NodeType::FLOAT_PRIMARY_EXP, atof(yytext));
+  Node* new_node = new ValuePrimaryExpNode((float)atof(yytext));
   assert(new_node != nullptr);
   yylval = new_node;
   return FLOAT_CONST;
@@ -198,7 +198,7 @@ inline void test_output(const char *type) {
 
 {CharConst} {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode<char>(NodeType::CHAR_PRIMARY_EXP, *((char*)yytext + 1));
+  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1));
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;
@@ -210,7 +210,8 @@ inline void test_output(const char *type) {
     yymore();
   } else {
     test_output("StringConst");
-    Node* new_node = new ValuePrimaryExpNode<std::string>(NodeType::STRING_PRIMARY_EXP, std::string(yytext));
+    std::string tmp_str(yytext);
+    Node* new_node = new ValuePrimaryExpNode(tmp_str);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
