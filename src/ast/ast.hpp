@@ -34,7 +34,9 @@ enum class NodeType {
     // identifier node
     IDENT,
     // for error check
-    ERROR
+    ERROR,
+    // for I/O
+    READ, WRITE
 };
 
 // unary operation type
