@@ -8,26 +8,13 @@
 
 #include <ir-gen/type-system.hpp>
 
-void SymbolTable::PushScope(llvm::BasicBlock *block) {
+void SymbolTable::PushScope() {
   assert(block != nullptr);
-  scope_stack_.push_back(Scope(block));
+  scope_stack_.push_back(Scope());
 }
 
 void SymbolTable::PopScope() {
   scope_stack_.pop_back();
-}
-
-void SymbolTable::SetScopeBlock(llvm::BasicBlock *block) {
-  auto itr = scope_stack_.rbegin();
-  assert(itr != scope_stack_.rend()); // empty stack
-  assert(block != nullptr);
-  itr->block_ = block;
-}
-
-llvm::BasicBlock *SymbolTable::GetScopeBasicBlock() const {
-  auto itr = scope_stack_.rbegin();
-  assert(itr != scope_stack_.rend()); // empty stack
-  return itr->block_;
 }
 
 void SymbolTable::AddLocalVariable(std::string &name, llvm::Value *instance, TypeCheckType &type) {

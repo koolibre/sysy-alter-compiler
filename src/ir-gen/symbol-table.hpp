@@ -15,11 +15,8 @@
 
 struct Scope {
  public:
-  // ctor
-  Scope(llvm::BasicBlock* block, llvm::Value *ret = nullptr) :
-      block_(block) {}
+  // default ctor
   // member
-  llvm::BasicBlock *block_;
   std::map<std::string, llvm::Value*> local_variable_instance_;
   std::map<std::string, TypeCheckType> local_variable_type_;
 };
@@ -30,10 +27,8 @@ class SymbolTable{
   SymbolTable(llvm::LLVMContext &llvm_context);
   // default dtor
   // other
-  void PushScope(llvm::BasicBlock *block);
+  void PushScope();
   void PopScope();
-  void SetScopeBlock(llvm::BasicBlock *block);
-  llvm::BasicBlock *GetScopeBasicBlock() const;
   void AddLocalVariable(std::string &name, llvm::Value *instance, TypeCheckType &type);
   bool IfExistLocal(std::string &name) const;
   llvm::Value* GetLocalVariableInstance(std::string &name) const;

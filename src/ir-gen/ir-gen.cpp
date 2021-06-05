@@ -89,9 +89,7 @@ void IrGenVisitor::VisitImplicit(ReturnStmtNode *node) {
 // generate code for block "{}"
 void IrGenVisitor::VisitImplicit(BlockNode *node) {
   // create new scope
-  BasicBlock *new_scope = BasicBlock::Create(llvm_context_, "new_scope");
-  symbol_table_.PushScope(new_scope);
-  builder_.SetInsertPoint(new_scope);
+  symbol_table_.PushScope(); // virtual BasicBlock
   // visit child
   if (node->decl_stmt_list_.empty()) { // empty block
     current_if_error_ = false;
@@ -106,8 +104,6 @@ void IrGenVisitor::VisitImplicit(BlockNode *node) {
   }
   // pop current scope
   symbol_table_.PopScope();
-  // restore scope
-  builder_.SetInsertPoint(symbol_table_.GetScopeBasicBlock());
 }
 
 // ident nodes are temporary node generated in scanning
@@ -168,7 +164,7 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node) {
   } else {
     rexp_value = type_system_.Cast(rexp_value,
                                    lval_value->getType(),
-                                   symbol_table_.GetScopeBasicBlock());
+                                   builder_.GetInsertBlock());
   }
   // do assignment
   builder_.CreateStore(rexp_value, lval_value);
@@ -178,7 +174,92 @@ void IrGenVisitor::VisitImplicit(IfStmtNode *node) {
   bool if_error = false;
   // cond_
   Visit(node->cond_);
-  if (current_if_error_)
+  if (current_if_error_) {
     if_error = true;
+    // check error of the if_stmt_ and else_stmt_
+    Visit(node->if_stmt_);
+    if (node->else_stmt_ != nullptr)
+      Visit(node->else_stmt_);
+    current_if_error_ = true;
+    return;
+  }
+  // if no error for cond_, check cond_value's type
   Value *cond_value = current_value_;
+  if (cond_value->getType() != Type::getInt1Ty(llvm_context_)) {
+    cout << "condition error!" << endl;
+    // check error of the if_stmt_ and else_stmt_
+    Visit(node->if_stmt_);
+    if (node->else_stmt_ != nullptr)
+      Visit(node->else_stmt_);
+    current_if_error_ = true;
+    return;
+  }
+  // if no error for cond_'s type
+  Function *function_belong = builder_.GetInsertBlock()->getParent();
+  BasicBlock *true_block = BasicBlock::Create(llvm_context_, "true", function_belong),
+             *false_block = BasicBlock::Create(llvm_context_, "false"),
+             *cont_block = BasicBlock::Create(llvm_context_, "cont", function_belong);
+  // connect blocks
+  // TODO : error check
+  if (node->else_stmt_ != nullptr) {
+    builder_.CreateCondBr(cond_value, true_block, false_block);
+  } else {
+    builder_.CreateCondBr(cond_value, true_block, cont_block);
+  }
+  // deal with true block
+  builder_.SetInsertPoint(true_block);
+  symbol_table_.PushScope();
+  Visit(node->if_stmt_);
+  symbol_table_.PopScope();
+  // deal with false block
+  if (node->else_stmt_ != nullptr) {
+    function_belong->getBasicBlockList().push_back(false_block);
+    builder_.SetInsertPoint(false_block);
+    symbol_table_.PushScope();
+    Visit(node->else_stmt_);
+    symbol_table_.PopScope();
+  }
+  // merge
+  builder_.CreateBr(cont_block);
+  builder_.SetInsertPoint(cont_block);
 }
+
+void IrGenVisitor::VisitImplicit(WhileStmtNode *node) {
+  // TODO : error check
+  Function *function_belog = builder_.GetInsertBlock()->getParent();
+  BasicBlock *cond_block = BasicBlock::Create(llvm_context_, "cond", function_belog),
+             *body_block = BasicBlock::Create(llvm_context_, "body", function_belog),
+             *cont_block = BasicBlock::Create(llvm_context_, "cont", function_belog);
+  current_cond_block_list_.push_back(cond_block);
+  current_cont_block_list_.push_back(cont_block);
+  // get cond value
+  symbol_table_.PushScope();
+  Visit(node->cond_);
+  symbol_table_.PopScope();
+  Value *cond_value = current_value_;
+  // connect origin block to cond_block
+  builder_.CreateBr(cond_block);
+  // connect cond_block to body_block and cont_block
+  builder_.SetInsertPoint(cond_block);
+  builder_.CreateCondBr(cond_value, body_block, cont_block);
+  // build body_block, connect to cond_block
+  builder_.SetInsertPoint(body_block);
+  symbol_table_.PushScope();
+  Visit(node->stmt_);
+  symbol_table_.PopScope();
+  builder_.CreateBr(cond_block);
+  builder_.SetInsertPoint(cont_block);
+  current_cond_block_list_.pop_back();
+  current_cont_block_list_.pop_back();
+}
+
+void IrGenVisitor::VisitImplicit(ContinueStmtNode *node) {
+  // TODO : error check
+  builder_.CreateBr(current_cond_block_list_.back());
+}
+
+void IrGenVisitor::VisitImplicit(BreakStmtNode *node) {
+  // TODO : error check
+  builder_.CreateBr(current_cont_block_list_.back());
+}
+

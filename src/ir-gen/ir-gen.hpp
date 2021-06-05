@@ -53,23 +53,23 @@ class IrGenVisitor : public NodeVisitor {
     symbol_table_(llvm_context_) {}
   // default dtor
   // other
-  void VisitImplicit(RootNode *root_node) override; // finish
+  void VisitImplicit(RootNode *root_node) override;                         // finish
   void VisitImplicit(DeclNode *decl_node) override;
-  void VisitImplicit(IdentNode *ident_node) override; // finish
-  void VisitImplicit(FuncDefNode *root_node) override; 
-  void VisitImplicit(BlockNode *root_node) override; // finish
+  void VisitImplicit(IdentNode *ident_node) override;                       // finish
+  void VisitImplicit(FuncDefNode *root_node) override;                      // finish
+  void VisitImplicit(BlockNode *root_node) override;                        // finish
   void VisitImplicit(InitValNode *init_val_node) override;
-  void VisitImplicit(AssignStmtNode *assign_stmt_node) override; // finish
-  void VisitImplicit(IfStmtNode *if_stmt_node) override; // 
-  void VisitImplicit(WhileStmtNode *while_stmt_node) override;
-  void VisitImplicit(BreakStmtNode *break_stmt_node) override;
-  void VisitImplicit(ContinueStmtNode *continue_stmt_node) override;
-  void VisitImplicit(ReturnStmtNode *return_stmt_node) override; // finish
+  void VisitImplicit(AssignStmtNode *assign_stmt_node) override;            // finish
+  void VisitImplicit(IfStmtNode *if_stmt_node) override;                    // finish
+  void VisitImplicit(WhileStmtNode *while_stmt_node) override;              // finish
+  void VisitImplicit(BreakStmtNode *break_stmt_node) override;              // finish
+  void VisitImplicit(ContinueStmtNode *continue_stmt_node) override;        // finish
+  void VisitImplicit(ReturnStmtNode *return_stmt_node) override;            // finish
   void VisitImplicit(FuncCallExpNode *func_call_exp_node) override;
-  void VisitImplicit(BinaryExpNode *binary_exp_node) override; //
+  void VisitImplicit(BinaryExpNode *binary_exp_node) override;
   void VisitImplicit(UnaryExpNode *unary_exp_node) override;
   void VisitImplicit(LValPrimaryExpNode *lval_primary_exp_node) override;
-  void VisitImplicit(ErrorNode *error_node) override; // finish
+  void VisitImplicit(ErrorNode *error_node) override;                       // finish
   void VisitImplicit(ValuePrimaryExpNode *value_primary_exp_node) override; // finish
  
  private:
@@ -85,6 +85,9 @@ class IrGenVisitor : public NodeVisitor {
   TypeCheckType current_type_;
   llvm::Value *current_value_;
   bool current_if_error_;
+  // record for "break" and "continue"
+  std::list<llvm::BasicBlock*> current_cond_block_list_;
+  std::list<llvm::BasicBlock*> current_cont_block_list_;
 };
 
 #endif
