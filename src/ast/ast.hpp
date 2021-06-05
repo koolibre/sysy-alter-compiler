@@ -1,5 +1,5 @@
-#ifndef SYSY_ALTER_COMPILER_AST_AST_DATA_HPP_
-#define SYSY_ALTER_COMPILER_AST_AST_DATA_HPP_
+#ifndef SYSY_ALTER_COMPILER_AST_AST_HPP_
+#define SYSY_ALTER_COMPILER_AST_AST_HPP_
 
 #ifndef DEBUG
   #define NDEBUG
@@ -7,12 +7,12 @@
   #undef NDEBUG
 #endif
 
-#include <cassert>        // use assert()
+#include <cassert>            // use assert()
 
-#include <iostream>       // use std::cout
-#include <string>         // use std::string
-#include <list>           // use std::list
-#include <vector>         // use std::vector
+#include <iostream>           // use std::cout
+#include <string>             // use std::string
+#include <list>               // use std::list
+#include <vector>             // use std::vector
 
 // node type
 enum class NodeType {
@@ -33,7 +33,10 @@ enum class NodeType {
     INIT_VAL,
     // identifier node
     IDENT,
-    ERROR
+    // for error check
+    ERROR,
+    // for I/O
+    READ, WRITE
 };
 
 // unary operation type
@@ -58,42 +61,34 @@ enum class BinaryOpType {
 
 // basic type
 enum class BasicType {
-  INT, FLOAT, CHAR, VOID, UNKNOWN
+  INT, FLOAT, CHAR, VOID
 };
 
 // all the nodes below are use as pure data storage,
 // so we use struct instead of class,
 // and there is no need to use smart pointer...
 
+// NodeVisitor: use visitor pattern
+class NodeVisitor;
+
 // Node
-// base struct type 
+// base struct type
 struct Node {
  public:
   // ctor
-  Node(NodeType node_type, int line_no) : node_type_(node_type),line_no(line_no) {}
+  Node(NodeType node_type) : node_type_(node_type) {}
   // dtor
-  virtual ~Node() {
-    for (auto itr : error_list_)
-      delete itr;
-  }
+  virtual ~Node() {}
   // other
   inline bool CheckNodeType(NodeType node_type) const {
     return node_type_ == node_type;
   }
-  void AddError(Node*);
-  inline bool CheckError() {
-    return !(error_list_.empty());
-  }
+  virtual void Accept(NodeVisitor *visitor) = 0;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   virtual void Print(int indentation) const = 0;
 #endif
 #endif
- public:
-  // member
-  int line_no;
-  std::vector<Node*> error_list_;
- private:
   // member
   NodeType node_type_;
 };
@@ -103,8 +98,8 @@ struct Node {
 struct RootNode : public Node {
  public:
   // ctor
-  RootNode(int line_no) :
-      Node(NodeType::ROOT, line_no) {}
+  RootNode() :
+      Node(NodeType::ROOT) {}
       // default ctor: decl_funcdef_list_(0)
   // dtor
   ~RootNode() {
@@ -117,15 +112,21 @@ struct RootNode : public Node {
     assert(new_node != nullptr);
     decl_funcdef_list_.push_back(new_node);
   }
+  void Accept(NodeVisitor *visitor) override;
+  inline void SetIfError(bool if_error) {
+    if_error_ = if_error;
+  }
+  inline bool GetIfError() const {
+    return if_error_;
+  }
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   std::list<Node*> decl_funcdef_list_;
+  bool if_error_;
 };
 // global RootNode
 extern RootNode *root;
@@ -140,8 +141,8 @@ extern BasicType declnode_tmp_basic_type;
 struct DeclNode : public Node {
  public:
   // ctor
-  DeclNode(NodeType node_type, int line_no) :
-      Node(node_type,line_no),
+  DeclNode(NodeType node_type) :
+      Node(node_type),
       basic_type_(BasicType::VOID) {}
       // create empty list
   // dtor
@@ -159,13 +160,12 @@ struct DeclNode : public Node {
   inline void SetTmpIdent(std::string &tmp_ident) {
     declnode_tmp_ident = tmp_ident;
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   BasicType basic_type_;
   std::list<std::list<Node*>*> array_dimension_list_list_;
@@ -178,8 +178,8 @@ struct DeclNode : public Node {
 struct IdentNode : public Node {
  public:
   // ctor
-  IdentNode(const std::string &ident, int line_no) :
-      Node(NodeType::IDENT, line_no),
+  IdentNode(const std::string &ident) :
+      Node(NodeType::IDENT),
       ident_(ident) {}
   // dtor : default
   // other
@@ -189,13 +189,12 @@ struct IdentNode : public Node {
   std::string GetIdent() const {
     return ident_;
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   std::string ident_;
 };
@@ -208,8 +207,8 @@ extern std::vector<Node*> funcdefnode_tmp_fparam_index_list;
 struct FuncDefNode : public Node {
  public:
   // ctor
-  FuncDefNode(BasicType func_type, int line_no) :
-      Node(NodeType::FUNC_DEF, line_no),
+  FuncDefNode(BasicType func_type) :
+      Node(NodeType::FUNC_DEF),
       func_type_(func_type),
       block_(nullptr) {}
   // dtor
@@ -230,17 +229,12 @@ struct FuncDefNode : public Node {
     block_ = block;
   }
   void AddParam(IdentNode *ident);
-  BasicType GetType()
-  {
-    return func_type_;
-  }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
 	// member
   BasicType func_type_;
   std::string func_ident_;
@@ -256,8 +250,8 @@ extern FuncDefNode* funcdefnode_tmp_func_def_node;
 struct BlockNode : public Node {
  public:
   // ctor
-  BlockNode(int line_no) :
-      Node(NodeType::BLOCK, line_no) {}
+  BlockNode() :
+      Node(NodeType::BLOCK) {}
   // dtor
   ~BlockNode() {
     for (auto itr : decl_stmt_list_)
@@ -269,46 +263,14 @@ struct BlockNode : public Node {
     assert(new_node != nullptr);
 	  decl_stmt_list_.push_back(new_node);
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   std::list<Node*> decl_stmt_list_;
-
-};
-
-// ErrorNode
-// the node to contain an error
-struct ErrorNode : public Node {
- public:
-  // ctor
-  ErrorNode(std::string err_msg, int line_no) :
-      Node(NodeType::ERROR, line_no), err_msg(err_msg) {}
-  // dtor
-  ~ErrorNode() {
-    for (auto itr : sub_stmt_list_)
-      delete itr;
-  }
-  // other
-  inline void AddNode(Node *new_node) {
-    // TODO(kolibre) : error check
-    assert(new_node != nullptr);
-	  sub_stmt_list_.push_back(new_node);
-  }
-#ifdef DEBUG
-#ifdef AST_DEBUG
-  void Print(int indentation) const override;
-#endif
-#endif
- public:
-  std::string err_msg;
- private:
-  // member
-  std::list<Node*> sub_stmt_list_;
 
 };
 
@@ -318,8 +280,8 @@ struct ErrorNode : public Node {
 struct InitValNode : public Node {
  public:
   // ctor
-  InitValNode(int line_no) :
-      Node(NodeType::INIT_VAL, line_no) {}
+  InitValNode() :
+      Node(NodeType::INIT_VAL) {}
   // dtor
   ~InitValNode() {
     for (auto itr : init_val_list_)
@@ -331,13 +293,12 @@ struct InitValNode : public Node {
     assert(init_val != nullptr);
     init_val_list_.push_back(init_val);
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   std::list<Node*> init_val_list_;
 };
@@ -346,8 +307,8 @@ struct InitValNode : public Node {
 struct AssignStmtNode : public Node {
  public:
   // ctor
-  AssignStmtNode(Node *lval, Node *rexp, int line_no) :
-      Node(NodeType::ASSIGN_STMT, line_no),
+  AssignStmtNode(Node *lval, Node *rexp) :
+      Node(NodeType::ASSIGN_STMT),
       lval_(lval),
       rexp_(rexp) {}
   // dtor
@@ -356,13 +317,12 @@ struct AssignStmtNode : public Node {
     delete rexp_;
   }
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
  // member
   Node *lval_, *rexp_;
 };
@@ -374,9 +334,8 @@ struct IfStmtNode : public Node {
   IfStmtNode(
       Node *cond,
       Node *if_stmt,
-      Node *else_stmt,
-      int line_no) :
-      Node(NodeType::IF_STMT, line_no),
+      Node *else_stmt) :
+      Node(NodeType::IF_STMT),
       cond_(cond),
       if_stmt_(if_stmt),
       else_stmt_(else_stmt) {}  
@@ -387,13 +346,12 @@ struct IfStmtNode : public Node {
     delete else_stmt_;
   }
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member	
   Node *cond_, *if_stmt_, *else_stmt_;
 };
@@ -402,8 +360,8 @@ struct IfStmtNode : public Node {
 struct WhileStmtNode : public Node {
  public:
   // ctor
-  WhileStmtNode(Node *cond, Node *stmt, int line_no) :
-      Node(NodeType::WHILE_STMT,line_no),
+  WhileStmtNode(Node *cond, Node *stmt) :
+      Node(NodeType::WHILE_STMT),
       cond_(cond),
       stmt_(stmt) {}
   // dtor
@@ -412,13 +370,12 @@ struct WhileStmtNode : public Node {
     delete stmt_;
   }
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   Node *cond_, *stmt_;
 };
@@ -427,10 +384,11 @@ struct WhileStmtNode : public Node {
 struct BreakStmtNode : public Node {
  public:
   // ctor
-  BreakStmtNode(int line_no) :
-      Node(NodeType::BREAK_STMT,line_no) {}
+  BreakStmtNode() :
+      Node(NodeType::BREAK_STMT) {}
   // default dtor
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
@@ -442,10 +400,11 @@ struct BreakStmtNode : public Node {
 struct ContinueStmtNode : public Node {
  public:
   // ctor
-  ContinueStmtNode(int line_no) :
-      Node(NodeType::CONTINUE_STMT, line_no) {}
+  ContinueStmtNode() :
+      Node(NodeType::CONTINUE_STMT) {}
   // default dtor
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
@@ -457,28 +416,27 @@ struct ContinueStmtNode : public Node {
 struct ReturnStmtNode : public Node {
  public:
   // ctor
-  ReturnStmtNode(Node *exp, int line_no) :
-      Node(NodeType::RETURN_STMT, line_no),
+  ReturnStmtNode(Node *exp) :
+      Node(NodeType::RETURN_STMT),
       exp_(exp) {}
   // default dtor
   // other
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
-  private:
-    // member
-    Node* exp_;
+  // member
+  Node* exp_;
 };
 
 // FuncCallExpNode
 struct FuncCallExpNode : public Node {
  public:
   // ctor
-  FuncCallExpNode(int line_no) :
-      Node(NodeType::FUNC_CALL_EXP,line_no) {}
+  FuncCallExpNode() :
+      Node(NodeType::FUNC_CALL_EXP) {}
   // dtor
   ~FuncCallExpNode() {
     for (auto itr : rparam_array_)
@@ -495,13 +453,12 @@ struct FuncCallExpNode : public Node {
     assert(rparam != nullptr);
     rparam_array_.push_back(rparam);
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   std::string ident_;
   std::vector<Node*> rparam_array_;
@@ -512,8 +469,8 @@ struct FuncCallExpNode : public Node {
 struct BinaryExpNode : public Node {
  public:
   // ctor
-  BinaryExpNode(BinaryOpType binary_op_type,int line_no) :
-      Node(NodeType::BINARY_EXP,line_no),
+  BinaryExpNode(BinaryOpType binary_op_type) :
+      Node(NodeType::BINARY_EXP),
       binary_op_type_(binary_op_type),
       lexp_(nullptr),
       rexp_(nullptr) {}
@@ -533,13 +490,12 @@ struct BinaryExpNode : public Node {
     assert(rexp != nullptr);
     rexp_ = rexp;
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   BinaryOpType binary_op_type_;
   Node *lexp_, *rexp_;
@@ -550,8 +506,8 @@ struct BinaryExpNode : public Node {
 class UnaryExpNode : public Node {
  public:
   // ctor
-  UnaryExpNode(UnaryOpType unary_op_type,int line_no) :
-      Node(NodeType::UNARY_EXP,line_no),
+  UnaryExpNode(UnaryOpType unary_op_type) :
+      Node(NodeType::UNARY_EXP),
       exp_(nullptr),
       unary_op_type_(unary_op_type) {}
   // dtor
@@ -564,13 +520,12 @@ class UnaryExpNode : public Node {
     assert(exp != nullptr);
     exp_ = exp;
   }
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
 #endif
 #endif
-
- private:
   // member
   UnaryOpType unary_op_type_;
   Node *exp_;
@@ -583,8 +538,8 @@ extern std::vector<Node*> lvalprimaryexpnode_tmp_index_array;
 class LValPrimaryExpNode : public Node {
  public:
   // ctor
-  LValPrimaryExpNode(IdentNode *ident, int line_no) :
-      Node(NodeType::LVAL_PRIMARY_EXP,line_no),
+  LValPrimaryExpNode(IdentNode *ident) :
+      Node(NodeType::LVAL_PRIMARY_EXP),
       ident_(ident->GetIdent()) {}
   // dtor
   ~LValPrimaryExpNode() {
@@ -598,6 +553,7 @@ class LValPrimaryExpNode : public Node {
     // index_list_.push_back(index_exp);
   // }
   void AddLVal();
+  void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override;
@@ -605,31 +561,30 @@ class LValPrimaryExpNode : public Node {
 #endif
   // member
   static std::vector<Node*> tmp_index_array_;
-
- private:
   // member
   std::string ident_;
   std::list<Node*> index_list_;
 };
 
 // ValuePrimaryExpNode
-// T can be: int char float and std::string
-// fetch value from lex
-template <typename T>
 struct ValuePrimaryExpNode : public Node {
  public:
   // ctor
-  ValuePrimaryExpNode(NodeType node_type, T value, int line_no) :
-      Node(node_type, line_no),
-      value_(value) {}
+  ValuePrimaryExpNode(int int_value) :
+      Node(NodeType::INT_PRIMARY_EXP),
+      int_value_(int_value) {}
+  ValuePrimaryExpNode(float float_value) :
+      Node(NodeType::FLOAT_PRIMARY_EXP),
+      float_value_(float_value) {}
+  ValuePrimaryExpNode(char char_value) :
+      Node(NodeType::CHAR_PRIMARY_EXP),
+      char_value_(char_value) {}
+  ValuePrimaryExpNode(std::string &string_value) :
+      Node(NodeType::STRING_PRIMARY_EXP),
+      string_value_(string_value) {}  
   // default dtor
   // other
-  inline void SetValue(T value) {
-    value_ = value;
-  }
-  inline T GetValue() const {
-    return value_;
-  }
+  
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override {
@@ -640,13 +595,42 @@ struct ValuePrimaryExpNode : public Node {
     // print value
     for (int i = 0; i < indentation+1; i++)
       std::cout << " ";
-    std::cout << "-value_: " << value_ << std::endl;
+    switch(node_type_) {
+      case NodeType::INT_PRIMARY_EXP : {
+        std::cout << "-int_value_: " << int_value_ << std::endl;
+        break;
+      }
+      case NodeType::FLOAT_PRIMARY_EXP : {
+        std::cout << "-float_value_: " << float_value_ << std::endl;
+        break;
+      }
+      case NodeType::CHAR_PRIMARY_EXP : {
+        std::cout << "-char_value_: " << char_value_ << std::endl;
+        break;
+      }
+      case NodeType::STRING_PRIMARY_EXP : {
+        std::cout << "-string_value_: " << string_value_ << std::endl;
+        break;
+      }
+      default : {
+        assert(0);
+      }
+    }
   }
 #endif
 #endif
-
- private:
   // member
-  T value_;
+  int int_value_;
+  char char_value_;
+  float float_value_;
+  std::string string_value_;
+};
+
+// ErrorNode
+// support error check
+struct ErrorNode : public Node {
+ public:
+  ErrorNode() :
+      Node(NodeType::ERROR) {}
 };
 #endif

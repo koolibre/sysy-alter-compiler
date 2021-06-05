@@ -3,14 +3,12 @@
   #define NDEBUG
 #else
   #undef NDEBUG
-  #define YYDEBUG 1
 #endif
 
 #include <cassert>     // use assert()
 
 #include <iostream>    // use std::cout
 #include <string>      // use std::string
-#include <sstream>
 
 #include "ast/ast.hpp" // use struct Node
 
@@ -21,10 +19,6 @@ extern void yyerror(const char *str);
 
 // defined in scanner.cpp
 extern int yylex();
-
-extern int yylineno;
-
-
 %}
 
 // token definition
@@ -38,7 +32,7 @@ extern int yylineno;
 // %token '+' '-' '*' '/' '%' '[' ']' '{' '}' ',' ';' '!' '<' '>'
 // two-character symbol
 %token LEEQ GEEQ EQ UNEQ AND OR
-// TODO(kolibre) : finish error token
+// error
 %token ERROR
 
 %start CompUnit
@@ -66,7 +60,7 @@ CompUnit:
   FuncDef {
     assert(root != nullptr);
     root->AddNode($1);
-    $$ = root;
+    $$ = root;    
   }
   ;
 
@@ -85,22 +79,12 @@ ConstDecl:
     assert(tmp_decl_node != nullptr);
     tmp_decl_node->SetBasicType();
     $$ = $3;
-  } |
-  CONST IDENT ConstDefList ';' {
-    DeclNode *tmp_decl_node = dynamic_cast<DeclNode*>($3);
-    assert(tmp_decl_node != nullptr);
-    std::stringstream msg;
-    msg << "[ERROR] Declaration to global const value(s) at line " << dynamic_cast<Node*>($3)->line_no << " is omitted due to unknown type \"" << dynamic_cast<IdentNode*>($2)->GetIdent() << "\".";
-    ErrorNode* new_node = new ErrorNode(msg.str(),dynamic_cast<Node*>($3)->line_no);
-    $$ = new_node;
-    delete tmp_decl_node;
-    printf("%s\n",msg.str().c_str());
   }
   ;
 
 ConstDefList:
   ConstDef {
-    DeclNode* new_decl_node = new DeclNode(NodeType::CONST_DECL,yylineno);
+    DeclNode* new_decl_node = new DeclNode(NodeType::CONST_DECL);
     assert(new_decl_node != nullptr);
     new_decl_node->AddDecl();
     $$ = new_decl_node;
@@ -109,7 +93,7 @@ ConstDefList:
     DeclNode* tmp_decl_node = dynamic_cast<DeclNode*>($1);
     assert(tmp_decl_node != nullptr);
     tmp_decl_node->AddDecl();
-    $$ = $1;
+    $$ = $1;   
   }
   ;
 
@@ -140,7 +124,7 @@ ConstInitVal:
     $$ = $2;
   } |
   '{' '}' {
-    $$ = new InitValNode(yylineno);
+    $$ = new InitValNode;
   }
   ;
 
@@ -150,7 +134,7 @@ ConstInitValList:
     $$ = $1;
   } |
   ConstInitVal {
-    InitValNode *new_init_val_node = new InitValNode(yylineno);
+    InitValNode *new_init_val_node = new InitValNode;
     new_init_val_node->AddInitVal($1);
     $$ = new_init_val_node;
   }
@@ -162,22 +146,12 @@ VarDecl:
     assert(tmp_decl_node != nullptr);
     tmp_decl_node->SetBasicType();
     $$ = $2;
-  } |
-  IDENT ConstDefList ';' {
-    DeclNode *tmp_decl_node = dynamic_cast<DeclNode*>($2);
-    assert(tmp_decl_node != nullptr);
-    std::stringstream msg;
-    msg << "[ERROR] Declaration to global value(s) at line " << dynamic_cast<Node*>($2)->line_no << " is omitted due to unknown type \"" << dynamic_cast<IdentNode*>($1)->GetIdent() << "\".";
-    ErrorNode* new_node = new ErrorNode(msg.str(),dynamic_cast<Node*>($2)->line_no);
-    $$ = new_node;
-    delete tmp_decl_node;
-    printf("%s\n",msg.str().c_str());
   }
   ;
 
 VarDefList:
   VarDef {
-    DeclNode* new_decl_node = new DeclNode(NodeType::VAR_DECL,yylineno);
+    DeclNode* new_decl_node = new DeclNode(NodeType::VAR_DECL);
     new_decl_node->AddDecl();
     $$ = new_decl_node;
   } |
@@ -214,7 +188,7 @@ VarInitVal:
     $$ = $2;
   } |
   '{' '}' {
-    $$ = new InitValNode(yylineno);
+    $$ = new InitValNode;
   }
   ;
 
@@ -224,7 +198,7 @@ VarInitValList:
     $$ = $1;
   } |
   VarInitVal {
-    InitValNode *new_init_val_node = new InitValNode(yylineno);
+    InitValNode *new_init_val_node = new InitValNode;
     new_init_val_node->AddInitVal($1);
     $$ = new_init_val_node;
   }
@@ -264,7 +238,7 @@ Block:
 
 BlockItemList:
   /* empty */ {
-    $$ = new BlockNode(yylineno);
+    $$ = new BlockNode;
     assert($$ != nullptr);
   } |
   BlockItemList BlockItem {
@@ -286,19 +260,19 @@ BlockItem:
 
 Stmt:
   RETURN ExpChoice ';' {
-    $$ = new ReturnStmtNode($2,yylineno);
+    $$ = new ReturnStmtNode($2);
   } |
   CONTINUE ';' {
-    $$ = new ContinueStmtNode(yylineno);  
+    $$ = new ContinueStmtNode;  
   } |
   BREAK ';' {
-    $$ = new BreakStmtNode(yylineno);
+    $$ = new BreakStmtNode;
   } | 
   WHILE '(' Cond ')' Stmt {
-    $$ = new WhileStmtNode($3, $5,yylineno);
+    $$ = new WhileStmtNode($3, $5);
   } |
   IF '(' Cond ')' Stmt ElseChoice {
-    $$ = new IfStmtNode($3, $5, $6,yylineno);
+    $$ = new IfStmtNode($3, $5, $6);
   } |
   Block {
     $$ = $1;
@@ -307,7 +281,7 @@ Stmt:
     $$ = $1;
   } |
   LVal '=' Exp ';' {
-    $$ = new AssignStmtNode($1, $3,yylineno);
+    $$ = new AssignStmtNode($1, $3);
   }
   ;
 
@@ -343,7 +317,7 @@ Exp:
 
 LVal:
   IDENT IndexList {
-    LValPrimaryExpNode* tmp_node = new LValPrimaryExpNode(dynamic_cast<IdentNode*>($1),yylineno);
+    LValPrimaryExpNode* tmp_node = new LValPrimaryExpNode(dynamic_cast<IdentNode*>($1));
     tmp_node->AddLVal();
     $$ = tmp_node;
   }
@@ -414,7 +388,7 @@ UnaryExp:
     $$ = $3;
   } |
   IDENT '(' ')' {
-    FuncCallExpNode* new_node = new FuncCallExpNode(yylineno);
+    FuncCallExpNode* new_node = new FuncCallExpNode;
     new_node->SetIdent(dynamic_cast<IdentNode*>($1));
     $$ = new_node;
   } |
@@ -426,11 +400,10 @@ UnaryExp:
 
 FuncRParamList:
   Exp {
-    FuncCallExpNode *new_node = new FuncCallExpNode(yylineno);
+    FuncCallExpNode *new_node = new FuncCallExpNode;
     $$ = new_node;
   } |
   FuncRParamList ',' Exp {
-    assert($1!=nullptr);
     dynamic_cast<FuncCallExpNode*>($1)->AddParam($3);
     $$ = $1;
   }
@@ -438,15 +411,15 @@ FuncRParamList:
 
 UnaryOp:
   '+' {
-    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::POSITIVE,yylineno);
+    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::POSITIVE);
     $$ = new_node;
   } |
   '-' {
-    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NEGATIVE,yylineno);
+    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NEGATIVE);
     $$ = new_node;
   } |
   '!' {
-    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NOT,yylineno);
+    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NOT);
     $$ = new_node;
   }
   ;
@@ -464,15 +437,15 @@ MulExp:
 
 MulOp:
   '*' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MUL,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MUL);
     $$ = new_node;
   } |
   '/' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::DIV,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::DIV);
     $$ = new_node;
   } |
   '%' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MOD,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MOD);
     $$ = new_node;
   }
   ;
@@ -490,11 +463,11 @@ AddExp:
 
 AddOp:
   '+' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::ADD,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::ADD);
     $$ = new_node;
   } |
   '-' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::SUB,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::SUB);
     $$ = new_node;
   }
   ;
@@ -512,19 +485,19 @@ RelExp:
 
 RelOp:
   '<' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LE,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LE);
     $$ = new_node; 
   } |
   '>' {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GE,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GE);
     $$ = new_node; 
   } |
   LEEQ {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LEEQ,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LEEQ);
     $$ = new_node; 
   } |
   GEEQ {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GEEQ,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GEEQ);
     $$ = new_node; 
   }
   ;
@@ -542,11 +515,11 @@ EqExp:
 
 EqOp:
   EQ {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::EQ,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::EQ);
     $$ = new_node;
   } |
   UNEQ {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::UNEQ,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::UNEQ);
     $$ = new_node;
   }
   ;
@@ -564,7 +537,7 @@ LAndExp:
 
 LAndOp:
   AND {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::AND,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::AND);
     $$ = new_node;
   }
   ;
@@ -582,7 +555,7 @@ LOrExp:
 
 LOrOp:
   OR {
-    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::OR,yylineno);
+    BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::OR);
     $$ = new_node;
   }
   ;
@@ -604,82 +577,21 @@ FuncDef:
     dynamic_cast<FuncDefNode*>($2)->SetIdent(dynamic_cast<IdentNode*>($3));
     dynamic_cast<FuncDefNode*>($2)->SetBlock($7);
     $$ = funcdefnode_tmp_func_def_node;
-    assert($$!=nullptr);
-    bool func_type_error = (dynamic_cast<FuncDefNode*>($2)->GetType() == BasicType::UNKNOWN);
-    bool func_param_list_error = dynamic_cast<Node*>($$)->error_list_.size()>(func_type_error?1:0);
-    if(func_type_error or func_param_list_error){
-      std::stringstream msg;
-      msg << "[ERROR] Function \"" << dynamic_cast<IdentNode*>($3)->GetIdent() << "\" at line " << dynamic_cast<Node*>($3)->line_no << " is omitted due to following error(s) in its declaration:\n";
-      if(func_type_error){
-        assert($$->error_list_.size()>0);
-        msg << "  " << "Unknown return type \"" << dynamic_cast<ErrorNode*>($$->error_list_[0])->err_msg << "\".\n";
-        $$->error_list_.erase($$->error_list_.begin());
-      }
-      if(func_param_list_error){
-        for (auto iter: dynamic_cast<Node*>($$)->error_list_){
-          msg << "  " << dynamic_cast<ErrorNode*>(&(*iter)) -> err_msg << ".\n";
-        }
-      }
-      ErrorNode *new_node = new ErrorNode(msg.str(),dynamic_cast<Node*>($3)->line_no);
-      printf("%s",msg.str().c_str());
-      delete $$;
-      $$ = new_node;
-    }
-    yyerrok;
   } |
   DEF FuncType IDENT '(' ')' Block {
     dynamic_cast<FuncDefNode*>($2)->SetIdent(dynamic_cast<IdentNode*>($3));
     dynamic_cast<FuncDefNode*>($2)->SetBlock($6);
     $$ = funcdefnode_tmp_func_def_node;
-    assert($$!=nullptr);
-    bool func_type_error = (dynamic_cast<FuncDefNode*>($2)->GetType() == BasicType::UNKNOWN);
-    if(func_type_error){
-      std::stringstream msg;
-      msg << "[ERROR] Function \"" << dynamic_cast<IdentNode*>($3)->GetIdent() << "\" at line " << dynamic_cast<Node*>($3)->line_no << " is omitted due to following error(s) in its declaration:\n";
-      assert($$->error_list_.size()>0);
-      msg << "  " << "Unknown return type \"" << dynamic_cast<ErrorNode*>($$->error_list_[0])->err_msg << "\".\n";
-      $$->error_list_.erase($$->error_list_.begin());
-      ErrorNode *new_node = new ErrorNode(msg.str(),dynamic_cast<Node*>($3)->line_no);
-      printf("%s",msg.str().c_str());
-      delete $$;
-      $$ = new_node;
-    }
-    yyerrok;
-  } |
-  error Block {
-    if(funcdefnode_tmp_func_def_node!=nullptr){
-      delete funcdefnode_tmp_func_def_node;
-    }
-    std::stringstream msg;
-    msg << "[ERROR] An unit seems to be a declaration of a function at line " << yylineno << " is omitted.";
-    ErrorNode *new_node = new ErrorNode(msg.str(),yylineno);
-    printf("%s\n",msg.str().c_str());
-    $$ = new_node;
-    yyerrok;
   }
   ;
 
 FuncFParamList:
   FuncFParam {
-    assert($1!=nullptr);
-    if(dynamic_cast<Node*>($1)->CheckNodeType(NodeType::IDENT)){
-      assert(funcdefnode_tmp_func_def_node!=nullptr);
-      funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($1));
-    }
-    else if(dynamic_cast<Node*>($1)->CheckNodeType(NodeType::ERROR)){
-      dynamic_cast<Node*>(funcdefnode_tmp_func_def_node)->AddError(dynamic_cast<Node*>($1));
-    }
+    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($1));
     $$ = nullptr;
   } |
   FuncFParamList ',' FuncFParam {
-    assert($3!=nullptr);
-    if(dynamic_cast<Node*>($3)->CheckNodeType(NodeType::IDENT)){
-      assert(funcdefnode_tmp_func_def_node!=nullptr);
-      funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($3));
-    }
-    else if(dynamic_cast<Node*>($3)->CheckNodeType(NodeType::ERROR)){
-      dynamic_cast<Node*>(funcdefnode_tmp_func_def_node)->AddError(dynamic_cast<Node*>($3));
-    }
+    funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>($3));
     $$ = nullptr;
   }
   ;
@@ -690,22 +602,6 @@ FuncFParam:
   } |
   BType IDENT '[' ']' FuncFParamIndexList {
     $$ = $2;
-  } |
-  IDENT IDENT {
-    assert($1!=nullptr);
-    std::stringstream msg;
-    msg << "Unknown data type \"" << dynamic_cast<IdentNode*>($1)->GetIdent() << "\" for param \"" << dynamic_cast<IdentNode*>($2)->GetIdent() << "\"";
-    ErrorNode *new_node = new ErrorNode(msg.str(),dynamic_cast<IdentNode*>($2)->line_no);
-        assert(new_node!=nullptr);
-    $$ = new_node;
-  } |
-  IDENT IDENT '[' ']' FuncFParamIndexList {
-    assert($1!=nullptr);
-    std::stringstream msg;
-    msg << "Unknown data type \"" << dynamic_cast<IdentNode*>($1)->GetIdent() << "[]\" for param \"" << dynamic_cast<IdentNode*>($2)->GetIdent() << "\"";
-    ErrorNode *new_node = new ErrorNode(msg.str(),dynamic_cast<IdentNode*>($2)->line_no);
-    assert(new_node!=nullptr);
-    $$ = new_node;
   }
   ;
 
@@ -723,29 +619,22 @@ FuncFParamIndexList:
 
 FuncType:
   VOID {
-    FuncDefNode *new_node = new FuncDefNode(BasicType::VOID,yylineno);
+    FuncDefNode *new_node = new FuncDefNode(BasicType::VOID);
     funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   INT {
-    FuncDefNode *new_node = new FuncDefNode(BasicType::INT,yylineno);
+    FuncDefNode *new_node = new FuncDefNode(BasicType::INT);
     funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   FLOAT {
-    FuncDefNode *new_node = new FuncDefNode(BasicType::FLOAT,yylineno);
+    FuncDefNode *new_node = new FuncDefNode(BasicType::FLOAT);
     funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   } |
   CHAR {
-    FuncDefNode *new_node = new FuncDefNode(BasicType::CHAR,yylineno);
-    funcdefnode_tmp_func_def_node = new_node;
-    $$ = new_node;
-  } |
-  IDENT {
-    FuncDefNode *new_node = new FuncDefNode(BasicType::UNKNOWN,yylineno);
-    ErrorNode* error_info = new ErrorNode(dynamic_cast<IdentNode*>($1)->GetIdent(),yylineno);
-    new_node -> AddError(error_info);
+    FuncDefNode *new_node = new FuncDefNode(BasicType::CHAR);
     funcdefnode_tmp_func_def_node = new_node;
     $$ = new_node;
   }
