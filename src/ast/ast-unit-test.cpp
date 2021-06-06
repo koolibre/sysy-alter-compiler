@@ -8,6 +8,7 @@
 extern void yyparse();
 extern RootNode* root;
 extern FILE *yyin;
+extern int yydebug;
 
 int main(int argc, char **argv) {
 #ifdef DEBUG
@@ -18,6 +19,7 @@ int main(int argc, char **argv) {
   streambuf *file_buf = output_stream.rdbuf();
   cout.rdbuf(file_buf);
   assert(root != nullptr);
+  yydebug = 0;
   yyparse();
 #ifdef AST_DEBUG
   root->Print(0);
