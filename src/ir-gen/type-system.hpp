@@ -1,5 +1,5 @@
 #ifndef SYSY_ALTER_COMPILER_IR_GEN_TYPE_SYSTEM_HPP_
-#define SYST_ALTER_COMPILER_IR_GEN_TYPE_SYSTEM_HPP_
+#define SYSY_ALTER_COMPILER_IR_GEN_TYPE_SYSTEM_HPP_
 
 #include <iostream>
 #include <string>
@@ -30,6 +30,7 @@ struct TypeCheckType {
                 std::list<int> &array_dimension_list) :
       basic_type_(basic_type),
       array_dimension_list_(array_dimension_list) {}
+      
   TypeCheckType(TypeCheckType &type) {
     this->basic_type_ = type.basic_type_;
     this->array_dimension_list_ = type.array_dimension_list_;

@@ -9,7 +9,7 @@
 #include <ir-gen/type-system.hpp>
 
 void SymbolTable::PushScope() {
-  assert(block != nullptr);
+  // assert(block != nullptr);
   scope_stack_.push_back(Scope());
 }
 

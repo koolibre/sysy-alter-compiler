@@ -16,7 +16,7 @@
 class NodeVisitor {
  public:
   // default ctor
-  // virtual dtor
+  // virtual dtor 
   virtual ~NodeVisitor() {}
   // other
   void Visit(Node *node) {
