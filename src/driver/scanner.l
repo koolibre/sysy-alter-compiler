@@ -172,7 +172,7 @@ inline void test_output(const char *type) {
 
 {Ident} {
   test_output("Ident");
-  Node *new_node = new IdentNode(std::string(yytext));
+  Node *new_node = new IdentNode(std::string(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return IDENT;
@@ -182,7 +182,7 @@ inline void test_output(const char *type) {
 
 {IntConst} {
   test_output("IntConst");
-  Node* new_node = new ValuePrimaryExpNode(atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode<int>(NodeType::INT_PRIMARY_EXP, atoi(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return INT_CONST;
@@ -190,7 +190,7 @@ inline void test_output(const char *type) {
 
 {floatConst} {
   test_output("floatConst");
-  Node* new_node = new ValuePrimaryExpNode((float)atof(yytext));
+  Node* new_node = new ValuePrimaryExpNode<float>(NodeType::FLOAT_PRIMARY_EXP, atof(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return FLOAT_CONST;
@@ -198,7 +198,7 @@ inline void test_output(const char *type) {
 
 {CharConst} {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1));
+  Node* new_node = new ValuePrimaryExpNode<char>(NodeType::CHAR_PRIMARY_EXP, *((char*)yytext + 1),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;
@@ -210,8 +210,7 @@ inline void test_output(const char *type) {
     yymore();
   } else {
     test_output("StringConst");
-    std::string tmp_str(yytext);
-    Node* new_node = new ValuePrimaryExpNode(tmp_str);
+    Node* new_node = new ValuePrimaryExpNode<std::string>(NodeType::STRING_PRIMARY_EXP, std::string(yytext),yylineno);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
@@ -225,7 +224,7 @@ inline void test_output(const char *type) {
   fprintf(yyout, "unknown symbol: ~%s~\n", yytext);
 #endif
 #endif
-  return ERROR;
+  // return ERROR;
 }/* error */
 
 %%
@@ -236,5 +235,6 @@ int yywrap() {
 
 void yyerror(const char *str) {
   assert(str != nullptr);
-  fprintf(yyout,"%s", str);
+  fprintf(yyout,"//line %d: ",yylineno);
+  fprintf(yyout,"%s\n", str);
 }
