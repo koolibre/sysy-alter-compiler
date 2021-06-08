@@ -23,6 +23,12 @@ using namespace std;
 
 void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
     Module* module_ = irgenvisitor.GetModule();
+    // print IR
+    //verifyModule(*module_);
+    std::error_code errorcode;
+    auto stream = new llvm::raw_fd_ostream("test.ll", errorcode);
+    module_->print(*stream, nullptr);
+    
     // Initialize the target registry etc.
     InitializeAllTargetInfos();
     InitializeAllTargets();
@@ -51,7 +57,6 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
     module_->setDataLayout(theTargetMachine->createDataLayout());
     module_->setTargetTriple(targetTriple);
 
-
     std::error_code EC;
     raw_fd_ostream dest(filename.c_str(), EC, sys::fs::F_None);
 //    raw_fd_ostream dest(filename.c_str(), EC, sys::fs::F_None);
@@ -70,10 +75,6 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
 
     outs() << "Object code wrote to " << filename.c_str() << "\n";
 
-    // print IR
-    //verifyModule(*module_);
-    std::error_code errorcode;
-    auto stream = new llvm::raw_fd_ostream("test.ll", errorcode);
-    module_->print(*stream, nullptr);
+
     return;
 }

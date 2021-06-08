@@ -504,10 +504,10 @@ void LValPrimaryExpNode::AddLVal() {
     index_list_.push_back(itr);
 }
 void LValPrimaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ValuePrimaryExpNode
 void ValuePrimaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
