@@ -17,6 +17,7 @@
 #include "obj-gen/obj-gen.hpp"
 
 using namespace llvm;
+using namespace llvm::sys;
 using namespace std;
 
 
@@ -50,20 +51,21 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
     module_->setDataLayout(theTargetMachine->createDataLayout());
     module_->setTargetTriple(targetTriple);
 
+
     std::error_code EC;
     raw_fd_ostream dest(filename.c_str(), EC, sys::fs::F_None);
 //    raw_fd_ostream dest(filename.c_str(), EC, sys::fs::F_None);
 //    formatted_raw_ostream formattedRawOstream(dest);
 
     legacy::PassManager pass;
-    auto fileType = TargetMachine::CGFT_ObjectFile;
+    auto fileType = CGFT_ObjectFile;
 
-    if( theTargetMachine->addPassesToEmitFile(pass, dest, fileType) ){
+    if( theTargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType) ){
         errs() << "theTargetMachine can't emit a file of this type";
         return;
     }
 
-    pass.run(*module_.get());
+    pass.run(*module_);
     dest.flush();
 
     outs() << "Object code wrote to " << filename.c_str() << "\n";
