@@ -444,57 +444,57 @@ void FuncDefNode::Accept(NodeVisitor *visitor) {
 
 // BlockNode
 void BlockNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // InitValNode
 void InitValNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // AssignStmtNode
 void AssignStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // IfStmtNode
 void IfStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // WhileStmtNode
 void WhileStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // BreakStmtNode
 void BreakStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ContinueStmtNode
 void ContinueStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ReturnStmtNode
 void ReturnStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // FuncCallExpNode
 void FuncCallExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // BinaryExpNode
 void BinaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // UnaryExpNode
 void UnaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // LvalPrimaryExpNode

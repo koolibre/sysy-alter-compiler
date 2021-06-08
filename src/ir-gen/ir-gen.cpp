@@ -24,18 +24,25 @@ llvm::Module * IrGenVisitor::GetModule(){
 void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
   cout << "[DeclNode]" << endl;
 }
+
 void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
   cout << "[FuncCallExpNode]" << endl; 
   cout << func_call_exp_node->ident_ << endl;
-  auto formatVal = builder_.CreateGlobalStringPtr("hello, world");
+  //auto formatVal = builder_.CreateGlobalStringPtr("hello, world", "string");
   vector<Value*> callArgs;
-  callArgs.push_back(formatVal);
+  //callArgs.push_back(formatVal);
   builder_.CreateCall(symbol_table_.GetPreDefinedFunction(func_call_exp_node->ident_), callArgs);
-
 }
-void IrGenVisitor::VisitImplicit(FuncDefNode *func_call_exp_node) {
+
+void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
   cout << "[FuncDefNode]" << endl;
-  cout << func_call_exp_node->func_ident_ << endl;
+  cout << func_def_node->func_ident_ << endl;
+  if (func_def_node->func_ident_.compare("main") == 0){
+    auto mainBlock = llvm::BasicBlock::Create(llvm_context_, "entry", symbol_table_.GetPreDefinedFunction(func_def_node->func_ident_));
+    builder_.SetInsertPoint(mainBlock);
+  }
+
+  Visit(func_def_node->block_);
   /*
   if (func_call_exp_node->func_ident_.compare("printf") == 0 ||
       func_call_exp_node->func_ident_.compare("scanf") == 0  ||

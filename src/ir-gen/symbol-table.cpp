@@ -94,6 +94,7 @@ SymbolTable::SymbolTable(llvm::LLVMContext &llvm_context) :
   main_ = llvm::Function::Create(type_of_main,
                            llvm::GlobalVariable::ExternalLinkage,
                            "main");
+
   // declare printf
   std::vector<llvm::Type*> args_of_printf;
   args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));

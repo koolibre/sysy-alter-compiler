@@ -70,5 +70,10 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
 
     outs() << "Object code wrote to " << filename.c_str() << "\n";
 
+    // print IR
+    //verifyModule(*module_);
+    std::error_code errorcode;
+    auto stream = new llvm::raw_fd_ostream("test.ll", errorcode);
+    module_->print(*stream, nullptr);
     return;
 }
