@@ -7,7 +7,7 @@
   #undef NDEBUG
 #endif
 
-#include <cassert>            // use assert()
+#include <cassert>            // use assYrt()
 
 #include <iostream>           // use std::cout
 #include <string>             // use std::string
@@ -584,7 +584,7 @@ struct ValuePrimaryExpNode : public Node {
       string_value_(string_value) {}  
   // default dtor
   // other
-  
+void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override {

@@ -15,6 +15,62 @@
 using namespace llvm;
 using namespace std;
 
+
+llvm::Module * IrGenVisitor::GetModule(){
+  return module_;
+}
+
+// unfinished function
+void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
+  cout << "[DeclNode]" << endl;
+}
+void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
+  cout << "[FuncCallExpNode]" << endl; 
+  cout << func_call_exp_node->ident_ << endl;
+  auto formatVal = builder_.CreateGlobalStringPtr("hello, world");
+  vector<Value*> callArgs;
+  callArgs.push_back(formatVal);
+  builder_.CreateCall(symbol_table_.GetPreDefinedFunction(func_call_exp_node->ident_), callArgs);
+
+}
+void IrGenVisitor::VisitImplicit(FuncDefNode *func_call_exp_node) {
+  cout << "[FuncDefNode]" << endl;
+  cout << func_call_exp_node->func_ident_ << endl;
+  /*
+  if (func_call_exp_node->func_ident_.compare("printf") == 0 ||
+      func_call_exp_node->func_ident_.compare("scanf") == 0  ||
+      func_call_exp_node->func_ident_.compare("main") == 0 ) {
+    
+    std::vector<llvm::Type*> args_of_printf;
+    args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
+    llvm::FunctionType *type_of_printf = llvm::FunctionType::get(
+        llvm::Type::getInt32Ty(llvm_context_),
+        args_of_printf,
+        true);
+    llvm:Function *printf_ = llvm::Function::Create(type_of_printf,
+                              llvm::GlobalValue::ExternalLinkage,
+                              func_call_,
+                              module_);
+    printf_->setCallingConv(llvm::CallingConv::C);
+
+    //auto formatVal = builder_.CreateGlobalStringPtr("hello, world");
+    //vector<Value*> callArgs;
+    //callArgs.push_back(formatVal);
+    //builder_.CreateCall(printf_, callArgs);
+  }
+  */
+}
+void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
+  cout << "[BinaryExpNode]" << endl;
+}
+void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node) {
+  cout << "[UnaryExpNode]" << endl;
+}
+void IrGenVisitor::VisitImplicit(InitValNode *lval_primary_exp_node) {
+  cout << "[InitValNode]" << endl;
+}
+
+
 // generate IR for error node
 // no code at all, just set error info
 void IrGenVisitor::VisitImplicit(ErrorNode *node) {

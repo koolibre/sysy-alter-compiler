@@ -395,7 +395,7 @@ void LValPrimaryExpNode::Print(int indentation) const {
 
 // RootNode
 void RootNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // DeclNode

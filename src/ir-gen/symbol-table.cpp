@@ -69,6 +69,20 @@ llvm::Function* SymbolTable::GetFunction(std::string &name) const {
     return nullptr;
 }
 
+llvm::Function* SymbolTable::GetPreDefinedFunction(std::string &name) const {
+  if (name.compare("printf") == 0) {
+    return printf_;
+  }
+  else if (name.compare("scanf") == 0) {
+    return scanf_;
+  }
+  else if (name.compare("main") == 0) {
+    return main_;
+  }
+  else
+    return nullptr;
+}
+
 SymbolTable::SymbolTable(llvm::LLVMContext &llvm_context) :
     llvm_context_(llvm_context) {
   // declare main
@@ -80,5 +94,27 @@ SymbolTable::SymbolTable(llvm::LLVMContext &llvm_context) :
   main_ = llvm::Function::Create(type_of_main,
                            llvm::GlobalVariable::ExternalLinkage,
                            "main");
-  // TODO : Declare printf and scanf
+  // declare printf
+  std::vector<llvm::Type*> args_of_printf;
+  args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
+  llvm::FunctionType *type_of_printf = llvm::FunctionType::get(
+      llvm::Type::getInt32Ty(llvm_context_),
+      llvm::makeArrayRef(args_of_printf),
+      true);
+  printf_ = llvm::Function::Create(type_of_printf,
+                             llvm::GlobalValue::ExternalLinkage,
+                             "printf");
+  printf_->setCallingConv(llvm::CallingConv::C);
+
+  // declare scanf
+  std::vector<llvm::Type*> args_of_scanf;
+  args_of_scanf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
+  llvm::FunctionType *type_of_scanf = llvm::FunctionType::get(
+      llvm::Type::getInt32Ty(llvm_context_),
+      llvm::makeArrayRef(args_of_scanf),
+      true);
+  scanf_ = llvm::Function::Create(type_of_scanf,
+                             llvm::GlobalValue::ExternalLinkage,
+                             "scanf");
+  scanf_->setCallingConv(llvm::CallingConv::C);
 }

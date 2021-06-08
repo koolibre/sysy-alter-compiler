@@ -50,9 +50,12 @@ class IrGenVisitor : public NodeVisitor {
     builder_(llvm_context_),
     type_system_(llvm_context_),
     current_type_(TypeCheckBasicType::VOID),
-    symbol_table_(llvm_context_) {}
+    symbol_table_(llvm_context_) {
+      module_ = new llvm::Module("test.ll", llvm_context);
+    }
   // default dtor
   // other
+  llvm::Module * GetModule();
   void VisitImplicit(RootNode *root_node) override;                         // finish
   void VisitImplicit(DeclNode *decl_node) override;
   void VisitImplicit(IdentNode *ident_node) override;                       // finish
@@ -77,7 +80,8 @@ class IrGenVisitor : public NodeVisitor {
   // info-component for ir generation
   llvm::LLVMContext &llvm_context_;
   llvm::IRBuilder<> builder_;
-  std::unique_ptr<llvm::Module> module_;
+  //std::unique_ptr<llvm::Module> module_;
+  llvm::Module *module_;
   SymbolTable symbol_table_;
   TypeSystem type_system_;
   // retern value
