@@ -604,11 +604,11 @@ static const yytype_int16 yyrline[] =
      265,   268,   271,   274,   277,   280,   283,   289,   292,   298,
      304,   307,   313,   319,   327,   331,   338,   341,   344,   347,
      350,   353,   359,   365,   371,   377,   383,   386,   390,   395,
-     402,   406,   413,   417,   421,   428,   431,   439,   443,   447,
-     454,   457,   465,   469,   476,   481,   487,   491,   495,   499,
-     506,   509,   517,   521,   528,   531,   539,   546,   549,   557,
-     564,   570,   576,   581,   589,   593,   600,   603,   609,   614,
-     621,   626,   631,   636
+     402,   407,   414,   418,   422,   429,   432,   440,   444,   448,
+     455,   458,   466,   470,   477,   482,   488,   492,   496,   500,
+     507,   510,   518,   522,   529,   532,   540,   547,   550,   558,
+     565,   571,   577,   582,   590,   594,   601,   604,   610,   615,
+     622,   627,   632,   637
 };
 #endif
 
@@ -1928,403 +1928,404 @@ yyreduce:
 #line 402 "../../src/driver/parser.y"
       {
     FuncCallExpNode *new_node = new FuncCallExpNode;
+    new_node->AddParam(yyvsp[0]);
     yyval = new_node;
   }
-#line 1934 "../../src/driver/parser.cpp"
+#line 1935 "../../src/driver/parser.cpp"
     break;
 
   case 71: /* FuncRParamList: FuncRParamList ',' Exp  */
-#line 406 "../../src/driver/parser.y"
+#line 407 "../../src/driver/parser.y"
                          {
     dynamic_cast<FuncCallExpNode*>(yyvsp[-2])->AddParam(yyvsp[0]);
     yyval = yyvsp[-2];
   }
-#line 1943 "../../src/driver/parser.cpp"
+#line 1944 "../../src/driver/parser.cpp"
     break;
 
   case 72: /* UnaryOp: '+'  */
-#line 413 "../../src/driver/parser.y"
+#line 414 "../../src/driver/parser.y"
       {
     UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::POSITIVE);
     yyval = new_node;
   }
-#line 1952 "../../src/driver/parser.cpp"
+#line 1953 "../../src/driver/parser.cpp"
     break;
 
   case 73: /* UnaryOp: '-'  */
-#line 417 "../../src/driver/parser.y"
+#line 418 "../../src/driver/parser.y"
       {
     UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NEGATIVE);
     yyval = new_node;
   }
-#line 1961 "../../src/driver/parser.cpp"
+#line 1962 "../../src/driver/parser.cpp"
     break;
 
   case 74: /* UnaryOp: '!'  */
-#line 421 "../../src/driver/parser.y"
+#line 422 "../../src/driver/parser.y"
       {
     UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NOT);
     yyval = new_node;
   }
-#line 1970 "../../src/driver/parser.cpp"
+#line 1971 "../../src/driver/parser.cpp"
     break;
 
   case 75: /* MulExp: UnaryExp  */
-#line 428 "../../src/driver/parser.y"
+#line 429 "../../src/driver/parser.y"
            {
     yyval = yyvsp[0];
   }
-#line 1978 "../../src/driver/parser.cpp"
+#line 1979 "../../src/driver/parser.cpp"
     break;
 
   case 76: /* MulExp: MulExp MulOp UnaryExp  */
-#line 431 "../../src/driver/parser.y"
+#line 432 "../../src/driver/parser.y"
                         {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1];
   }
-#line 1988 "../../src/driver/parser.cpp"
+#line 1989 "../../src/driver/parser.cpp"
     break;
 
   case 77: /* MulOp: '*'  */
-#line 439 "../../src/driver/parser.y"
+#line 440 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MUL);
     yyval = new_node;
   }
-#line 1997 "../../src/driver/parser.cpp"
+#line 1998 "../../src/driver/parser.cpp"
     break;
 
   case 78: /* MulOp: '/'  */
-#line 443 "../../src/driver/parser.y"
+#line 444 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::DIV);
     yyval = new_node;
   }
-#line 2006 "../../src/driver/parser.cpp"
+#line 2007 "../../src/driver/parser.cpp"
     break;
 
   case 79: /* MulOp: '%'  */
-#line 447 "../../src/driver/parser.y"
+#line 448 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::MOD);
     yyval = new_node;
   }
-#line 2015 "../../src/driver/parser.cpp"
+#line 2016 "../../src/driver/parser.cpp"
     break;
 
   case 80: /* AddExp: MulExp  */
-#line 454 "../../src/driver/parser.y"
+#line 455 "../../src/driver/parser.y"
          {
     yyval = yyvsp[0];
   }
-#line 2023 "../../src/driver/parser.cpp"
+#line 2024 "../../src/driver/parser.cpp"
     break;
 
   case 81: /* AddExp: AddExp AddOp MulExp  */
-#line 457 "../../src/driver/parser.y"
+#line 458 "../../src/driver/parser.y"
                       {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1]; 
   }
-#line 2033 "../../src/driver/parser.cpp"
+#line 2034 "../../src/driver/parser.cpp"
     break;
 
   case 82: /* AddOp: '+'  */
-#line 465 "../../src/driver/parser.y"
+#line 466 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::ADD);
     yyval = new_node;
   }
-#line 2042 "../../src/driver/parser.cpp"
+#line 2043 "../../src/driver/parser.cpp"
     break;
 
   case 83: /* AddOp: '-'  */
-#line 469 "../../src/driver/parser.y"
+#line 470 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::SUB);
     yyval = new_node;
   }
-#line 2051 "../../src/driver/parser.cpp"
+#line 2052 "../../src/driver/parser.cpp"
     break;
 
   case 84: /* RelExp: RelExp RelOp AddExp  */
-#line 476 "../../src/driver/parser.y"
+#line 477 "../../src/driver/parser.y"
                       {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1];
   }
-#line 2061 "../../src/driver/parser.cpp"
+#line 2062 "../../src/driver/parser.cpp"
     break;
 
   case 85: /* RelExp: AddExp  */
-#line 481 "../../src/driver/parser.y"
+#line 482 "../../src/driver/parser.y"
          {
     yyval = yyvsp[0]; 
   }
-#line 2069 "../../src/driver/parser.cpp"
+#line 2070 "../../src/driver/parser.cpp"
     break;
 
   case 86: /* RelOp: '<'  */
-#line 487 "../../src/driver/parser.y"
+#line 488 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LE);
     yyval = new_node; 
   }
-#line 2078 "../../src/driver/parser.cpp"
+#line 2079 "../../src/driver/parser.cpp"
     break;
 
   case 87: /* RelOp: '>'  */
-#line 491 "../../src/driver/parser.y"
+#line 492 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GE);
     yyval = new_node; 
   }
-#line 2087 "../../src/driver/parser.cpp"
+#line 2088 "../../src/driver/parser.cpp"
     break;
 
   case 88: /* RelOp: LEEQ  */
-#line 495 "../../src/driver/parser.y"
+#line 496 "../../src/driver/parser.y"
        {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::LEEQ);
     yyval = new_node; 
   }
-#line 2096 "../../src/driver/parser.cpp"
+#line 2097 "../../src/driver/parser.cpp"
     break;
 
   case 89: /* RelOp: GEEQ  */
-#line 499 "../../src/driver/parser.y"
+#line 500 "../../src/driver/parser.y"
        {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::GEEQ);
     yyval = new_node; 
   }
-#line 2105 "../../src/driver/parser.cpp"
+#line 2106 "../../src/driver/parser.cpp"
     break;
 
   case 90: /* EqExp: RelExp  */
-#line 506 "../../src/driver/parser.y"
+#line 507 "../../src/driver/parser.y"
          {
     yyval = yyvsp[0];
   }
-#line 2113 "../../src/driver/parser.cpp"
+#line 2114 "../../src/driver/parser.cpp"
     break;
 
   case 91: /* EqExp: EqExp EqOp RelExp  */
-#line 509 "../../src/driver/parser.y"
+#line 510 "../../src/driver/parser.y"
                     {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1];
   }
-#line 2123 "../../src/driver/parser.cpp"
+#line 2124 "../../src/driver/parser.cpp"
     break;
 
   case 92: /* EqOp: EQ  */
-#line 517 "../../src/driver/parser.y"
+#line 518 "../../src/driver/parser.y"
      {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::EQ);
     yyval = new_node;
   }
-#line 2132 "../../src/driver/parser.cpp"
+#line 2133 "../../src/driver/parser.cpp"
     break;
 
   case 93: /* EqOp: UNEQ  */
-#line 521 "../../src/driver/parser.y"
+#line 522 "../../src/driver/parser.y"
        {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::UNEQ);
     yyval = new_node;
   }
-#line 2141 "../../src/driver/parser.cpp"
+#line 2142 "../../src/driver/parser.cpp"
     break;
 
   case 94: /* LAndExp: EqExp  */
-#line 528 "../../src/driver/parser.y"
+#line 529 "../../src/driver/parser.y"
         {
     yyval = yyvsp[0];
   }
-#line 2149 "../../src/driver/parser.cpp"
+#line 2150 "../../src/driver/parser.cpp"
     break;
 
   case 95: /* LAndExp: LAndExp LAndOp EqExp  */
-#line 531 "../../src/driver/parser.y"
+#line 532 "../../src/driver/parser.y"
                        {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1];
   }
-#line 2159 "../../src/driver/parser.cpp"
+#line 2160 "../../src/driver/parser.cpp"
     break;
 
   case 96: /* LAndOp: AND  */
-#line 539 "../../src/driver/parser.y"
+#line 540 "../../src/driver/parser.y"
       {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::AND);
     yyval = new_node;
   }
-#line 2168 "../../src/driver/parser.cpp"
+#line 2169 "../../src/driver/parser.cpp"
     break;
 
   case 97: /* LOrExp: LAndExp  */
-#line 546 "../../src/driver/parser.y"
+#line 547 "../../src/driver/parser.y"
           {
     yyval = yyvsp[0];
   }
-#line 2176 "../../src/driver/parser.cpp"
+#line 2177 "../../src/driver/parser.cpp"
     break;
 
   case 98: /* LOrExp: LOrExp LOrOp LAndExp  */
-#line 549 "../../src/driver/parser.y"
+#line 550 "../../src/driver/parser.y"
                        {
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetLeftExp(yyvsp[-2]);
     dynamic_cast<BinaryExpNode*>(yyvsp[-1])->SetRightExp(yyvsp[0]);
     yyval = yyvsp[-1];
   }
-#line 2186 "../../src/driver/parser.cpp"
+#line 2187 "../../src/driver/parser.cpp"
     break;
 
   case 99: /* LOrOp: OR  */
-#line 557 "../../src/driver/parser.y"
+#line 558 "../../src/driver/parser.y"
      {
     BinaryExpNode *new_node = new BinaryExpNode(BinaryOpType::OR);
     yyval = new_node;
   }
-#line 2195 "../../src/driver/parser.cpp"
+#line 2196 "../../src/driver/parser.cpp"
     break;
 
   case 100: /* ConstExp: AddExp  */
-#line 564 "../../src/driver/parser.y"
+#line 565 "../../src/driver/parser.y"
          {
     yyval = yyvsp[0];
   }
-#line 2203 "../../src/driver/parser.cpp"
+#line 2204 "../../src/driver/parser.cpp"
     break;
 
   case 101: /* VarExp: AddExp  */
-#line 570 "../../src/driver/parser.y"
+#line 571 "../../src/driver/parser.y"
          {
     yyval = yyvsp[0];
   }
-#line 2211 "../../src/driver/parser.cpp"
+#line 2212 "../../src/driver/parser.cpp"
     break;
 
   case 102: /* FuncDef: DEF FuncType IDENT '(' FuncFParamList ')' Block  */
-#line 576 "../../src/driver/parser.y"
+#line 577 "../../src/driver/parser.y"
                                                   {
     dynamic_cast<FuncDefNode*>(yyvsp[-5])->SetIdent(dynamic_cast<IdentNode*>(yyvsp[-4]));
     dynamic_cast<FuncDefNode*>(yyvsp[-5])->SetBlock(yyvsp[0]);
     yyval = funcdefnode_tmp_func_def_node;
   }
-#line 2221 "../../src/driver/parser.cpp"
+#line 2222 "../../src/driver/parser.cpp"
     break;
 
   case 103: /* FuncDef: DEF FuncType IDENT '(' ')' Block  */
-#line 581 "../../src/driver/parser.y"
+#line 582 "../../src/driver/parser.y"
                                    {
     dynamic_cast<FuncDefNode*>(yyvsp[-4])->SetIdent(dynamic_cast<IdentNode*>(yyvsp[-3]));
     dynamic_cast<FuncDefNode*>(yyvsp[-4])->SetBlock(yyvsp[0]);
     yyval = funcdefnode_tmp_func_def_node;
   }
-#line 2231 "../../src/driver/parser.cpp"
+#line 2232 "../../src/driver/parser.cpp"
     break;
 
   case 104: /* FuncFParamList: FuncFParam  */
-#line 589 "../../src/driver/parser.y"
+#line 590 "../../src/driver/parser.y"
              {
     funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>(yyvsp[0]));
     yyval = nullptr;
   }
-#line 2240 "../../src/driver/parser.cpp"
+#line 2241 "../../src/driver/parser.cpp"
     break;
 
   case 105: /* FuncFParamList: FuncFParamList ',' FuncFParam  */
-#line 593 "../../src/driver/parser.y"
+#line 594 "../../src/driver/parser.y"
                                 {
     funcdefnode_tmp_func_def_node->AddParam(dynamic_cast<IdentNode*>(yyvsp[0]));
     yyval = nullptr;
   }
-#line 2249 "../../src/driver/parser.cpp"
+#line 2250 "../../src/driver/parser.cpp"
     break;
 
   case 106: /* FuncFParam: BType IDENT  */
-#line 600 "../../src/driver/parser.y"
+#line 601 "../../src/driver/parser.y"
               {
     yyval = yyvsp[0];
   }
-#line 2257 "../../src/driver/parser.cpp"
+#line 2258 "../../src/driver/parser.cpp"
     break;
 
   case 107: /* FuncFParam: BType IDENT '[' ']' FuncFParamIndexList  */
-#line 603 "../../src/driver/parser.y"
+#line 604 "../../src/driver/parser.y"
                                           {
     yyval = yyvsp[-3];
   }
-#line 2265 "../../src/driver/parser.cpp"
+#line 2266 "../../src/driver/parser.cpp"
     break;
 
   case 108: /* FuncFParamIndexList: %empty  */
-#line 609 "../../src/driver/parser.y"
+#line 610 "../../src/driver/parser.y"
               {
     funcdefnode_tmp_fparam_index_list.resize(0);
     funcdefnode_tmp_fparam_index_list.push_back(nullptr);
     yyval = nullptr;
   }
-#line 2275 "../../src/driver/parser.cpp"
+#line 2276 "../../src/driver/parser.cpp"
     break;
 
   case 109: /* FuncFParamIndexList: FuncFParamIndexList '[' Exp ']'  */
-#line 614 "../../src/driver/parser.y"
+#line 615 "../../src/driver/parser.y"
                                   {
     funcdefnode_tmp_fparam_index_list.push_back(yyvsp[-1]);
     yyval = nullptr;
   }
-#line 2284 "../../src/driver/parser.cpp"
+#line 2285 "../../src/driver/parser.cpp"
     break;
 
   case 110: /* FuncType: VOID  */
-#line 621 "../../src/driver/parser.y"
+#line 622 "../../src/driver/parser.y"
        {
     FuncDefNode *new_node = new FuncDefNode(BasicType::VOID);
     funcdefnode_tmp_func_def_node = new_node;
     yyval = new_node;
   }
-#line 2294 "../../src/driver/parser.cpp"
+#line 2295 "../../src/driver/parser.cpp"
     break;
 
   case 111: /* FuncType: INT  */
-#line 626 "../../src/driver/parser.y"
+#line 627 "../../src/driver/parser.y"
       {
     FuncDefNode *new_node = new FuncDefNode(BasicType::INT);
     funcdefnode_tmp_func_def_node = new_node;
     yyval = new_node;
   }
-#line 2304 "../../src/driver/parser.cpp"
+#line 2305 "../../src/driver/parser.cpp"
     break;
 
   case 112: /* FuncType: FLOAT  */
-#line 631 "../../src/driver/parser.y"
+#line 632 "../../src/driver/parser.y"
         {
     FuncDefNode *new_node = new FuncDefNode(BasicType::FLOAT);
     funcdefnode_tmp_func_def_node = new_node;
     yyval = new_node;
   }
-#line 2314 "../../src/driver/parser.cpp"
+#line 2315 "../../src/driver/parser.cpp"
     break;
 
   case 113: /* FuncType: CHAR  */
-#line 636 "../../src/driver/parser.y"
+#line 637 "../../src/driver/parser.y"
        {
     FuncDefNode *new_node = new FuncDefNode(BasicType::CHAR);
     funcdefnode_tmp_func_def_node = new_node;
     yyval = new_node;
   }
-#line 2324 "../../src/driver/parser.cpp"
+#line 2325 "../../src/driver/parser.cpp"
     break;
 
 
-#line 2328 "../../src/driver/parser.cpp"
+#line 2329 "../../src/driver/parser.cpp"
 
       default: break;
     }
@@ -2518,4 +2519,4 @@ yyreturn:
   return yyresult;
 }
 
-#line 643 "../../src/driver/parser.y"
+#line 644 "../../src/driver/parser.y"

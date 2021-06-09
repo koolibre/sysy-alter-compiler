@@ -401,6 +401,7 @@ UnaryExp:
 FuncRParamList:
   Exp {
     FuncCallExpNode *new_node = new FuncCallExpNode;
+    new_node->AddParam($1);
     $$ = new_node;
   } |
   FuncRParamList ',' Exp {

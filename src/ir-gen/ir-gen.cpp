@@ -28,20 +28,22 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
 void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
   cout << "[FuncCallExpNode]" << endl; 
   cout << func_call_exp_node->ident_ << endl;
+  cout << func_call_exp_node->rparam_array_.size() << endl;
 
-  std::vector<llvm::Type*> args_of_printf;
-  args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
+  if (func_call_exp_node->ident_.compare("printf") == 0){
+    std::vector<llvm::Type*> args_of_printf;
+    args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
 
-  llvm::FunctionType *type_of_printf= llvm::FunctionType::get(
-    llvm::Type::getInt32Ty(llvm_context_),
-    llvm::makeArrayRef(args_of_printf),
-    false);
+    llvm::FunctionType *type_of_printf= llvm::FunctionType::get(
+      llvm::Type::getInt32Ty(llvm_context_),
+      llvm::makeArrayRef(args_of_printf),
+      false);
 
-  llvm::Function *printf_ = llvm::Function::Create(type_of_printf,
-                                                  llvm::GlobalVariable::ExternalLinkage,
-                                                  "printf",
-                                                  module_);
-
+    llvm::Function *printf_ = llvm::Function::Create(type_of_printf,
+                                                    llvm::GlobalVariable::ExternalLinkage,
+                                                    "printf",
+                                                    module_);
+  }
 
   auto formatVal = builder_.CreateGlobalStringPtr("hello, world", "string");
   vector<Value*> callArgs;
@@ -53,45 +55,21 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
   cout << "[FuncDefNode]" << endl;
   cout << func_def_node->func_ident_ << endl;
 
-  if (func_def_node->func_ident_.compare("printf") == 0 || func_def_node->func_ident_.compare("scanf") == 0 || func_def_node->func_ident_.compare("main") == 0 ){
-    std::vector<llvm::Type*> args_of_func;
-    llvm::FunctionType *type_of_func = llvm::FunctionType::get(
-      llvm::Type::getVoidTy(llvm_context_),
-      llvm::makeArrayRef(args_of_func),
-      false);
+  std::vector<llvm::Type*> args_of_func;
+  llvm::FunctionType *type_of_func = llvm::FunctionType::get(
+    llvm::Type::getVoidTy(llvm_context_),
+    llvm::makeArrayRef(args_of_func),
+    false);
 
-    llvm::Function *func_ = llvm::Function::Create(type_of_func,
-                                                   llvm::GlobalVariable::ExternalLinkage,
-                                                   func_def_node->func_ident_,
-                                                   module_);
-    auto funcBlock = llvm::BasicBlock::Create(llvm_context_, func_def_node->func_ident_, module_->getFunction(func_def_node->func_ident_));
-    builder_.SetInsertPoint(funcBlock);
-  }
+  llvm::Function *func_ = llvm::Function::Create(type_of_func,
+                                                  llvm::GlobalVariable::ExternalLinkage,
+                                                  func_def_node->func_ident_,
+                                                  module_);
+  auto funcBlock = llvm::BasicBlock::Create(llvm_context_, func_def_node->func_ident_, module_->getFunction(func_def_node->func_ident_));
+  builder_.SetInsertPoint(funcBlock);
 
   Visit(func_def_node->block_);
-  /*
-  if (func_call_exp_node->func_ident_.compare("printf") == 0 ||
-      func_call_exp_node->func_ident_.compare("scanf") == 0  ||
-      func_call_exp_node->func_ident_.compare("main") == 0 ) {
-    
-    std::vector<llvm::Type*> args_of_printf;
-    args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
-    llvm::FunctionType *type_of_printf = llvm::FunctionType::get(
-        llvm::Type::getInt32Ty(llvm_context_),
-        args_of_printf,
-        true);
-    llvm:Function *printf_ = llvm::Function::Create(type_of_printf,
-                              llvm::GlobalValue::ExternalLinkage,
-                              func_call_,
-                              module_);
-    printf_->setCallingConv(llvm::CallingConv::C);
 
-    //auto formatVal = builder_.CreateGlobalStringPtr("hello, world");
-    //vector<Value*> callArgs;
-    //callArgs.push_back(formatVal);
-    //builder_.CreateCall(printf_, callArgs);
-  }
-  */
 }
 void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
   cout << "[BinaryExpNode]" << endl;

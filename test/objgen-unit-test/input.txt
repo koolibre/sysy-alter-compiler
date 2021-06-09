@@ -1,4 +1,8 @@
+def void func() {
+    printf("hello, world");
+    return;
+}
 def void main() {
-    printf();
+    func();
     return;
 }
