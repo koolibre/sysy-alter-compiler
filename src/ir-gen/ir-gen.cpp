@@ -23,37 +23,57 @@ llvm::Module * IrGenVisitor::GetModule(){
 // unfinished function
 void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
   cout << "[DeclNode]" << endl;
+
+  switch (decl_node->basic_type_) {
+    case (BasicType::INT) : {
+      Value * PtrVal = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1.5), PtrVal);
+      symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), PtrVal, decl_node->basic_type_);
+      break;
+    }
+    case (BasicType::FLOAT) : {
+      Value * PtrVal = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), 1.6), PtrVal);
+      symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), PtrVal, decl_node->basic_type_);
+      break;
+    }
+  }
+
 }
 
 void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
-  cout << "[FuncCallExpNode]" << endl; 
-  cout << func_call_exp_node->ident_ << endl;
-  cout << func_call_exp_node->rparam_array_.size() << endl;
+  cout << "[FuncCallExpNode]" << func_call_exp_node->ident_ << endl; 
 
-  if (func_call_exp_node->ident_.compare("printf") == 0){
+  // call args
+  std::vector<llvm::Value*> callArgs;
+  for (auto itr : func_call_exp_node->rparam_array_) {
+    Visit(itr);
+    callArgs.push_back(current_value_);
+  }
+
+  if (func_call_exp_node->ident_.compare("printf") == 0) {
     std::vector<llvm::Type*> args_of_printf;
     args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
 
+    // true arg means params can have ...
     llvm::FunctionType *type_of_printf= llvm::FunctionType::get(
       llvm::Type::getInt32Ty(llvm_context_),
-      llvm::makeArrayRef(args_of_printf),
-      false);
-
+      args_of_printf,
+      true);
     llvm::Function *printf_ = llvm::Function::Create(type_of_printf,
-                                                    llvm::GlobalVariable::ExternalLinkage,
+                                                    llvm::GlobalValue::ExternalLinkage,
                                                     "printf",
                                                     module_);
+    printf_->setCallingConv(llvm::CallingConv::C);
+    builder_.CreateCall(module_->getFunction("printf"), callArgs);
   }
-
-  auto formatVal = builder_.CreateGlobalStringPtr("hello, world", "string");
-  vector<Value*> callArgs;
-  callArgs.push_back(formatVal);
-  builder_.CreateCall(module_->getFunction("printf"), callArgs);
+  else {
+    builder_.CreateCall(module_->getFunction(func_call_exp_node->ident_), callArgs);
+  }
 }
 
 void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
-  cout << "[FuncDefNode]" << endl;
-  cout << func_def_node->func_ident_ << endl;
+  cout << "[FuncDefNode]" << func_def_node->func_ident_ << endl;
 
   std::vector<llvm::Type*> args_of_func;
   llvm::FunctionType *type_of_func = llvm::FunctionType::get(
@@ -62,15 +82,18 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
     false);
 
   llvm::Function *func_ = llvm::Function::Create(type_of_func,
-                                                  llvm::GlobalVariable::ExternalLinkage,
-                                                  func_def_node->func_ident_,
-                                                  module_);
+                                                 llvm::GlobalValue::ExternalLinkage,
+                                                 func_def_node->func_ident_,
+                                                 module_);
+  func_->setCallingConv(llvm::CallingConv::C);
+  symbol_table_.AddFunction(func_def_node->func_ident_, func_);
   auto funcBlock = llvm::BasicBlock::Create(llvm_context_, func_def_node->func_ident_, module_->getFunction(func_def_node->func_ident_));
   builder_.SetInsertPoint(funcBlock);
 
   Visit(func_def_node->block_);
 
 }
+
 void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
   cout << "[BinaryExpNode]" << endl;
 }
@@ -93,8 +116,10 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node) {
   cout << "[ValuePrimaryExpNode]" << endl;
   switch (node->node_type_) {
     case (NodeType::STRING_PRIMARY_EXP) : {
-      current_value_ = builder_.CreateGlobalString(node->string_value_, 
-                                                   "string");
+      // delete "xxx" of " in the param string
+      //node->string_value_.erase(std::remove(node->string_value_.begin(), node->string_value_.end(), '"'), node->string_value_.end());
+      cout << node->string_value_ << endl;
+      current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
       current_type_.basic_type_ = TypeCheckBasicType::STRING;
       break;
     }

@@ -414,12 +414,12 @@ void DeclNode::AddDecl() {
   init_val_list_.push_back(declnode_tmp_init_val);
 }
 void DeclNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // IdentNode
 void IdentNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // FuncDefNode
