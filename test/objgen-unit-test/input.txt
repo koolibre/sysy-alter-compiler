@@ -4,7 +4,7 @@ def void func() {
     return;
 }
 def void main() {
-    int a = 3;
+    int a = 5;
     int b = 4;
     printf("hello \n");
     printf("a=%d, b=%d\n", a, b);

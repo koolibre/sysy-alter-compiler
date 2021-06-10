@@ -39,7 +39,6 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
       }
     }
   }
-
 }
 
 void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
@@ -52,21 +51,21 @@ void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
     callArgs.push_back(current_value_);
   }
 
-  if (func_call_exp_node->ident_.compare("printf") == 0) {
-    std::vector<llvm::Type*> args_of_printf;
-    args_of_printf.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
+  if (func_call_exp_node->ident_.compare("printf") == 0 || func_call_exp_node->ident_.compare("scanf") == 0) {
+    std::vector<llvm::Type*> args_of_func;
+    args_of_func.push_back(llvm::Type::getInt8PtrTy(llvm_context_));
 
     // true arg means params can have ...
-    llvm::FunctionType *type_of_printf= llvm::FunctionType::get(
+    llvm::FunctionType * runtimeFunctionType= llvm::FunctionType::get(
       llvm::Type::getInt32Ty(llvm_context_),
-      args_of_printf,
+      args_of_func,
       true);
-    llvm::Function *printf_ = llvm::Function::Create(type_of_printf,
+    llvm::Function *func_ = llvm::Function::Create(runtimeFunctionType,
                                                     llvm::GlobalValue::ExternalLinkage,
-                                                    "printf",
+                                                    func_call_exp_node->ident_,
                                                     module_);
-    printf_->setCallingConv(llvm::CallingConv::C);
-    builder_.CreateCall(module_->getFunction("printf"), callArgs);
+    func_->setCallingConv(llvm::CallingConv::C);
+    builder_.CreateCall(module_->getFunction(func_call_exp_node->ident_), callArgs);
   }
   else {
     builder_.CreateCall(module_->getFunction(func_call_exp_node->ident_), callArgs);
@@ -92,19 +91,19 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
   builder_.SetInsertPoint(funcBlock);
 
   Visit(func_def_node->block_);
-
 }
 
 void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
   cout << "[BinaryExpNode]" << endl;
 }
+
 void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node) {
   cout << "[UnaryExpNode]" << endl;
 }
+
 void IrGenVisitor::VisitImplicit(InitValNode *lval_primary_exp_node) {
   cout << "[InitValNode]" << endl;
 }
-
 
 // generate IR for error node
 // no code at all, just set error info
@@ -125,22 +124,23 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node) {
       break;
     }
     case (NodeType::INT_PRIMARY_EXP) : {
-      current_value_ = ConstantInt::get(Type::getInt32Ty(llvm_context_),
-                                        node->int_value_,
-                                        true);
+      auto ptrVal = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), node->int_value_), ptrVal);
+      current_value_ = builder_.CreateLoad(ptrVal);
       current_type_.basic_type_ = TypeCheckBasicType::INT;
       break;
     }
     case (NodeType::FLOAT_PRIMARY_EXP) : {
-      current_value_ = ConstantFP::get(Type::getFloatTy(llvm_context_),
-                                       node->float_value_);
+      auto ptrVal = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), node->float_value_), ptrVal);
+      current_value_ = builder_.CreateLoad(ptrVal);
       current_type_.basic_type_ = TypeCheckBasicType::FLOAT;
       break;
     }
     case (NodeType::CHAR_PRIMARY_EXP) : {
-      current_value_ = ConstantInt::get(Type::getInt8Ty(llvm_context_),
-                                        node->char_value_,
-                                        true);
+      auto ptrVal = builder_.CreateAlloca(llvm::Type::getInt8Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), node->char_value_), ptrVal);
+      current_value_ = builder_.CreateLoad(ptrVal);
       current_type_.basic_type_ = TypeCheckBasicType::CHAR;
       break;
     }
