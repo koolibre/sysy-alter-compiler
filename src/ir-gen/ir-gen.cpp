@@ -24,18 +24,19 @@ llvm::Module * IrGenVisitor::GetModule(){
 void IrGenVisitor::VisitImplicit(DeclNode *decl_node) {
   cout << "[DeclNode]" << endl;
 
-  switch (decl_node->basic_type_) {
-    case (BasicType::INT) : {
-      Value * PtrVal = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
-      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1.5), PtrVal);
-      symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), PtrVal, decl_node->basic_type_);
-      break;
-    }
-    case (BasicType::FLOAT) : {
-      Value * PtrVal = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
-      builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), 1.6), PtrVal);
-      symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), PtrVal, decl_node->basic_type_);
-      break;
+  for (auto itr : decl_node->init_val_list_){
+    Visit(itr);
+    switch (decl_node->basic_type_) {
+      case (BasicType::INT) : {
+        TypeCheckType type(TypeCheckBasicType::INT);
+        symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), current_value_, type);
+        break;
+      }
+      case (BasicType::FLOAT) : {
+        TypeCheckType type(TypeCheckBasicType::FLOAT);
+        symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), current_value_, type);
+        break;
+      }
     }
   }
 
@@ -86,7 +87,7 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
                                                  func_def_node->func_ident_,
                                                  module_);
   func_->setCallingConv(llvm::CallingConv::C);
-  symbol_table_.AddFunction(func_def_node->func_ident_, func_);
+  //symbol_table_.AddFunction(func_def_node->func_ident_, func_);
   auto funcBlock = llvm::BasicBlock::Create(llvm_context_, func_def_node->func_ident_, module_->getFunction(func_def_node->func_ident_));
   builder_.SetInsertPoint(funcBlock);
 
@@ -165,6 +166,8 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node) {
   if (var_type_dimension_list_size == index_list_size) {
   // TODO : finish it
   }
+
+  current_value_ = symbol_table_.GetLocalVariableInstance(node->ident_);
 }
 
 // generate code for return statement

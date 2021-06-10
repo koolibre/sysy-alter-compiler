@@ -1,12 +1,13 @@
 def void func() {
     // printf("hello, world");
+    printf("hello");
     return;
 }
 def void main() {
     int a = 3;
-    float b = 1.5;
+    int b = 4;
     printf("hello \n");
-    printf("a=%d, b=%f\n", a, 2.5);
+    printf("a=%d, b=%d\n", a, b);
     func();
     return;
 }
