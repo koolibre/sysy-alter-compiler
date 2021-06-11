@@ -24,6 +24,7 @@ symbol [,;\[\]{}+\-!\*/\%<>=\(\)]
 
 #include <iostream>           // use std::cout
 #include <string>             // use std::string
+#include <sstream>
 
 #include "ast/ast.hpp"        // use nodes
 #define YYSTYPE Node*
@@ -211,12 +212,24 @@ inline void test_output(const char *type) {
   } else {
     test_output("StringConst");
     std::string tmp_str(yytext);
+    if(*(tmp_str.begin()) == '"'){tmp_str.erase(tmp_str.begin());}
+    if(*(tmp_str.end()) == '"'){tmp_str.erase(tmp_str.end());}
+    std::stringstream new_str;
+    char last_char = '\0';
+    for (auto iter : tmp_str){
+      if(iter == '\\' and last_char == '\\'){
+        last_char = '\0';
+      } else {
+        new_str << iter;
+        last_char = iter;
+      }
+    }
+    tmp_str = new_str.str();
     Node* new_node = new ValuePrimaryExpNode(tmp_str);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
   }
-
 } /* string literal */
 
 . {

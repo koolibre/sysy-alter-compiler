@@ -546,6 +546,7 @@ char *yytext;
 
 #include <iostream>           // use std::cout
 #include <string>             // use std::string
+#include <sstream>
 
 #include "ast/ast.hpp"        // use nodes
 #define YYSTYPE Node*
@@ -562,8 +563,8 @@ inline void test_output(const char *type) {
 #endif
 #endif
 }
-#line 566 "../../src/driver/scanner.cpp"
 #line 567 "../../src/driver/scanner.cpp"
+#line 568 "../../src/driver/scanner.cpp"
 
 #define INITIAL 0
 
@@ -780,10 +781,10 @@ YY_DECL
 		}
 
 	{
-#line 45 "../../src/driver/scanner.l"
+#line 46 "../../src/driver/scanner.l"
 
 
-#line 787 "../../src/driver/scanner.cpp"
+#line 788 "../../src/driver/scanner.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -857,7 +858,7 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case YY_STATE_EOF(INITIAL):
-#line 47 "../../src/driver/scanner.l"
+#line 48 "../../src/driver/scanner.l"
 {
   return 0;
 }
@@ -865,21 +866,21 @@ case YY_STATE_EOF(INITIAL):
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 51 "../../src/driver/scanner.l"
+#line 52 "../../src/driver/scanner.l"
 {
   test_output("comment_typetwo");
 } /* comment_typetwo */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 55 "../../src/driver/scanner.l"
+#line 56 "../../src/driver/scanner.l"
 {
   test_output("comment_typeone");
 } /* comment_typeone*/
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 59 "../../src/driver/scanner.l"
+#line 60 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -888,7 +889,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 65 "../../src/driver/scanner.l"
+#line 66 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -897,7 +898,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 71 "../../src/driver/scanner.l"
+#line 72 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -906,7 +907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 77 "../../src/driver/scanner.l"
+#line 78 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -915,7 +916,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "../../src/driver/scanner.l"
+#line 84 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -924,7 +925,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 89 "../../src/driver/scanner.l"
+#line 90 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -933,7 +934,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 95 "../../src/driver/scanner.l"
+#line 96 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -942,7 +943,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 101 "../../src/driver/scanner.l"
+#line 102 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -951,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 107 "../../src/driver/scanner.l"
+#line 108 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -960,7 +961,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 113 "../../src/driver/scanner.l"
+#line 114 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -969,7 +970,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 119 "../../src/driver/scanner.l"
+#line 120 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -978,7 +979,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 125 "../../src/driver/scanner.l"
+#line 126 "../../src/driver/scanner.l"
 {
   test_output("keyword");
   yylval = nullptr;
@@ -987,7 +988,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 131 "../../src/driver/scanner.l"
+#line 132 "../../src/driver/scanner.l"
 {
   test_output("symbol1");
   yylval = nullptr;
@@ -996,7 +997,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 137 "../../src/driver/scanner.l"
+#line 138 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1005,7 +1006,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 143 "../../src/driver/scanner.l"
+#line 144 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1014,7 +1015,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 149 "../../src/driver/scanner.l"
+#line 150 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1023,7 +1024,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 155 "../../src/driver/scanner.l"
+#line 156 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1032,7 +1033,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 161 "../../src/driver/scanner.l"
+#line 162 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1041,7 +1042,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 167 "../../src/driver/scanner.l"
+#line 168 "../../src/driver/scanner.l"
 {
   test_output("symbol2");
   yylval = nullptr;
@@ -1050,7 +1051,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 173 "../../src/driver/scanner.l"
+#line 174 "../../src/driver/scanner.l"
 {
   test_output("Ident");
   Node *new_node = new IdentNode(std::string(yytext));
@@ -1062,12 +1063,12 @@ YY_RULE_SETUP
 case 23:
 /* rule 23 can match eol */
 YY_RULE_SETUP
-#line 181 "../../src/driver/scanner.l"
+#line 182 "../../src/driver/scanner.l"
 /* eat up white space */
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 183 "../../src/driver/scanner.l"
+#line 184 "../../src/driver/scanner.l"
 {
   test_output("IntConst");
   Node* new_node = new ValuePrimaryExpNode(atoi(yytext));
@@ -1078,7 +1079,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 191 "../../src/driver/scanner.l"
+#line 192 "../../src/driver/scanner.l"
 {
   test_output("floatConst");
   Node* new_node = new ValuePrimaryExpNode((float)atof(yytext));
@@ -1089,7 +1090,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 199 "../../src/driver/scanner.l"
+#line 200 "../../src/driver/scanner.l"
 {
   test_output("CharConst");
   Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1));
@@ -1101,7 +1102,7 @@ YY_RULE_SETUP
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 207 "../../src/driver/scanner.l"
+#line 208 "../../src/driver/scanner.l"
 {
   if (yytext[yyleng-2] == '\\') {
     yyless(yyleng-1);
@@ -1109,17 +1110,29 @@ YY_RULE_SETUP
   } else {
     test_output("StringConst");
     std::string tmp_str(yytext);
+    if(*(tmp_str.begin()) == '"'){tmp_str.erase(tmp_str.begin());}
+    if(*(tmp_str.end()) == '"'){tmp_str.erase(tmp_str.end());}
+    std::stringstream new_str;
+    char last_char = '\0';
+    for (auto iter : tmp_str){
+      if(iter == '\\' and last_char == '\\'){
+        last_char = '\0';
+      } else {
+        new_str << iter;
+        last_char = iter;
+      }
+    }
+    tmp_str = new_str.str();
     Node* new_node = new ValuePrimaryExpNode(tmp_str);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
   }
-
 } /* string literal */
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 222 "../../src/driver/scanner.l"
+#line 235 "../../src/driver/scanner.l"
 {
 #ifdef DEBUG
 #ifdef SCANNER_DEBUG
@@ -1131,10 +1144,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 231 "../../src/driver/scanner.l"
+#line 244 "../../src/driver/scanner.l"
 ECHO;
 	YY_BREAK
-#line 1138 "../../src/driver/scanner.cpp"
+#line 1151 "../../src/driver/scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2149,7 +2162,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 231 "../../src/driver/scanner.l"
+#line 244 "../../src/driver/scanner.l"
 
 
 int yywrap() {
