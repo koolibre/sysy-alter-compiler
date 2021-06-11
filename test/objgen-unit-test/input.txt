@@ -6,8 +6,12 @@ def void func() {
 def void main() {
     int a = 5;
     int b = 4;
-    a = a + 2;
-    a = a - 2;
+    b = b % 2;
+    a = a % 2;
+    //a = -a;
+    if (a > 0) {
+       printf("good");
+    }
     printf("hello \n");
     printf("a=%d, b=%d\n", a, b);
     func();
