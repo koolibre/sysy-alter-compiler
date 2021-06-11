@@ -1111,7 +1111,7 @@ YY_RULE_SETUP
     test_output("StringConst");
     std::string tmp_str(yytext);
     if(*(tmp_str.begin()) == '"'){tmp_str.erase(tmp_str.begin());}
-    if(*(tmp_str.end()) == '"'){tmp_str.erase(tmp_str.end());}
+    if(*(tmp_str.end() - 1 ) == '"'){tmp_str.erase(tmp_str.end() - 1);}
     std::stringstream new_str;
     char last_char = '\0';
     for (auto iter : tmp_str){
