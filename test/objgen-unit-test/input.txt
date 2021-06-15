@@ -1,19 +1,61 @@
+/*
 def void func() {
-    // printf("hello, world");
-    printf("hello");
+    int a = 3;
+    while ( a > 0 ) {
+        printf("func_a=%d", a);
+        a = a - 1;
+        break;
+    }
     return;
 }
+*/
 def void main() {
-    int a = 5;
-    int b = 4;
-    b = b % 2;
-    a = a % 2;
-    //a = -a;
-    if (a > 0) {
-       printf("good");
+    int int_var1 = 5;
+    int int_var2 = 4;
+    float float_var1 = 3.2;
+    float float_var2 = 2.8;
+
+    // unary int test
+    int_var1 = +int_var1;
+    printf("%d ", int_var1);
+    int_var1 = -int_var1;
+    printf("%d ", int_var1);
+
+    // binary int test
+    int_var2 = int_var1 + int_var2 + 1;
+    printf("%d /", int_var2);
+    int_var2 = (int_var1 + int_var2) * 3 - 7 + (9 % 2) + (int_var1 / 2);
+    printf("%d /", int_var2);
+/*
+    // unary float test
+    float_var1 = +float_var1;
+    printf("%f ", float_var1);
+    float_var1 = -float_var1;
+    printf("%f ", float_var1);
+    // float_var1 = !float_var1;
+    // printf("%f /", float_var1);
+*/
+    // binary float test
+    float_var2 = (float_var1 + float_var2) * 3.4 - 7.8 + (6 / 2);
+    printf("%f /", float_var2);
+    // if test
+    if (float_var1 != 3.5) {
+       printf("var1 is not 3/");
     }
-    printf("hello \n");
-    printf("a=%d, b=%d\n", a, b);
-    func();
+/*
+    else {
+       printf("else output/");
+    }
+*/
+    if (int_var1 == 3) {
+       printf("var1 is 3/");
+    }
+/*
+    else {
+       printf("else output/");
+    }
+*/
+    // func test
+    // func();
     return;
 }

@@ -51,7 +51,12 @@ void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node) {
     if ((int)current_type_.basic_type_ == (int)TypeCheckBasicType::STRING){
       callArgs.push_back(current_value_);
     }
-    else{
+    else if ((int)current_type_.basic_type_ == (int)TypeCheckBasicType::FLOAT){
+      auto load_value_ = builder_.CreateLoad(current_value_);
+      auto value_ = builder_.CreateFPExt(load_value_, llvm::Type::getDoubleTy(llvm_context_));
+      callArgs.push_back(value_);
+    }
+    else {
       auto load_value_ = builder_.CreateLoad(current_value_);
       callArgs.push_back(load_value_);
     }
@@ -103,40 +108,73 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
   cout << "[BinaryExpNode]" << endl;
 
   Visit(binary_exp_node->lexp_);
-  auto leftVariable = builder_.CreateLoad(current_value_);
+  Value * leftVariable;
+  if (dynamic_cast<Node*>(binary_exp_node->lexp_)->CheckNodeType(NodeType::BINARY_EXP) ||
+      dynamic_cast<Node*>(binary_exp_node->lexp_)->CheckNodeType(NodeType::UNARY_EXP))
+    leftVariable = current_value_;
+  else
+    leftVariable = builder_.CreateLoad(current_value_);
+  auto leftVariableType = current_type_.basic_type_;
+
   Visit(binary_exp_node->rexp_);
-  auto rightVariable = builder_.CreateLoad(current_value_);
+  Value * rightVariable;
+  if (dynamic_cast<Node*>(binary_exp_node->rexp_)->CheckNodeType(NodeType::BINARY_EXP) ||
+      dynamic_cast<Node*>(binary_exp_node->rexp_)->CheckNodeType(NodeType::UNARY_EXP))
+    rightVariable = current_value_;
+  else 
+    rightVariable = builder_.CreateLoad(current_value_);
+  auto rightVariableType = current_type_.basic_type_;
+
+  bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT && (int)rightVariableType == (int)TypeCheckBasicType::INT);
+  
+  if (!isIntType){
+    if ((int)leftVariableType == (int)TypeCheckBasicType::INT){
+      leftVariable = type_system_.Cast(leftVariable,
+                                       rightVariable->getType(),
+                                       builder_.GetInsertBlock());
+    }
+    if ((int)rightVariableType == (int)TypeCheckBasicType::INT){
+      rightVariable = type_system_.Cast(rightVariable,
+                                        leftVariable->getType(),
+                                        builder_.GetInsertBlock());
+    }
+  }
 
   switch (binary_exp_node->binary_op_type_) {
     case (BinaryOpType::MUL) : {
-      Value * mulVal = builder_.CreateMul(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * mulVal = isIntType ? builder_.CreateMul(leftVariable, rightVariable) : builder_.CreateFMul(leftVariable, rightVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(mulVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
     case (BinaryOpType::DIV) : {
-      Value * divVal = builder_.CreateSDiv(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(divVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * divVal = isIntType ? builder_.CreateSDiv(leftVariable, rightVariable) : builder_.CreateFDiv(leftVariable, rightVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(divVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(divVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
     case (BinaryOpType::MOD) : {
-      Value * divVal = builder_.CreateSDiv(leftVariable, rightVariable);
-      Value * mulVal = builder_.CreateMul(rightVariable, divVal);
-      Value * modVal = builder_.CreateSub(leftVariable, mulVal);
-      current_value_ = builder_.CreateFPExt(modVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * divVal = isIntType ? builder_.CreateSDiv(leftVariable, rightVariable) : builder_.CreateFDiv(leftVariable, rightVariable);
+      Value * mulVal = isIntType ? builder_.CreateMul(leftVariable, rightVariable) : builder_.CreateFMul(rightVariable, divVal);
+      Value * modVal = isIntType ? builder_.CreateSub(leftVariable, rightVariable) : builder_.CreateFSub(leftVariable, mulVal);
+      current_value_ = isIntType ? builder_.CreateFPExt(modVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(modVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
     case (BinaryOpType::ADD) : {
-      Value * addVal = builder_.CreateAdd(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(addVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * addVal = isIntType ? builder_.CreateAdd(leftVariable, rightVariable) : builder_.CreateFAdd(leftVariable, rightVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(addVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(addVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
     case (BinaryOpType::SUB) : {
-      Value * subVal = builder_.CreateSub(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(subVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * subVal = isIntType ? builder_.CreateSub(leftVariable, rightVariable) : builder_.CreateFSub(leftVariable, rightVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(subVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(subVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
     case (BinaryOpType::AND) : {
-      Value * andVal = builder_.CreateSub(leftVariable, rightVariable);
+      Value * andVal = builder_.CreateAnd(leftVariable, rightVariable);
       current_value_ = builder_.CreateFPExt(andVal, llvm::Type::getInt32Ty(llvm_context_));
       break;
     }
@@ -147,66 +185,80 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
     }
     // >
     case (BinaryOpType::GE) : {
-      Value * geVal = builder_.CreateICmpSGT(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(geVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * geVal = isIntType ? builder_.CreateICmpSGT(leftVariable, rightVariable) : builder_.CreateFCmpOGT(leftVariable, rightVariable) ;
+      current_value_ = builder_.CreateFPExt(geVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
     // <
     case (BinaryOpType::LE) : {
-      Value * orVal = builder_.CreateICmpULT(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * orVal = isIntType ? builder_.CreateICmpULT(leftVariable, rightVariable) : builder_.CreateFCmpOLT(leftVariable, rightVariable);
+      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
     // >=
     case (BinaryOpType::GEEQ) : {
-      Value * orVal = builder_.CreateICmpSGE(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * orVal = isIntType ? builder_.CreateICmpSGE(leftVariable, rightVariable) : builder_.CreateFCmpOGE(leftVariable, rightVariable);
+      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
     // <=
     case (BinaryOpType::LEEQ) : {
-      Value * orVal = builder_.CreateICmpSLE(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * orVal = isIntType ? builder_.CreateICmpSLE(leftVariable, rightVariable) : builder_.CreateFCmpOLE(leftVariable, rightVariable);
+      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
     // ==
     case (BinaryOpType::EQ) : {
-      Value * orVal = builder_.CreateICmpEQ(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * orVal = isIntType ? builder_.CreateICmpEQ(leftVariable, rightVariable) : builder_.CreateFCmpOEQ(leftVariable, rightVariable);
+      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
     // !=
     case (BinaryOpType::UNEQ) : {
-      Value * orVal = builder_.CreateICmpNE(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
+      Value * orVal = isIntType ? builder_.CreateICmpNE(leftVariable, rightVariable) : builder_.CreateFCmpONE(leftVariable, rightVariable);
+      current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
       break;
     }
+    //TypeCheckType type(current_type_.basic_type_);
+    //symbol_table_.AddLocalVariable(binary_exp_node, current_value_, type);
   }
 }
 
 void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node) {
   cout << "[UnaryExpNode]" << endl;
-  /*
   Visit(unary_exp_node->exp_);
-  auto unaryVariable = builder_.CreateLoad(current_value_);
+  //auto unaryVariable = builder_.CreateLoad(current_value_);
+  Value * unaryVariable;
+  if (dynamic_cast<Node*>(unary_exp_node->exp_)->CheckNodeType(NodeType::BINARY_EXP) || 
+      dynamic_cast<Node*>(unary_exp_node->exp_)->CheckNodeType(NodeType::UNARY_EXP))
+    unaryVariable = current_value_;
+  else
+    unaryVariable = builder_.CreateLoad(current_value_);
+  auto unaryVariableType = current_type_.basic_type_;
+
+  bool isIntType = (int)unaryVariableType == (int)TypeCheckBasicType::INT ;
+
+  current_type_.basic_type_ = isIntType ? TypeCheckBasicType::INT : TypeCheckBasicType::FLOAT ;
 
   switch (unary_exp_node->unary_op_type_) {
     case (UnaryOpType::POSITIVE) : {
-      Value * mulVal = builder_.CreateMul(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_));
+      current_value_ = isIntType ? builder_.CreateFPExt(unaryVariable, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(unaryVariable, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
-    case (UnaryOpType::POSITIVE) : {
-      Value * mulVal = builder_.CreateMul(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_));
+    case (UnaryOpType::NEGATIVE) : {
+      Value * negVal = builder_.CreateNeg(unaryVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(negVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(negVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
-    case (UnaryOpType::POSITIVE) : {
-      Value * mulVal = builder_.CreateMul(leftVariable, rightVariable);
-      current_value_ = builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_));
+    case (UnaryOpType::NOT) : {
+      Value * notVal = builder_.CreateNot(unaryVariable);
+      current_value_ = isIntType ? builder_.CreateFPExt(notVal, llvm::Type::getInt32Ty(llvm_context_)) :
+                                   builder_.CreateFPExt(notVal, llvm::Type::getFloatTy(llvm_context_)) ;
       break;
     }
-  */
+  }
 }
 
 void IrGenVisitor::VisitImplicit(InitValNode *init_val_node) {
@@ -220,11 +272,11 @@ void IrGenVisitor::VisitImplicit(ErrorNode *node) {
 }
 
 // generate code for "leaves" of expression
+// current_value_ as the address
 void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node) {
   cout << "[ValuePrimaryExpNode]" << endl;
   switch (node->node_type_) {
     case (NodeType::STRING_PRIMARY_EXP) : {
-      cout << node->string_value_ << endl;
       current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
       current_type_.basic_type_ = TypeCheckBasicType::STRING;
       break;
@@ -253,6 +305,7 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node) {
 }
 
 // generate code for left value, such as a, b[1] ...
+// current_value_ as an address
 void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node) {
   current_if_const_ = false;
   // find destination
