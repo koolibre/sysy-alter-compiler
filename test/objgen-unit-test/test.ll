@@ -9,7 +9,10 @@ source_filename = "test.ll"
 @5 = private unnamed_addr constant [5 x i8] c"%d /\00", align 1
 @6 = private unnamed_addr constant [5 x i8] c"%f /\00", align 1
 @7 = private unnamed_addr constant [15 x i8] c"var1 is not 3/\00", align 1
-@8 = private unnamed_addr constant [11 x i8] c"var1 is 3/\00", align 1
+@8 = private unnamed_addr constant [13 x i8] c"else output/\00", align 1
+@9 = private unnamed_addr constant [11 x i8] c"var1 is 3/\00", align 1
+@10 = private unnamed_addr constant [13 x i8] c"else output/\00", align 1
+@11 = private unnamed_addr constant [7 x i8] c"//%d /\00", align 1
 
 define void @func() {
 func:
@@ -17,14 +20,14 @@ func:
   store i32 3, i32* %0, align 4
   %1 = alloca i32, align 4
   store i32 3, i32* %1, align 4
+  br label %cond
+
+cond:                                             ; preds = %body, %func
   %2 = load i32, i32* %0, align 4
   %3 = alloca i32, align 4
   store i32 0, i32* %3, align 4
   %4 = load i32, i32* %3, align 4
   %5 = icmp sgt i32 %2, %4
-  br label %cond
-
-cond:                                             ; preds = %body, %func
   br i1 %5, label %body, label %cont
 
 body:                                             ; preds = %cond
@@ -36,18 +39,17 @@ body:                                             ; preds = %cond
   %10 = load i32, i32* %9, align 4
   %11 = sub i32 %8, %10
   store i32 %11, i32* %0, align 4
-  br label %cont
   br label %cond
 
-cont:                                             ; preds = %body, %cond
+cont:                                             ; preds = %cond
+  br label %cond1
+
+cond1:                                            ; preds = %body2, %cont
   %12 = load i32, i32* %1, align 4
   %13 = alloca i32, align 4
   store i32 0, i32* %13, align 4
   %14 = load i32, i32* %13, align 4
   %15 = icmp sgt i32 %12, %14
-  br label %cond1
-
-cond1:                                            ; preds = %body2, %cont
   br i1 %15, label %body2, label %cont3
 
 body2:                                            ; preds = %cond1
@@ -157,27 +159,37 @@ main:
   store float 3.500000e+00, float* %62, align 4
   %63 = load float, float* %62, align 4
   %64 = fcmp one float %61, %63
-  br i1 %64, label %true, label %cont
+  br i1 %64, label %true, label %false
 
 true:                                             ; preds = %main
   %65 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @7, i32 0, i32 0))
   br label %cont
 
-cont:                                             ; preds = %true, %main
+cont:                                             ; preds = %false, %true
   %66 = load i32, i32* %0, align 4
   %67 = alloca i32, align 4
   store i32 3, i32* %67, align 4
   %68 = load i32, i32* %67, align 4
   %69 = icmp eq i32 %66, %68
-  br i1 %69, label %true1, label %cont2
+  br i1 %69, label %true1, label %false3
+
+false:                                            ; preds = %main
+  %70 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @8, i32 0, i32 0))
+  br label %cont
 
 true1:                                            ; preds = %cont
-  %70 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @8, i32 0, i32 0))
+  %71 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @9, i32 0, i32 0))
   br label %cont2
 
-cont2:                                            ; preds = %true1, %cont
+cont2:                                            ; preds = %false3, %true1
   call void @func()
+  %72 = load i32, i32* %0, align 4
+  %73 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @11, i32 0, i32 0), i32 %72)
   ret void
+
+false3:                                           ; preds = %cont
+  %74 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @10, i32 0, i32 0))
+  br label %cont2
 }
 
 declare i32 @printf.2(i8*, ...)
@@ -193,3 +205,9 @@ declare i32 @printf.6(i8*, ...)
 declare i32 @printf.7(i8*, ...)
 
 declare i32 @printf.8(i8*, ...)
+
+declare i32 @printf.9(i8*, ...)
+
+declare i32 @printf.10(i8*, ...)
+
+declare i32 @printf.11(i8*, ...)

@@ -99,9 +99,11 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node) {
   func_->setCallingConv(llvm::CallingConv::C);
   //symbol_table_.AddFunction(func_def_node->func_ident_, func_);
   auto funcBlock = llvm::BasicBlock::Create(llvm_context_, func_def_node->func_ident_, module_->getFunction(func_def_node->func_ident_));
-  builder_.SetInsertPoint(funcBlock);
 
+  builder_.SetInsertPoint(funcBlock);
+  symbol_table_.PushScope();
   Visit(func_def_node->block_);
+  symbol_table_.PopScope();
 }
 
 void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node) {
@@ -466,6 +468,7 @@ void IrGenVisitor::VisitImplicit(IfStmtNode *node) {
   symbol_table_.PushScope();
   Visit(node->if_stmt_);
   symbol_table_.PopScope();
+  builder_.CreateBr(cont_block);
   // deal with false block
   if (node->else_stmt_ != nullptr) {
     function_belong->getBasicBlockList().push_back(false_block);
@@ -473,9 +476,10 @@ void IrGenVisitor::VisitImplicit(IfStmtNode *node) {
     symbol_table_.PushScope();
     Visit(node->else_stmt_);
     symbol_table_.PopScope();
+    builder_.CreateBr(cont_block);
   }
   // merge
-  builder_.CreateBr(cont_block);
+  
   builder_.SetInsertPoint(cont_block);
 }
 
@@ -485,19 +489,18 @@ void IrGenVisitor::VisitImplicit(WhileStmtNode *node) {
   BasicBlock *cond_block = BasicBlock::Create(llvm_context_, "cond", function_belog),
              *body_block = BasicBlock::Create(llvm_context_, "body", function_belog),
              *cont_block = BasicBlock::Create(llvm_context_, "cont", function_belog);
-  current_cond_block_list_.push_back(cond_block);
-  current_cont_block_list_.push_back(cont_block);
+  // connect origin block to cond_block
+  builder_.CreateBr(cond_block);
   // get cond value
+  builder_.SetInsertPoint(cond_block);
   symbol_table_.PushScope();
   Visit(node->cond_);
   symbol_table_.PopScope();
   Value *cond_value = current_value_;
-  // connect origin block to cond_block
-  builder_.CreateBr(cond_block);
-  // connect cond_block to body_block and cont_block
-  builder_.SetInsertPoint(cond_block);
   builder_.CreateCondBr(cond_value, body_block, cont_block);
   // build body_block, connect to cond_block
+  current_cond_block_list_.push_back(cond_block);
+  current_cont_block_list_.push_back(cont_block);
   builder_.SetInsertPoint(body_block);
   symbol_table_.PushScope();
   Visit(node->stmt_);
