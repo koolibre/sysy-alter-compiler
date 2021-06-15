@@ -1,14 +1,18 @@
-/*
 def void func() {
     int a = 3;
+    int b = 3;
     while ( a > 0 ) {
         printf("func_a=%d", a);
         a = a - 1;
         break;
     }
+    while ( b > 0 ) {
+        printf("func_b=%d", b);
+        b = b - 1;
+    }
     return;
 }
-*/
+
 def void main() {
     int int_var1 = 5;
     int int_var2 = 4;
@@ -56,6 +60,6 @@ def void main() {
     }
 */
     // func test
-    // func();
+    func();
     return;
 }
