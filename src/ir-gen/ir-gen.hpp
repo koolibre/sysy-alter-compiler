@@ -86,8 +86,10 @@ class IrGenVisitor : public NodeVisitor {
   TypeSystem type_system_;
   // retern value
   bool current_if_const_;
+  double current_const_value_;
   TypeCheckType current_type_;
   llvm::Value *current_value_;
+  llvm::Value *current_arr_tgt_;
   bool current_if_error_;
   // record for "break" and "continue"
   std::list<llvm::BasicBlock*> current_cond_block_list_;

@@ -17,46 +17,46 @@
 // node type
 enum class NodeType {
     // root node
-    ROOT,
+    ROOT,//0
     // declaration and definition node
-    VAR_DECL, CONST_DECL, FUNC_DEF,
+    VAR_DECL, CONST_DECL, FUNC_DEF,//1,2,3
     // block node
-    BLOCK,
+    BLOCK,//4
     // statement node
-    ASSIGN_STMT, IF_STMT, WHILE_STMT, BREAK_STMT,
-    CONTINUE_STMT, RETURN_STMT,
+    ASSIGN_STMT, IF_STMT, WHILE_STMT, BREAK_STMT,//5 6 7 8
+    CONTINUE_STMT, RETURN_STMT,//9 10
     // expression node
-    FUNC_CALL_EXP, BINARY_EXP, UNARY_EXP,
-    LVAL_PRIMARY_EXP, INT_PRIMARY_EXP, FLOAT_PRIMARY_EXP,
-    CHAR_PRIMARY_EXP, STRING_PRIMARY_EXP,
+    FUNC_CALL_EXP, BINARY_EXP, UNARY_EXP,//11 12 13
+    LVAL_PRIMARY_EXP, INT_PRIMARY_EXP, FLOAT_PRIMARY_EXP, // 14 15 16
+    CHAR_PRIMARY_EXP, STRING_PRIMARY_EXP,//17 18
     // initialization value node
-    INIT_VAL,
+    INIT_VAL,// 19
     // identifier node
-    IDENT,
+    IDENT,//20
     // for error check
-    ERROR,
+    ERROR,//21
     // for I/O
-    READ, WRITE
+    READ, WRITE//22 23
 };
 
 // unary operation type
 enum class UnaryOpType {
     // + - !
-    POSITIVE, NEGATIVE, NOT
+    POSITIVE, NEGATIVE, NOT, GETPTR
 };
 
 // binary operation type
 enum class BinaryOpType {
     // multiplication
-    MUL, DIV, MOD,
+    MUL, DIV, MOD,//0 1 2
     // addition
-    ADD, SUB,
+    ADD, SUB,//3 4
     // relation
-    LE, GE, LEEQ, GEEQ,
+    LE, GE, LEEQ, GEEQ,//5 6 7 8
     // equation
-    EQ, UNEQ,
+    EQ, UNEQ,//9 10
     // logic
-    AND, OR
+    AND, OR// 11 12
 };
 
 // basic type

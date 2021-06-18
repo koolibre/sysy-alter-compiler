@@ -136,6 +136,10 @@ auto PrintUnaryOp = [](UnaryOpType unary_op_type) {
       std::cout << "!" << std::endl;
       break;
     }
+    case UnaryOpType::GETPTR : {
+      std::cout << "&" << std::endl;
+      break;
+    }
     default : {
       assert(0);
     }

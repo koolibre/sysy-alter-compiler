@@ -422,6 +422,10 @@ UnaryOp:
   '!' {
     UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::NOT);
     $$ = new_node;
+  } |
+  '&' {
+    UnaryExpNode *new_node = new UnaryExpNode(UnaryOpType::GETPTR);
+    $$ = new_node;
   }
   ;
 

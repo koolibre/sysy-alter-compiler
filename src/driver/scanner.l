@@ -7,7 +7,7 @@ CharConst '{character}'
 StringConst \"[^\"]*\"
 comment_typeone "//"
 comment_typetwo "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/"
-symbol [,;\[\]{}+\-!\*/\%<>=\(\)]
+symbol [,;\[\]{}+\-!\*/\%<>=\(\)&]
 
 %option yylineno
 

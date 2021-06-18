@@ -17,7 +17,7 @@
 enum class TypeCheckBasicType {
   CHAR, INT, VOID, FLOAT, STRING,
   CHAR_ARRAY, INT_ARRAY, FLOAT_ARRAY,
-  ERROR
+  ERROR, POINTER
 };
 
 // complex type for type check
