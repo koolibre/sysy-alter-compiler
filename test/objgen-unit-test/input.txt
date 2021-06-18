@@ -1,22 +1,16 @@
-def void func() {
-    int int_var1 = 3;
-    int b = 3;
-    while ( int_var1 > 0 ) {
-        printf("func_a=%d", int_var1);
-        int_var1 = int_var1 - 1;
-    }
-    while ( b > 0 ) {
-        printf("func_b=%d", b);
-        b = b - 1;
-    }
-    return;
+/*
+def void printNL() {
+    char nl = 10;
+    printf("%c",nl);
 }
-
+*/
 def void main() {
+    /*
     int int_var1 = 5;
     int int_var2 = 4;
     float float_var1 = 3.2;
     float float_var2 = 2.8;
+    printf("a ");
 
     // unary int test
     int_var1 = +int_var1;
@@ -29,32 +23,61 @@ def void main() {
     printf("%d /", int_var2);
     int_var2 = (int_var1 + int_var2) * 3 - 7 + (9 % 2) + (int_var1 / 2);
     printf("%d /", int_var2);
-/*
-    // unary float test
-    float_var1 = +float_var1;
-    printf("%f ", float_var1);
-    float_var1 = -float_var1;
-    printf("%f ", float_var1);
-    // float_var1 = !float_var1;
-    // printf("%f /", float_var1);
-*/
+
     // binary float test
     float_var2 = (float_var1 + float_var2) * 3.4 - 7.8 + (6 / 2);
     printf("%f /", float_var2);
-    // if test
-    if (float_var1 != 3.5) {
-       printf("var1 is not 3/");
+    */
+    /*
+    int arr[2+2][4];
+    arr[3][3]=2;
+    printf("<%d>\n",arr[3][3]);
+    float a;
+    */
+    /*
+    char n = 10;
+    printf("%c",n);
+    */
+    /*
+    char b[32];
+    //printf("<%p>\n",b);
+    scanf("%s",b);
+    //printf("<%c>",b[0]);
+    printf("<%s>",b);
+    printf("<%c>",b[3]);
+    */
+
+    char nl = 10;
+    
+    printf("please input the dim:");
+    printf("%c",nl);
+    int dim = 3;
+    scanf("%d",&dim);
+    int arr[20];
+    int i = 0;
+    while(i<dim){
+        arr[i] = i;
+        printf("<%d>",i);
+        i = i+1;
     }
-    else {
-       printf("else output/");
-    }
-    if (int_var1 == 3) {
-       printf("var1 is 3/");
-    }
-    else {
-       printf("else output/");
-    }
-    // func test
-    func();
+    printf("%c",nl);
+    printf("please input some words:");
+    char str[100];
+    scanf("%s",str);
+    printf("%s",str);
+    printf("%c",nl);
+    float x;
+    scanf("%f",&x);
+    printf("%f",x[0]);
+    printf("%c",nl);
+
+    
+    
+    /*
+    int a;
+    a = 1;
+    */
+
+
     return;
 }

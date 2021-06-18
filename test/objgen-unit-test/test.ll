@@ -1,69 +1,104 @@
 ; ModuleID = 'test.ll'
 source_filename = "test.ll"
 
-@0 = private unnamed_addr constant [10 x i8] c"func_a=%d\00", align 1
-@1 = private unnamed_addr constant [10 x i8] c"func_b=%d\00", align 1
-@2 = private unnamed_addr constant [4 x i8] c"%d \00", align 1
-@3 = private unnamed_addr constant [4 x i8] c"%d \00", align 1
-@4 = private unnamed_addr constant [5 x i8] c"%d /\00", align 1
-@5 = private unnamed_addr constant [5 x i8] c"%d /\00", align 1
-@6 = private unnamed_addr constant [5 x i8] c"%f /\00", align 1
-@7 = private unnamed_addr constant [15 x i8] c"var1 is not 3/\00", align 1
-@8 = private unnamed_addr constant [13 x i8] c"else output/\00", align 1
-@9 = private unnamed_addr constant [11 x i8] c"var1 is 3/\00", align 1
-@10 = private unnamed_addr constant [13 x i8] c"else output/\00", align 1
-@11 = private unnamed_addr constant [7 x i8] c"//%d /\00", align 1
+@0 = private unnamed_addr constant [22 x i8] c"please input the dim:\00", align 1
+@1 = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@2 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@3 = private unnamed_addr constant [5 x i8] c"<%d>\00", align 1
+@4 = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@5 = private unnamed_addr constant [25 x i8] c"please input some words:\00", align 1
+@6 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
+@7 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
+@8 = private unnamed_addr constant [3 x i8] c"%c\00", align 1
+@9 = private unnamed_addr constant [3 x i8] c"%f\00", align 1
+@10 = private unnamed_addr constant [3 x i8] c"%f\00", align 1
+@11 = private unnamed_addr constant [3 x i8] c"%c\00", align 1
 
-define void @func() {
-func:
-  %0 = alloca i32, align 4
-  store i32 3, i32* %0, align 4
-  %1 = alloca i32, align 4
-  store i32 3, i32* %1, align 4
+define void @main() {
+main:
+  %0 = alloca i8
+  %1 = alloca i32
+  store i32 10, i32* %1
+  %2 = load i32, i32* %1
+  store i32 %2, i8* %0
+  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([22 x i8], [22 x i8]* @0, i32 0, i32 0))
+  %4 = load i8, i8* %0
+  %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @1, i32 0, i32 0), i8 %4)
+  %6 = alloca i32
+  %7 = alloca i32
+  store i32 3, i32* %7
+  %8 = load i32, i32* %7
+  store i32 %8, i32* %6
+  %9 = load i32, i32* %6
+  %10 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @2, i32 0, i32 0), i32* %6)
+  %11 = alloca i32
+  store i32 20, i32* %11
+  %decl_arr = alloca [20 x i32], i32 20
+  %12 = alloca i32
+  %13 = alloca i32
+  store i32 0, i32* %13
+  %14 = load i32, i32* %13
+  store i32 %14, i32* %12
   br label %cond
 
-cond:                                             ; preds = %body, %func
-  %2 = load i32, i32* %0, align 4
-  %3 = alloca i32, align 4
-  store i32 0, i32* %3, align 4
-  %4 = load i32, i32* %3, align 4
-  %5 = icmp sgt i32 %2, %4
-  br i1 %5, label %body, label %cont
+cond:                                             ; preds = %body, %main
+  %15 = load i32, i32* %12
+  %16 = load i32, i32* %6
+  %17 = icmp ult i32 %15, %16
+  br i1 %17, label %body, label %cont
 
 body:                                             ; preds = %cond
-  %6 = load i32, i32* %0, align 4
-  %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @0, i32 0, i32 0), i32 %6)
-  %8 = load i32, i32* %0, align 4
-  %9 = alloca i32, align 4
-  store i32 1, i32* %9, align 4
-  %10 = load i32, i32* %9, align 4
-  %11 = sub i32 %8, %10
-  store i32 %11, i32* %0, align 4
+  %18 = alloca i32
+  store i32 0, i32* %18
+  %19 = alloca i32
+  store i32 1, i32* %19
+  %20 = load i32, i32* %19
+  %21 = load i32, i32* %12
+  %22 = mul i32 %21, %20
+  %23 = load i32, i32* %18
+  %24 = add i32 %22, %23
+  store i32 %24, i32* %18
+  %25 = load i32, i32* %18
+  %arr_ele_ref = getelementptr inbounds [20 x i32], [20 x i32]* %decl_arr, i32 0, i32 %25
+  %arr_ele_ref_var = alloca i32
+  %26 = load i32, i32* %arr_ele_ref, align 2
+  store i32 %26, i32* %arr_ele_ref_var
+  %27 = alloca i32
+  %28 = load i32, i32* %arr_ele_ref, align 2
+  store i32 %28, i32* %27
+  %29 = load i32, i32* %12
+  store i32 %29, i32* %arr_ele_ref, align 2
+  %30 = load i32, i32* %12
+  %31 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @3, i32 0, i32 0), i32 %30)
+  %32 = load i32, i32* %12
+  %33 = alloca i32
+  store i32 1, i32* %33
+  %34 = load i32, i32* %33
+  %35 = add i32 %32, %34
+  store i32 %35, i32* %12
   br label %cond
 
 cont:                                             ; preds = %cond
-  br label %cond1
-
-cond1:                                            ; preds = %body2, %cont
-  %12 = load i32, i32* %1, align 4
-  %13 = alloca i32, align 4
-  store i32 0, i32* %13, align 4
-  %14 = load i32, i32* %13, align 4
-  %15 = icmp sgt i32 %12, %14
-  br i1 %15, label %body2, label %cont3
-
-body2:                                            ; preds = %cond1
-  %16 = load i32, i32* %1, align 4
-  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([10 x i8], [10 x i8]* @1, i32 0, i32 0), i32 %16)
-  %18 = load i32, i32* %1, align 4
-  %19 = alloca i32, align 4
-  store i32 1, i32* %19, align 4
-  %20 = load i32, i32* %19, align 4
-  %21 = sub i32 %18, %20
-  store i32 %21, i32* %1, align 4
-  br label %cond1
-
-cont3:                                            ; preds = %cond1
+  %36 = load i8, i8* %0
+  %37 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @4, i32 0, i32 0), i8 %36)
+  %38 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @5, i32 0, i32 0))
+  %39 = alloca i32
+  store i32 100, i32* %39
+  %decl_arr1 = alloca [100 x i8], i32 100
+  %arrayPtr = getelementptr inbounds [100 x i8], [100 x i8]* %decl_arr1, i32 0, i32 0
+  %40 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @6, i32 0, i32 0), i8* %arrayPtr)
+  %arrayPtr2 = getelementptr inbounds [100 x i8], [100 x i8]* %decl_arr1, i32 0, i32 0
+  %41 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @7, i32 0, i32 0), i8* %arrayPtr2)
+  %42 = load i8, i8* %0
+  %43 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @8, i32 0, i32 0), i8 %42)
+  %44 = alloca float
+  %45 = load float, float* %44
+  %46 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @9, i32 0, i32 0), float* %44)
+  %47 = load float, float* %44
+  %48 = fpext float %47 to double
+  %49 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @10, i32 0, i32 0), double %48)
+  %50 = load i8, i8* %0
+  %51 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @11, i32 0, i32 0), i8 %50)
   ret void
 }
 
@@ -71,126 +106,7 @@ declare i32 @printf(i8*, ...)
 
 declare i32 @printf.1(i8*, ...)
 
-define void @main() {
-main:
-  %0 = alloca i32, align 4
-  store i32 5, i32* %0, align 4
-  %1 = alloca i32, align 4
-  store i32 4, i32* %1, align 4
-  %2 = alloca float, align 4
-  store float 0x40099999A0000000, float* %2, align 4
-  %3 = alloca float, align 4
-  store float 0x4006666660000000, float* %3, align 4
-  %4 = load i32, i32* %0, align 4
-  store i32 %4, i32* %0, align 4
-  %5 = load i32, i32* %0, align 4
-  %6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @2, i32 0, i32 0), i32 %5)
-  %7 = load i32, i32* %0, align 4
-  %8 = sub i32 0, %7
-  store i32 %8, i32* %0, align 4
-  %9 = load i32, i32* %0, align 4
-  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @3, i32 0, i32 0), i32 %9)
-  %11 = load i32, i32* %0, align 4
-  %12 = load i32, i32* %1, align 4
-  %13 = add i32 %11, %12
-  %14 = alloca i32, align 4
-  store i32 1, i32* %14, align 4
-  %15 = load i32, i32* %14, align 4
-  %16 = add i32 %13, %15
-  store i32 %16, i32* %1, align 4
-  %17 = load i32, i32* %1, align 4
-  %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @4, i32 0, i32 0), i32 %17)
-  %19 = load i32, i32* %0, align 4
-  %20 = load i32, i32* %1, align 4
-  %21 = add i32 %19, %20
-  %22 = alloca i32, align 4
-  store i32 3, i32* %22, align 4
-  %23 = load i32, i32* %22, align 4
-  %24 = mul i32 %21, %23
-  %25 = alloca i32, align 4
-  store i32 7, i32* %25, align 4
-  %26 = load i32, i32* %25, align 4
-  %27 = sub i32 %24, %26
-  %28 = alloca i32, align 4
-  store i32 9, i32* %28, align 4
-  %29 = load i32, i32* %28, align 4
-  %30 = alloca i32, align 4
-  store i32 2, i32* %30, align 4
-  %31 = load i32, i32* %30, align 4
-  %32 = sdiv i32 %29, %31
-  %33 = mul i32 %29, %31
-  %34 = sub i32 %29, %31
-  %35 = add i32 %27, %34
-  %36 = load i32, i32* %0, align 4
-  %37 = alloca i32, align 4
-  store i32 2, i32* %37, align 4
-  %38 = load i32, i32* %37, align 4
-  %39 = sdiv i32 %36, %38
-  %40 = add i32 %35, %39
-  store i32 %40, i32* %1, align 4
-  %41 = load i32, i32* %1, align 4
-  %42 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @5, i32 0, i32 0), i32 %41)
-  %43 = load float, float* %2, align 4
-  %44 = load float, float* %3, align 4
-  %45 = fadd float %43, %44
-  %46 = alloca float, align 4
-  store float 0x400B333340000000, float* %46, align 4
-  %47 = load float, float* %46, align 4
-  %48 = fmul float %45, %47
-  %49 = alloca float, align 4
-  store float 0x401F333340000000, float* %49, align 4
-  %50 = load float, float* %49, align 4
-  %51 = fsub float %48, %50
-  %52 = alloca i32, align 4
-  store i32 6, i32* %52, align 4
-  %53 = load i32, i32* %52, align 4
-  %54 = alloca i32, align 4
-  store i32 2, i32* %54, align 4
-  %55 = load i32, i32* %54, align 4
-  %56 = sdiv i32 %53, %55
-  %type_cast = sitofp i32 %56 to float
-  %57 = fadd float %51, %type_cast
-  store float %57, float* %3, align 4
-  %58 = load float, float* %3, align 4
-  %59 = fpext float %58 to double
-  %60 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @6, i32 0, i32 0), double %59)
-  %61 = load float, float* %2, align 4
-  %62 = alloca float, align 4
-  store float 3.500000e+00, float* %62, align 4
-  %63 = load float, float* %62, align 4
-  %64 = fcmp one float %61, %63
-  br i1 %64, label %true, label %false
-
-true:                                             ; preds = %main
-  %65 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @7, i32 0, i32 0))
-  br label %cont
-
-cont:                                             ; preds = %false, %true
-  %66 = load i32, i32* %0, align 4
-  %67 = alloca i32, align 4
-  store i32 3, i32* %67, align 4
-  %68 = load i32, i32* %67, align 4
-  %69 = icmp eq i32 %66, %68
-  br i1 %69, label %true1, label %false3
-
-false:                                            ; preds = %main
-  %70 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @8, i32 0, i32 0))
-  br label %cont
-
-true1:                                            ; preds = %cont
-  %71 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @9, i32 0, i32 0))
-  br label %cont2
-
-cont2:                                            ; preds = %false3, %true1
-  call void @func()
-  %72 = load i32, i32* %0, align 4
-  %73 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @11, i32 0, i32 0), i32 %72)
-  ret void
-
-false3:                                           ; preds = %cont
-  %74 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @10, i32 0, i32 0))
-  br label %cont2
-}
+declare i32 @scanf(i8*, ...)
 
 declare i32 @printf.2(i8*, ...)
 
@@ -198,16 +114,14 @@ declare i32 @printf.3(i8*, ...)
 
 declare i32 @printf.4(i8*, ...)
 
-declare i32 @printf.5(i8*, ...)
+declare i32 @scanf.5(i8*, ...)
 
 declare i32 @printf.6(i8*, ...)
 
 declare i32 @printf.7(i8*, ...)
 
-declare i32 @printf.8(i8*, ...)
+declare i32 @scanf.8(i8*, ...)
 
 declare i32 @printf.9(i8*, ...)
 
 declare i32 @printf.10(i8*, ...)
-
-declare i32 @printf.11(i8*, ...)
