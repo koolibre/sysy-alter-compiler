@@ -396,13 +396,43 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   Visit(binary_exp_node->lexp_);
   bool left_is_const = current_if_const_;
   double left_const_value = current_const_value_;
+  TypeCheckBasicType rightVariableType = TypeCheckBasicType::VOID;
+  TypeCheckBasicType leftVariableType = TypeCheckBasicType::VOID;
   Value *leftVariable;
   if (dynamic_cast<Node *>(binary_exp_node->lexp_)->CheckNodeType(NodeType::BINARY_EXP) ||
       dynamic_cast<Node *>(binary_exp_node->lexp_)->CheckNodeType(NodeType::UNARY_EXP))
+  {
     leftVariable = current_value_;
+    leftVariableType = current_type_.basic_type_;
+  }
+  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  {
+    cout << "loading array ref for left" << endl;
+    leftVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    switch (current_type_.basic_type_)
+    {
+    case TypeCheckBasicType::INT_ARRAY:
+    {
+      leftVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case TypeCheckBasicType::FLOAT_ARRAY:
+    {
+      leftVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case TypeCheckBasicType::CHAR_ARRAY:
+    {
+      leftVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
+    }
+  }
   else
+  {
     leftVariable = builder_.CreateLoad(current_value_);
-  auto leftVariableType = current_type_.basic_type_;
+    leftVariableType = current_type_.basic_type_;
+  }
 
   Visit(binary_exp_node->rexp_);
   bool right_is_const = current_if_const_;
@@ -410,10 +440,38 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   Value *rightVariable;
   if (dynamic_cast<Node *>(binary_exp_node->rexp_)->CheckNodeType(NodeType::BINARY_EXP) ||
       dynamic_cast<Node *>(binary_exp_node->rexp_)->CheckNodeType(NodeType::UNARY_EXP))
+  {
     rightVariable = current_value_;
+    rightVariableType = current_type_.basic_type_;
+  }
+  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  {
+    cout << "loading array ref for left" << endl;
+    rightVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    switch (current_type_.basic_type_)
+    {
+    case TypeCheckBasicType::INT_ARRAY:
+    {
+      rightVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case TypeCheckBasicType::FLOAT_ARRAY:
+    {
+      rightVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case TypeCheckBasicType::CHAR_ARRAY:
+    {
+      rightVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
+    }
+  }
   else
+  {
     rightVariable = builder_.CreateLoad(current_value_);
-  auto rightVariableType = current_type_.basic_type_;
+    rightVariableType = current_type_.basic_type_;
+  }
 
   bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT && (int)rightVariableType == (int)TypeCheckBasicType::INT);
 
@@ -433,6 +491,8 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     }
   }
   cout << "the left and right type:" << int(rightVariable->getType()->getTypeID()) << " & " << int(leftVariable->getType()->getTypeID()) << endl;
+  cout << "the binary operator: " << int(binary_exp_node->binary_op_type_) << endl;
+  cout << "is int type: " << isIntType << ": " << (int)leftVariableType << " and " << (int)rightVariableType << "." << endl;
   current_if_const_ = left_is_const and right_is_const;
   switch (binary_exp_node->binary_op_type_)
   {
