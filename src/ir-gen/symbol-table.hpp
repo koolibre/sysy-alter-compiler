@@ -37,6 +37,7 @@ class SymbolTable{
   void AddFunction(std::string &name, llvm::Function *function);
   llvm::Function* GetFunction(std::string &name) const;
   llvm::Function* GetPreDefinedFunction(std::string &name) const;
+  bool IsInGlobalScope();
 
  private:
   // member

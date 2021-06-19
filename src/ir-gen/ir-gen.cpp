@@ -45,6 +45,7 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
   auto iter_init = decl_node->init_val_list_.begin();
   BasicType basic_type = decl_node->basic_type_;
   cout << "basic_type:" << int(basic_type) << endl;
+  bool use_global = symbol_table_.IsInGlobalScope();
   for (; iter_id != decl_node->ident_list_.end(); iter_dim++, iter_id++, iter_init++)
   {
     std::string param_name = *iter_id; // name of this param
@@ -72,11 +73,11 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
         // v_param_dim indeed is a ConstantInt, we can use dim here
         // if (dim->getBitWidth() <= 32)
         // {
-          // int dim_value = dim->getSExtValue();
-          int dim_value = int(current_const_value_);
-          param_dims.push_back(dim_value);
-          param_full_dims *= dim_value;
-          cout << "-<" << dim_value << ">-";
+        // int dim_value = dim->getSExtValue();
+        int dim_value = int(current_const_value_);
+        param_dims.push_back(dim_value);
+        param_full_dims *= dim_value;
+        cout << "-<" << dim_value << ">-";
         // }
       }
       else
@@ -120,8 +121,43 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
     if (is_array)
     {
       llvm::ArrayType *param_arr_type = llvm::ArrayType::get(param_type, param_full_dims);
-      llvm::Value *param_dim_Value = llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), param_full_dims, true);
-      param_inst = builder_.CreateAlloca(param_arr_type, param_dim_Value, "decl_arr");
+      // llvm::Value *param_dim_Value = llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), param_full_dims, true);
+      if (use_global)
+      {
+        llvm::GlobalVariable *global_var_value = new GlobalVariable(/*Module=*/*module_,
+                                                                    /*Type=*/param_arr_type,
+                                                                    /*isConstant=*/false,
+                                                                    /*Linkage=*/GlobalValue::CommonLinkage,
+                                                                    /*Initializer=*/nullptr,
+                                                                    /*Name=*/"global_var");
+        global_var_value->setAlignment(2);
+        llvm::Constant *init_val = nullptr;
+        switch (basic_type)
+        {
+        case BasicType::INT:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0);
+          break;
+        }
+        case BasicType::FLOAT:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getFloatTy(llvm_context_), 0.0);
+          break;
+        }
+        case BasicType::CHAR:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), 0);
+          break;
+        }
+        }
+        //Global Variable Definitions
+        global_var_value->setInitializer(init_val);
+        param_inst = global_var_value;
+      }
+      else
+      {
+        param_inst = builder_.CreateAlloca(param_arr_type, llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), 1, true), "decl_arr");
+      }
       std::list<int> param_dims_list(param_dims.begin(), param_dims.end());
       switch (basic_type)
       {
@@ -145,7 +181,52 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
     }
     else
     {
-      param_inst = builder_.CreateAlloca(param_type);
+      if (use_global)
+      {
+        llvm::GlobalVariable *global_var_value = new GlobalVariable(/*Module=*/*module_,
+                                                                    /*Type=*/param_type,
+                                                                    /*isConstant=*/false,
+                                                                    /*Linkage=*/GlobalValue::CommonLinkage,
+                                                                    /*Initializer=*/nullptr,
+                                                                    /*Name=*/"global_var");
+        global_var_value->setAlignment(2);
+
+        // if (*iter_init != nullptr and not(*iter_init)->CheckNodeType(NodeType::INIT_VAL))
+        // {
+        //   Visit(*iter_init);
+        //   if (current_if_const_)
+        //   {
+        //Constant Definitions
+        // ConstantPointerNull* const_ptr_2 = ConstantPointerNull::get(PointerTy_0);
+        llvm::Constant *init_val = nullptr;
+        switch (basic_type)
+        {
+        case BasicType::INT:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0);
+          break;
+        }
+        case BasicType::FLOAT:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getFloatTy(llvm_context_), 0.0);
+          break;
+        }
+        case BasicType::CHAR:
+        {
+          init_val = llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), 0);
+          break;
+        }
+        }
+        //Global Variable Definitions
+        global_var_value->setInitializer(init_val);
+        //   }
+        // }
+        param_inst = global_var_value;
+      }
+      else
+      {
+        param_inst = builder_.CreateAlloca(param_type);
+      }
       // VOID and ERROR type shall not appear as the type of a declared var
       // // ? what is the different from **STRING** and CHAR_ARRAY type?
       // the different between STRING and CHAR_ARRAY is that the STRING type means a string literal
@@ -247,7 +328,7 @@ void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node)
       auto value_ = builder_.CreateFPExt(load_value_, llvm::Type::getDoubleTy(llvm_context_));
       callArgs.push_back(value_);
     }
-    else if((int)current_type_.basic_type_ == (int)TypeCheckBasicType::POINTER)
+    else if ((int)current_type_.basic_type_ == (int)TypeCheckBasicType::POINTER)
     {
       callArgs.push_back(current_value_);
     }
@@ -359,14 +440,28 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *mulVal = isIntType ? builder_.CreateMul(leftVariable, rightVariable) : builder_.CreateFMul(leftVariable, rightVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(mulVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(mulVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = right_const_value * left_const_value;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = right_const_value * left_const_value;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::DIV):
   {
     Value *divVal = isIntType ? builder_.CreateSDiv(leftVariable, rightVariable) : builder_.CreateFDiv(leftVariable, rightVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(divVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(divVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = left_const_value / right_const_value;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = left_const_value / right_const_value;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::MOD):
@@ -375,35 +470,70 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     Value *mulVal = isIntType ? builder_.CreateMul(rightVariable, divVal) : builder_.CreateFMul(rightVariable, divVal);
     Value *modVal = isIntType ? builder_.CreateSub(leftVariable, mulVal) : builder_.CreateFSub(leftVariable, mulVal);
     current_value_ = isIntType ? builder_.CreateFPExt(modVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(modVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = double(int(left_const_value) % int(right_const_value));}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = double(int(left_const_value) % int(right_const_value));
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::ADD):
   {
     Value *addVal = isIntType ? builder_.CreateAdd(leftVariable, rightVariable) : builder_.CreateFAdd(leftVariable, rightVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(addVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(addVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = right_const_value + left_const_value;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = right_const_value + left_const_value;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::SUB):
   {
     Value *subVal = isIntType ? builder_.CreateSub(leftVariable, rightVariable) : builder_.CreateFSub(leftVariable, rightVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(subVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(subVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = left_const_value - right_const_value;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = left_const_value - right_const_value;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::AND):
   {
     Value *andVal = builder_.CreateAnd(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(andVal, llvm::Type::getInt32Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value!=0.0 and right_const_value!=0.0)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value != 0.0 and right_const_value != 0.0) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (BinaryOpType::OR):
   {
     Value *orVal = builder_.CreateSub(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt32Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value!=0.0 or right_const_value!=0.0)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value != 0.0 or right_const_value != 0.0) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // >
@@ -411,7 +541,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *geVal = isIntType ? builder_.CreateICmpSGT(leftVariable, rightVariable) : builder_.CreateFCmpOGT(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(geVal, llvm::Type::getInt1Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value > right_const_value)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value > right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // <
@@ -419,7 +556,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *orVal = isIntType ? builder_.CreateICmpULT(leftVariable, rightVariable) : builder_.CreateFCmpOLT(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value < right_const_value)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value < right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // >=
@@ -427,7 +571,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *orVal = isIntType ? builder_.CreateICmpSGE(leftVariable, rightVariable) : builder_.CreateFCmpOGE(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value >= right_const_value)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value >= right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // <=
@@ -435,7 +586,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *orVal = isIntType ? builder_.CreateICmpSLE(leftVariable, rightVariable) : builder_.CreateFCmpOLE(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value <= right_const_value)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value <= right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // ==
@@ -444,7 +602,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     Value *orVal = isIntType ? builder_.CreateICmpEQ(leftVariable, rightVariable) : builder_.CreateFCmpOEQ(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
     // ! LahElr: 浮点误差可能性微存
-    if(current_if_const_){current_const_value_ = (left_const_value == right_const_value)?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value == right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   // !=
@@ -452,8 +617,14 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     Value *orVal = isIntType ? builder_.CreateICmpNE(leftVariable, rightVariable) : builder_.CreateFCmpONE(leftVariable, rightVariable);
     current_value_ = builder_.CreateFPExt(orVal, llvm::Type::getInt1Ty(llvm_context_));
-    if(current_if_const_){current_const_value_ = (left_const_value != right_const_value)?1.0:0.0;}
-    else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = (left_const_value != right_const_value) ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
     //TypeCheckType type(current_type_.basic_type_);
@@ -483,14 +654,24 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
   case (UnaryOpType::POSITIVE):
   {
     current_value_ = isIntType ? builder_.CreateFPExt(unaryVariable, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(unaryVariable, llvm::Type::getFloatTy(llvm_context_));
-    if(not current_if_const_){current_const_value_ = 0.0;}
+    if (not current_if_const_)
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (UnaryOpType::NEGATIVE):
   {
     Value *negVal = builder_.CreateNeg(unaryVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(negVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(negVal, llvm::Type::getFloatTy(llvm_context_));
-    if(current_if_const_){current_const_value_ = -current_const_value_;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = -current_const_value_;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (UnaryOpType::NOT):
@@ -498,7 +679,14 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
     Value *notVal = builder_.CreateNot(unaryVariable);
     current_value_ = isIntType ? builder_.CreateFPExt(notVal, llvm::Type::getInt32Ty(llvm_context_)) : builder_.CreateFPExt(notVal, llvm::Type::getFloatTy(llvm_context_));
     //! LahElr: 浮点误差可能性微存
-    if(current_if_const_){current_const_value_ = current_const_value_==0.0?1.0:0.0;}else{current_const_value_ = 0.0;}
+    if (current_if_const_)
+    {
+      current_const_value_ = current_const_value_ == 0.0 ? 1.0 : 0.0;
+    }
+    else
+    {
+      current_const_value_ = 0.0;
+    }
     break;
   }
   case (UnaryOpType::GETPTR):
@@ -533,6 +721,7 @@ void IrGenVisitor::VisitImplicit(InitValNode *init_val_node)
 // no code at all, just set error info
 void IrGenVisitor::VisitImplicit(ErrorNode *node)
 {
+  cout << "[ErrorNode]" << endl;
   current_if_error_ = true;
 }
 
@@ -541,42 +730,82 @@ void IrGenVisitor::VisitImplicit(ErrorNode *node)
 void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node)
 {
   cout << "[ValuePrimaryExpNode]" << endl;
-  switch (node->node_type_)
+  bool use_global = symbol_table_.IsInGlobalScope();
+  if (not use_global)
   {
-  case (NodeType::STRING_PRIMARY_EXP):
+    switch (node->node_type_)
+    {
+    case (NodeType::STRING_PRIMARY_EXP):
+    {
+      current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::STRING;
+      current_const_value_ = 0.0;
+      break;
+    }
+    case (NodeType::INT_PRIMARY_EXP):
+    {
+      current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), node->int_value_), current_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::INT;
+      current_const_value_ = double(node->int_value_);
+      break;
+    }
+    case (NodeType::FLOAT_PRIMARY_EXP):
+    {
+      current_value_ = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), node->float_value_), current_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::FLOAT;
+      current_const_value_ = double(node->float_value_);
+      break;
+    }
+    case (NodeType::CHAR_PRIMARY_EXP):
+    {
+      current_value_ = builder_.CreateAlloca(llvm::Type::getInt8Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), node->char_value_), current_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::CHAR;
+      current_const_value_ = double(node->char_value_);
+      break;
+    }
+    }
+    current_if_const_ = true;
+    current_if_error_ = false;
+  }
+  else
   {
-    current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
-    current_type_.basic_type_ = TypeCheckBasicType::STRING;
-    current_const_value_ = 0.0;
-    break;
+    switch (node->node_type_)
+    {
+    case (NodeType::STRING_PRIMARY_EXP):
+    {
+      current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::STRING;
+      current_const_value_ = 0.0;
+      break;
+    }
+    case (NodeType::INT_PRIMARY_EXP):
+    {
+      current_value_ = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), node->int_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::INT;
+      current_const_value_ = double(node->int_value_);
+      break;
+    }
+    case (NodeType::FLOAT_PRIMARY_EXP):
+    {
+      current_value_ = llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), node->float_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::FLOAT;
+      current_const_value_ = double(node->float_value_);
+      break;
+    }
+    case (NodeType::CHAR_PRIMARY_EXP):
+    {
+      current_value_ = llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), node->char_value_);
+      current_type_.basic_type_ = TypeCheckBasicType::CHAR;
+      current_const_value_ = double(node->char_value_);
+      break;
+    }
+    }
+    current_if_const_ = true;
+    current_if_error_ = false;
   }
-  case (NodeType::INT_PRIMARY_EXP):
-  {
-    current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
-    builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), node->int_value_), current_value_);
-    current_type_.basic_type_ = TypeCheckBasicType::INT;
-    current_const_value_ = double(node->int_value_);
-    break;
-  }
-  case (NodeType::FLOAT_PRIMARY_EXP):
-  {
-    current_value_ = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
-    builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), node->float_value_), current_value_);
-    current_type_.basic_type_ = TypeCheckBasicType::FLOAT;
-    current_const_value_ = double(node->float_value_);
-    break;
-  }
-  case (NodeType::CHAR_PRIMARY_EXP):
-  {
-    current_value_ = builder_.CreateAlloca(llvm::Type::getInt8Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
-    builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), node->char_value_), current_value_);
-    current_type_.basic_type_ = TypeCheckBasicType::CHAR;
-    current_const_value_ = double(node->char_value_);
-    break;
-  }
-  }
-  current_if_const_ = true;
-  current_if_error_ = false;
   // cout << "[finished]" << endl;
 }
 
@@ -671,9 +900,10 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node)
     // indices.push_back(ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0, false));
     cout << "give the start ptr to the array" << endl;
     llvm::Value *arr_start = symbol_table_.GetLocalVariableInstance(node->ident_);
-    std::vector<Value*> indices;
+    std::vector<Value *> indices;
     ArrayRef<Value *> arr_index({ConstantInt::get(Type::getInt32Ty(llvm_context_), 0), ConstantInt::get(Type::getInt32Ty(llvm_context_), 0)});
-    llvm:;Value* ptr = builder_.CreateInBoundsGEP(arr_start, arr_index, "arrayPtr");
+  llvm:;
+    Value *ptr = builder_.CreateInBoundsGEP(arr_start, arr_index, "arrayPtr");
     // current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_));
     // builder_.CreateStore(ptr,current_value_);
     current_value_ = ptr;
@@ -683,7 +913,8 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node)
   else if (var_type_dimension_list_size != index_list_size and index_list_size > 0 and var_type_dimension_list_size > 0)
   {
     // TODO: raise error
-    cout << "array ref and decl not match." << endl;
+    cout << "array ref and decl not match: " << var_type_dimension_list_size << " and "
+         << index_list_size << endl;
   }
   else
   {
@@ -713,6 +944,7 @@ void IrGenVisitor::VisitImplicit(ReturnStmtNode *node)
 // generate code for block "{}"
 void IrGenVisitor::VisitImplicit(BlockNode *node)
 {
+  cout << "[BlockNode]" << endl;
   // create new scope
   symbol_table_.PushScope(); // virtual BasicBlock
   // visit child
@@ -746,6 +978,7 @@ void IrGenVisitor::VisitImplicit(IdentNode *node)
 // root node
 void IrGenVisitor::VisitImplicit(RootNode *node)
 {
+  cout << "[RootNode]" << endl;
   // generate IR of children
   bool if_error = false;
   for (auto itr : node->decl_funcdef_list_)
@@ -844,13 +1077,38 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
   // no such type conversion
   cout << "f";
   TypeCheckBasicType ele_check_tcbt_type = TypeCheckBasicType::VOID;
-  switch(current_type_.basic_type_){
-    case TypeCheckBasicType::INT:{ele_check_tcbt_type = TypeCheckBasicType::INT; break;}
-    case TypeCheckBasicType::CHAR:{ele_check_tcbt_type = TypeCheckBasicType::CHAR; break;}
-    case TypeCheckBasicType::FLOAT:{ele_check_tcbt_type = TypeCheckBasicType::FLOAT; break;}
-    case TypeCheckBasicType::INT_ARRAY:{ele_check_tcbt_type = TypeCheckBasicType::INT; break;}
-    case TypeCheckBasicType::CHAR_ARRAY:{ele_check_tcbt_type = TypeCheckBasicType::CHAR; break;}
-    case TypeCheckBasicType::FLOAT_ARRAY:{ele_check_tcbt_type = TypeCheckBasicType::FLOAT; break;}
+  switch (current_type_.basic_type_)
+  {
+  case TypeCheckBasicType::INT:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::INT;
+    break;
+  }
+  case TypeCheckBasicType::CHAR:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::CHAR;
+    break;
+  }
+  case TypeCheckBasicType::FLOAT:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::FLOAT;
+    break;
+  }
+  case TypeCheckBasicType::INT_ARRAY:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::INT;
+    break;
+  }
+  case TypeCheckBasicType::CHAR_ARRAY:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::CHAR;
+    break;
+  }
+  case TypeCheckBasicType::FLOAT_ARRAY:
+  {
+    ele_check_tcbt_type = TypeCheckBasicType::FLOAT;
+    break;
+  }
   }
   if (type_system_.GetAssignTypeResult(lval_type, ele_check_tcbt_type) == TypeCheckBasicType::ERROR)
   {
@@ -888,6 +1146,7 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
 
 void IrGenVisitor::VisitImplicit(IfStmtNode *node)
 {
+  cout << "[IfStmtNode]" << endl;
   bool if_error = false;
   // cond_
   Visit(node->cond_);
@@ -951,6 +1210,7 @@ void IrGenVisitor::VisitImplicit(IfStmtNode *node)
 
 void IrGenVisitor::VisitImplicit(WhileStmtNode *node)
 {
+  cout << "[WhileStmtNode]" << endl;
   // TODO : error check
   Function *function_belog = builder_.GetInsertBlock()->getParent();
   BasicBlock *cond_block = BasicBlock::Create(llvm_context_, "cond", function_belog),
@@ -980,12 +1240,14 @@ void IrGenVisitor::VisitImplicit(WhileStmtNode *node)
 
 void IrGenVisitor::VisitImplicit(ContinueStmtNode *node)
 {
+  cout << "[ContinueStmtNode]" << endl;
   // TODO : error check
   builder_.CreateBr(current_cond_block_list_.back());
 }
 
 void IrGenVisitor::VisitImplicit(BreakStmtNode *node)
 {
+  cout << "[BreakStmtNode]" << endl;
   // TODO : error check
   builder_.CreateBr(current_cont_block_list_.back());
 }

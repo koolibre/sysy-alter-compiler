@@ -13,6 +13,10 @@ void SymbolTable::PushScope() {
   scope_stack_.push_back(Scope());
 }
 
+bool SymbolTable::IsInGlobalScope() {
+  return scope_stack_.size() == 1;
+}
+
 void SymbolTable::PopScope() {
   scope_stack_.pop_back();
 }
@@ -118,4 +122,6 @@ SymbolTable::SymbolTable(llvm::LLVMContext &llvm_context) :
                              llvm::GlobalValue::ExternalLinkage,
                              "scanf");
   scanf_->setCallingConv(llvm::CallingConv::C);
+
+  PushScope();
 }

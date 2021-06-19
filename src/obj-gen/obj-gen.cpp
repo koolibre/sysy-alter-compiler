@@ -27,7 +27,9 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
     //verifyModule(*module_);
     std::error_code errorcode;
     auto stream = new llvm::raw_fd_ostream("test.ll", errorcode);
+    cout << "l" << endl;
     module_->print(*stream, nullptr);
+    cout << "k" << endl;
     
     // Initialize the target registry etc.
     InitializeAllTargetInfos();
@@ -69,8 +71,9 @@ void ObjGen(IrGenVisitor & irgenvisitor, const std::string& filename){
         errs() << "theTargetMachine can't emit a file of this type";
         return;
     }
-
+    cout << "v" << endl;
     pass.run(*module_);
+    cout << "m" << endl;
     dest.flush();
 
     outs() << "Object code wrote to " << filename.c_str() << "\n";
