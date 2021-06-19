@@ -404,6 +404,11 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     leftVariable = current_value_;
     leftVariableType = current_type_.basic_type_;
+    switch(leftVariableType){
+      case (TypeCheckBasicType::INT_ARRAY) : {leftVariableType = TypeCheckBasicType::INT; break;}
+      case (TypeCheckBasicType::FLOAT_ARRAY) : {leftVariableType = TypeCheckBasicType::FLOAT; break;}
+      case (TypeCheckBasicType::CHAR_ARRAY) : {leftVariableType = TypeCheckBasicType::CHAR; break;}
+    }
   }
   else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
   {
@@ -443,10 +448,15 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     rightVariable = current_value_;
     rightVariableType = current_type_.basic_type_;
+    switch(rightVariableType){
+      case (TypeCheckBasicType::INT_ARRAY) : {rightVariableType = TypeCheckBasicType::INT; break;}
+      case (TypeCheckBasicType::FLOAT_ARRAY) : {rightVariableType = TypeCheckBasicType::FLOAT; break;}
+      case (TypeCheckBasicType::CHAR_ARRAY) : {rightVariableType = TypeCheckBasicType::CHAR; break;}
+    }
   }
   else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
   {
-    cout << "loading array ref for left" << endl;
+    cout << "loading array ref for right" << endl;
     rightVariable = builder_.CreateAlignedLoad(current_value_, 2);
     switch (current_type_.basic_type_)
     {
@@ -473,7 +483,7 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     rightVariableType = current_type_.basic_type_;
   }
 
-  bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT && (int)rightVariableType == (int)TypeCheckBasicType::INT);
+  bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT and (int)rightVariableType == (int)TypeCheckBasicType::INT);
 
   if (!isIntType)
   {
@@ -690,6 +700,7 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     //TypeCheckType type(current_type_.basic_type_);
     //symbol_table_.AddLocalVariable(binary_exp_node, current_value_, type);
   }
+  //current_type_ = isIntType ? TypeCheckType(TypeCheckBasicType::INT) : TypeCheckType(TypeCheckBasicType::FLOAT);
 }
 
 void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
@@ -698,12 +709,46 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
   Visit(unary_exp_node->exp_);
   //auto unaryVariable = builder_.CreateLoad(current_value_);
   Value *unaryVariable;
+  TypeCheckBasicType unaryVariableType = TypeCheckBasicType::VOID;
   if (dynamic_cast<Node *>(unary_exp_node->exp_)->CheckNodeType(NodeType::BINARY_EXP) ||
       dynamic_cast<Node *>(unary_exp_node->exp_)->CheckNodeType(NodeType::UNARY_EXP))
+  {
     unaryVariable = current_value_;
+    unaryVariableType = current_type_.basic_type_;
+    switch(unaryVariableType){
+      case (TypeCheckBasicType::INT_ARRAY) : {unaryVariableType = TypeCheckBasicType::INT; break;}
+      case (TypeCheckBasicType::FLOAT_ARRAY) : {unaryVariableType = TypeCheckBasicType::FLOAT; break;}
+      case (TypeCheckBasicType::CHAR_ARRAY) : {unaryVariableType = TypeCheckBasicType::CHAR; break;}
+    }
+  }
+  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  {
+    cout << "loading array ref for unary" << endl;
+    unaryVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    switch (current_type_.basic_type_)
+    {
+    case TypeCheckBasicType::INT_ARRAY:
+    {
+      unaryVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case TypeCheckBasicType::FLOAT_ARRAY:
+    {
+      unaryVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case TypeCheckBasicType::CHAR_ARRAY:
+    {
+      unaryVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
+    }
+  }
   else
+  {
     unaryVariable = builder_.CreateLoad(current_value_);
-  auto unaryVariableType = current_type_.basic_type_;
+    unaryVariableType = current_type_.basic_type_;
+  }
 
   bool isIntType = (int)unaryVariableType == (int)TypeCheckBasicType::INT;
 
@@ -752,7 +797,7 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
   case (UnaryOpType::GETPTR):
   {
     // // LahElr:bookmark
-    cout << "using unfinished get-pointer operator" << endl;
+    cout << "using get-pointer operator" << endl;
     // llvm::Value* ptr_to_the_ptr = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_));
     // builder_.CreateStore(current_value_,ptr_to_the_ptr);
     // current_value_ = ptr_to_the_ptr;
@@ -770,6 +815,7 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
     // break;
   }
   }
+  //current_type_ = isIntType ? TypeCheckType(TypeCheckBasicType::INT) : TypeCheckType(TypeCheckBasicType::FLOAT);
 }
 
 void IrGenVisitor::VisitImplicit(InitValNode *init_val_node)
