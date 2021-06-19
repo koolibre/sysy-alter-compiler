@@ -320,15 +320,21 @@ LVal:
     LValPrimaryExpNode* tmp_node = new LValPrimaryExpNode(dynamic_cast<IdentNode*>($1));
     tmp_node->AddLVal();
     $$ = tmp_node;
+  } |
+  IDENT {
+    LValPrimaryExpNode* tmp_node = new LValPrimaryExpNode(dynamic_cast<IdentNode*>($1));
+    $$ = tmp_node;    
   }
   ;
 
 IndexList:
-  /* empty */ {
+  '[' Exp ']' {
     lvalprimaryexpnode_tmp_index_array.resize(0);
+    lvalprimaryexpnode_tmp_index_array.push_back($2);
     $$ = nullptr;
   } |
   IndexList '[' Exp ']' {
+    printf("1\n");
     lvalprimaryexpnode_tmp_index_array.push_back($3);
     $$ = nullptr;
   }
