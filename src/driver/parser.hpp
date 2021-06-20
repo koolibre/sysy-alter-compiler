@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_SRC_DRIVER_PARSER_HPP_INCLUDED
 # define YY_YY_SRC_DRIVER_PARSER_HPP_INCLUDED
@@ -44,36 +45,41 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    CONST = 258,
-    INT = 259,
-    FLOAT = 260,
-    CHAR = 261,
-    VOID = 262,
-    IF = 263,
-    ELSE = 264,
-    WHILE = 265,
-    BREAK = 266,
-    CONTINUE = 267,
-    RETURN = 268,
-    DEF = 269,
-    IDENT = 270,
-    INT_CONST = 271,
-    FLOAT_CONST = 272,
-    CHAR_CONST = 273,
-    STRING_CONST = 274,
-    LEEQ = 275,
-    GEEQ = 276,
-    EQ = 277,
-    UNEQ = 278,
-    AND = 279,
-    OR = 280,
-    ERROR = 281
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    CONST = 258,                   /* CONST  */
+    INT = 259,                     /* INT  */
+    FLOAT = 260,                   /* FLOAT  */
+    CHAR = 261,                    /* CHAR  */
+    VOID = 262,                    /* VOID  */
+    IF = 263,                      /* IF  */
+    ELSE = 264,                    /* ELSE  */
+    WHILE = 265,                   /* WHILE  */
+    BREAK = 266,                   /* BREAK  */
+    CONTINUE = 267,                /* CONTINUE  */
+    RETURN = 268,                  /* RETURN  */
+    DEF = 269,                     /* DEF  */
+    IDENT = 270,                   /* IDENT  */
+    INT_CONST = 271,               /* INT_CONST  */
+    FLOAT_CONST = 272,             /* FLOAT_CONST  */
+    CHAR_CONST = 273,              /* CHAR_CONST  */
+    STRING_CONST = 274,            /* STRING_CONST  */
+    LEEQ = 275,                    /* LEEQ  */
+    GEEQ = 276,                    /* GEEQ  */
+    EQ = 277,                      /* EQ  */
+    UNEQ = 278,                    /* UNEQ  */
+    AND = 279,                     /* AND  */
+    OR = 280,                      /* OR  */
+    ERROR = 281                    /* ERROR  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */

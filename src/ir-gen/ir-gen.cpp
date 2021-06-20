@@ -130,7 +130,7 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
                                                                     /*Linkage=*/GlobalValue::CommonLinkage,
                                                                     /*Initializer=*/nullptr,
                                                                     /*Name=*/"global_var");
-        global_var_value->setAlignment(2);
+        global_var_value->setAlignment(llvm::MaybeAlign(2));
         llvm::Constant *init_val = nullptr;
         switch (basic_type)
         {
@@ -189,7 +189,7 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
                                                                     /*Linkage=*/GlobalValue::CommonLinkage,
                                                                     /*Initializer=*/nullptr,
                                                                     /*Name=*/"global_var");
-        global_var_value->setAlignment(2);
+        global_var_value->setAlignment(llvm::MaybeAlign(2));
 
         // if (*iter_init != nullptr and not(*iter_init)->CheckNodeType(NodeType::INIT_VAL))
         // {
@@ -367,10 +367,61 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node)
   cout << "[FuncDefNode]" << func_def_node->func_ident_ << endl;
 
   std::vector<llvm::Type *> args_of_func;
-  llvm::FunctionType *type_of_func = llvm::FunctionType::get(
+  for (auto itr: func_def_node->fparam_basic_type_array_){
+      switch (itr){
+      case BasicType::INT:
+      {
+	args_of_func.push_back(llvm::Type::getInt32Ty(llvm_context_));
+        break;
+      }
+      case BasicType::FLOAT:
+      {
+	args_of_func.push_back(llvm::Type::getFloatTy(llvm_context_));
+        break;
+      }
+      case BasicType::CHAR:
+      {
+	args_of_func.push_back(llvm::Type::getInt8Ty(llvm_context_));
+        break;
+      }
+      }
+  }
+
+  llvm::FunctionType * type_of_func;
+  switch (func_def_node->func_type_){
+  case BasicType::VOID:
+  {
+  type_of_func = llvm::FunctionType::get(
       llvm::Type::getVoidTy(llvm_context_),
       llvm::makeArrayRef(args_of_func),
       false);
+  break;
+  }
+  case BasicType::INT:
+  {
+  type_of_func = llvm::FunctionType::get(
+      llvm::Type::getInt32Ty(llvm_context_),
+      llvm::makeArrayRef(args_of_func),
+      false);
+  break;
+  }
+  case BasicType::FLOAT:
+  {
+  type_of_func = llvm::FunctionType::get(
+      llvm::Type::getFloatTy(llvm_context_),
+      llvm::makeArrayRef(args_of_func),
+      false);
+  break;
+  }
+  case BasicType::CHAR:
+  {
+  type_of_func = llvm::FunctionType::get(
+      llvm::Type::getInt8Ty(llvm_context_),
+      llvm::makeArrayRef(args_of_func),
+      false);
+  break;
+  }
+  }
 
   llvm::Function *func_ = llvm::Function::Create(type_of_func,
                                                  llvm::GlobalValue::ExternalLinkage,
@@ -382,6 +433,19 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node)
 
   builder_.SetInsertPoint(funcBlock);
   symbol_table_.PushScope();
+
+  int cnt = 0;
+  for (auto AI = func_->arg_begin(), AE = func_->arg_end(); AI != AE; ++AI)
+  {
+    Value* v = &*AI;
+    TypeCheckType * type_ = new TypeCheckType(TypeCheckBasicType::INT);
+    current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+    builder_.CreateStore(v, current_value_);
+    symbol_table_.AddLocalVariable(func_def_node->fparam_ident_array_[cnt], current_value_, *type_);
+    cout << symbol_table_.IfExistLocal(func_def_node->fparam_ident_array_[cnt]) << func_def_node->fparam_ident_array_[cnt] << endl;
+    cnt ++;
+  } 
+
   Visit(func_def_node->block_);
   symbol_table_.PopScope();
 }
@@ -404,10 +468,23 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     leftVariable = current_value_;
     leftVariableType = current_type_.basic_type_;
-    switch(leftVariableType){
-      case (TypeCheckBasicType::INT_ARRAY) : {leftVariableType = TypeCheckBasicType::INT; break;}
-      case (TypeCheckBasicType::FLOAT_ARRAY) : {leftVariableType = TypeCheckBasicType::FLOAT; break;}
-      case (TypeCheckBasicType::CHAR_ARRAY) : {leftVariableType = TypeCheckBasicType::CHAR; break;}
+    switch (leftVariableType)
+    {
+    case (TypeCheckBasicType::INT_ARRAY):
+    {
+      leftVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case (TypeCheckBasicType::FLOAT_ARRAY):
+    {
+      leftVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case (TypeCheckBasicType::CHAR_ARRAY):
+    {
+      leftVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
     }
   }
   else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
@@ -448,10 +525,23 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
   {
     rightVariable = current_value_;
     rightVariableType = current_type_.basic_type_;
-    switch(rightVariableType){
-      case (TypeCheckBasicType::INT_ARRAY) : {rightVariableType = TypeCheckBasicType::INT; break;}
-      case (TypeCheckBasicType::FLOAT_ARRAY) : {rightVariableType = TypeCheckBasicType::FLOAT; break;}
-      case (TypeCheckBasicType::CHAR_ARRAY) : {rightVariableType = TypeCheckBasicType::CHAR; break;}
+    switch (rightVariableType)
+    {
+    case (TypeCheckBasicType::INT_ARRAY):
+    {
+      rightVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case (TypeCheckBasicType::FLOAT_ARRAY):
+    {
+      rightVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case (TypeCheckBasicType::CHAR_ARRAY):
+    {
+      rightVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
     }
   }
   else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
@@ -483,7 +573,7 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     rightVariableType = current_type_.basic_type_;
   }
 
-  bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT and (int)rightVariableType == (int)TypeCheckBasicType::INT);
+  bool isIntType = ((int)leftVariableType == (int)TypeCheckBasicType::INT and (int) rightVariableType == (int)TypeCheckBasicType::INT);
 
   if (!isIntType)
   {
@@ -715,10 +805,23 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
   {
     unaryVariable = current_value_;
     unaryVariableType = current_type_.basic_type_;
-    switch(unaryVariableType){
-      case (TypeCheckBasicType::INT_ARRAY) : {unaryVariableType = TypeCheckBasicType::INT; break;}
-      case (TypeCheckBasicType::FLOAT_ARRAY) : {unaryVariableType = TypeCheckBasicType::FLOAT; break;}
-      case (TypeCheckBasicType::CHAR_ARRAY) : {unaryVariableType = TypeCheckBasicType::CHAR; break;}
+    switch (unaryVariableType)
+    {
+    case (TypeCheckBasicType::INT_ARRAY):
+    {
+      unaryVariableType = TypeCheckBasicType::INT;
+      break;
+    }
+    case (TypeCheckBasicType::FLOAT_ARRAY):
+    {
+      unaryVariableType = TypeCheckBasicType::FLOAT;
+      break;
+    }
+    case (TypeCheckBasicType::CHAR_ARRAY):
+    {
+      unaryVariableType = TypeCheckBasicType::CHAR;
+      break;
+    }
     }
   }
   else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
@@ -1038,6 +1141,7 @@ void IrGenVisitor::VisitImplicit(ReturnStmtNode *node)
   if (node->exp_ != nullptr)
   {
     Visit(node->exp_);
+    current_value_ = builder_.CreateLoad(current_value_);
     builder_.CreateRet(current_value_);
   }
   else
@@ -1105,6 +1209,7 @@ void IrGenVisitor::VisitImplicit(RootNode *node)
 void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
 {
   cout << "[AssignStmtNode]" << endl;
+  current_if_error_ = false;
   // test error
   bool if_error = false;
   bool is_arr_ref = false;

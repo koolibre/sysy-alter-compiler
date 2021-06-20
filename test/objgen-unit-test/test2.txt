@@ -1,0 +1,83 @@
+def void main(){
+    int a[20][20];
+    int b[20][20];
+    int c[20][20];
+
+    int row;
+    int col;
+    int row_num_a;
+    int col_num_a;
+    int row_num_b;
+    int col_num_b;
+    int value;
+
+    row=0;
+    col=0;
+    scanf("%d %d", &row_num_a, &col_num_a);
+    while (row<row_num_a){
+	col=0;
+    	while (col<col_num_a){
+	    scanf("%d ", &value);
+            a[row][col] = value;
+	    col = col+1;
+	}
+	row = row+1;
+    }
+
+    row=0;
+    col=0;
+    scanf("%d %d", &row_num_b, &col_num_b);
+    while (row<row_num_b){
+	col=0;
+    	while (col<col_num_b){
+	    scanf("%d", &value);
+	    b[row][col] = value;
+	    col = col+1;
+	}
+	row = row+1;
+    }
+
+    if (row_num_b != col_num_a){
+        printf("Incompatible Dimensions");
+	return;
+    }
+    int tgt_row=0;
+    int tgt_col=0;
+    int shared_dim=0;
+    int sum=0;
+    int row_num_c = row_num_a;
+    int col_num_c = col_num_b;
+    int ele1;
+    int ele2;
+
+    while (tgt_row < row_num_c){
+	tgt_col = 0;
+        while (tgt_col < col_num_c){
+	    shared_dim = 0;
+	    sum = 0;
+	    while (shared_dim < row_num_b){
+                ele1 = a[tgt_row][shared_dim];
+                ele2 = b[shared_dim][tgt_col]; 
+                sum = sum + ele1 * ele2;
+		shared_dim = shared_dim + 1;
+	    }
+	    c[tgt_row][tgt_col] = sum;
+	    tgt_col = tgt_col + 1;
+	}
+	tgt_row = tgt_row + 1;
+    }
+
+    row=0;
+    col=0;
+    while (row<row_num_c){
+	col=0;
+        while (col<col_num_c){
+   	    printf("%d ", c[row][col]);
+	    col = col+1;
+	}
+	char n = 10;
+	printf("%c", n);
+	row = row+1;
+    }
+    return;
+}

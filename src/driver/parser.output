@@ -390,7 +390,7 @@ Nonterminals, with rules where they appear
 
 State 0
 
-    0 $accept: . CompUnit $end
+    0 $accept: • CompUnit $end
 
     CONST  shift, and go to state 1
     INT    shift, and go to state 2
@@ -408,7 +408,7 @@ State 0
 
 State 1
 
-    7 ConstDecl: CONST . BType ConstDefList ';'
+    7 ConstDecl: CONST • BType ConstDefList ';'
 
     INT    shift, and go to state 2
     FLOAT  shift, and go to state 3
@@ -419,29 +419,29 @@ State 1
 
 State 2
 
-   30 BType: INT .
+   30 BType: INT •
 
     $default  reduce using rule 30 (BType)
 
 
 State 3
 
-   31 BType: FLOAT .
+   31 BType: FLOAT •
 
     $default  reduce using rule 31 (BType)
 
 
 State 4
 
-   32 BType: CHAR .
+   32 BType: CHAR •
 
     $default  reduce using rule 32 (BType)
 
 
 State 5
 
-  103 FuncDef: DEF . FuncType IDENT '(' FuncFParamList ')' Block
-  104        | DEF . FuncType IDENT '(' ')' Block
+  103 FuncDef: DEF • FuncType IDENT '(' FuncFParamList ')' Block
+  104        | DEF • FuncType IDENT '(' ')' Block
 
     INT    shift, and go to state 13
     FLOAT  shift, and go to state 14
@@ -453,9 +453,9 @@ State 5
 
 State 6
 
-    0 $accept: CompUnit . $end
-    1 CompUnit: CompUnit . Decl
-    2         | CompUnit . FuncDef
+    0 $accept: CompUnit • $end
+    1 CompUnit: CompUnit • Decl
+    2         | CompUnit • FuncDef
 
     $end   shift, and go to state 18
     CONST  shift, and go to state 1
@@ -473,28 +473,28 @@ State 6
 
 State 7
 
-    3 CompUnit: Decl .
+    3 CompUnit: Decl •
 
     $default  reduce using rule 3 (CompUnit)
 
 
 State 8
 
-    5 Decl: ConstDecl .
+    5 Decl: ConstDecl •
 
     $default  reduce using rule 5 (Decl)
 
 
 State 9
 
-    6 Decl: VarDecl .
+    6 Decl: VarDecl •
 
     $default  reduce using rule 6 (Decl)
 
 
 State 10
 
-   18 VarDecl: BType . VarDefList ';'
+   18 VarDecl: BType • VarDefList ';'
 
     IDENT  shift, and go to state 21
 
@@ -504,14 +504,14 @@ State 10
 
 State 11
 
-    4 CompUnit: FuncDef .
+    4 CompUnit: FuncDef •
 
     $default  reduce using rule 4 (CompUnit)
 
 
 State 12
 
-    7 ConstDecl: CONST BType . ConstDefList ';'
+    7 ConstDecl: CONST BType • ConstDefList ';'
 
     IDENT  shift, and go to state 24
 
@@ -521,65 +521,65 @@ State 12
 
 State 13
 
-  112 FuncType: INT .
+  112 FuncType: INT •
 
     $default  reduce using rule 112 (FuncType)
 
 
 State 14
 
-  113 FuncType: FLOAT .
+  113 FuncType: FLOAT •
 
     $default  reduce using rule 113 (FuncType)
 
 
 State 15
 
-  114 FuncType: CHAR .
+  114 FuncType: CHAR •
 
     $default  reduce using rule 114 (FuncType)
 
 
 State 16
 
-  111 FuncType: VOID .
+  111 FuncType: VOID •
 
     $default  reduce using rule 111 (FuncType)
 
 
 State 17
 
-  103 FuncDef: DEF FuncType . IDENT '(' FuncFParamList ')' Block
-  104        | DEF FuncType . IDENT '(' ')' Block
+  103 FuncDef: DEF FuncType • IDENT '(' FuncFParamList ')' Block
+  104        | DEF FuncType • IDENT '(' ')' Block
 
     IDENT  shift, and go to state 27
 
 
 State 18
 
-    0 $accept: CompUnit $end .
+    0 $accept: CompUnit $end •
 
     $default  accept
 
 
 State 19
 
-    1 CompUnit: CompUnit Decl .
+    1 CompUnit: CompUnit Decl •
 
     $default  reduce using rule 1 (CompUnit)
 
 
 State 20
 
-    2 CompUnit: CompUnit FuncDef .
+    2 CompUnit: CompUnit FuncDef •
 
     $default  reduce using rule 2 (CompUnit)
 
 
 State 21
 
-   21 VarDef: IDENT . VarDefDimensionList '=' VarInitVal
-   29       | IDENT . VarDefDimensionList
+   21 VarDef: IDENT • VarDefDimensionList '=' VarInitVal
+   29       | IDENT • VarDefDimensionList
 
     $default  reduce using rule 22 (VarDefDimensionList)
 
@@ -588,8 +588,8 @@ State 21
 
 State 22
 
-   18 VarDecl: BType VarDefList . ';'
-   20 VarDefList: VarDefList . ',' VarDef
+   18 VarDecl: BType VarDefList • ';'
+   20 VarDefList: VarDefList • ',' VarDef
 
     ';'  shift, and go to state 29
     ','  shift, and go to state 30
@@ -597,14 +597,14 @@ State 22
 
 State 23
 
-   19 VarDefList: VarDef .
+   19 VarDefList: VarDef •
 
     $default  reduce using rule 19 (VarDefList)
 
 
 State 24
 
-   10 ConstDef: IDENT . ConstDefDimensionList '=' ConstInitVal
+   10 ConstDef: IDENT • ConstDefDimensionList '=' ConstInitVal
 
     $default  reduce using rule 11 (ConstDefDimensionList)
 
@@ -613,8 +613,8 @@ State 24
 
 State 25
 
-    7 ConstDecl: CONST BType ConstDefList . ';'
-    9 ConstDefList: ConstDefList . ',' ConstDef
+    7 ConstDecl: CONST BType ConstDefList • ';'
+    9 ConstDefList: ConstDefList • ',' ConstDef
 
     ';'  shift, and go to state 32
     ','  shift, and go to state 33
@@ -622,24 +622,24 @@ State 25
 
 State 26
 
-    8 ConstDefList: ConstDef .
+    8 ConstDefList: ConstDef •
 
     $default  reduce using rule 8 (ConstDefList)
 
 
 State 27
 
-  103 FuncDef: DEF FuncType IDENT . '(' FuncFParamList ')' Block
-  104        | DEF FuncType IDENT . '(' ')' Block
+  103 FuncDef: DEF FuncType IDENT • '(' FuncFParamList ')' Block
+  104        | DEF FuncType IDENT • '(' ')' Block
 
     '('  shift, and go to state 34
 
 
 State 28
 
-   21 VarDef: IDENT VarDefDimensionList . '=' VarInitVal
-   23 VarDefDimensionList: VarDefDimensionList . '[' VarExp ']'
-   29 VarDef: IDENT VarDefDimensionList .
+   21 VarDef: IDENT VarDefDimensionList • '=' VarInitVal
+   23 VarDefDimensionList: VarDefDimensionList • '[' VarExp ']'
+   29 VarDef: IDENT VarDefDimensionList •
 
     '='  shift, and go to state 35
     '['  shift, and go to state 36
@@ -649,14 +649,14 @@ State 28
 
 State 29
 
-   18 VarDecl: BType VarDefList ';' .
+   18 VarDecl: BType VarDefList ';' •
 
     $default  reduce using rule 18 (VarDecl)
 
 
 State 30
 
-   20 VarDefList: VarDefList ',' . VarDef
+   20 VarDefList: VarDefList ',' • VarDef
 
     IDENT  shift, and go to state 21
 
@@ -665,8 +665,8 @@ State 30
 
 State 31
 
-   10 ConstDef: IDENT ConstDefDimensionList . '=' ConstInitVal
-   12 ConstDefDimensionList: ConstDefDimensionList . '[' ConstExp ']'
+   10 ConstDef: IDENT ConstDefDimensionList • '=' ConstInitVal
+   12 ConstDefDimensionList: ConstDefDimensionList • '[' ConstExp ']'
 
     '='  shift, and go to state 38
     '['  shift, and go to state 39
@@ -674,14 +674,14 @@ State 31
 
 State 32
 
-    7 ConstDecl: CONST BType ConstDefList ';' .
+    7 ConstDecl: CONST BType ConstDefList ';' •
 
     $default  reduce using rule 7 (ConstDecl)
 
 
 State 33
 
-    9 ConstDefList: ConstDefList ',' . ConstDef
+    9 ConstDefList: ConstDefList ',' • ConstDef
 
     IDENT  shift, and go to state 24
 
@@ -690,8 +690,8 @@ State 33
 
 State 34
 
-  103 FuncDef: DEF FuncType IDENT '(' . FuncFParamList ')' Block
-  104        | DEF FuncType IDENT '(' . ')' Block
+  103 FuncDef: DEF FuncType IDENT '(' • FuncFParamList ')' Block
+  104        | DEF FuncType IDENT '(' • ')' Block
 
     INT    shift, and go to state 2
     FLOAT  shift, and go to state 3
@@ -705,7 +705,7 @@ State 34
 
 State 35
 
-   21 VarDef: IDENT VarDefDimensionList '=' . VarInitVal
+   21 VarDef: IDENT VarDefDimensionList '=' • VarInitVal
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -735,7 +735,7 @@ State 35
 
 State 36
 
-   23 VarDefDimensionList: VarDefDimensionList '[' . VarExp ']'
+   23 VarDefDimensionList: VarDefDimensionList '[' • VarExp ']'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -763,14 +763,14 @@ State 36
 
 State 37
 
-   20 VarDefList: VarDefList ',' VarDef .
+   20 VarDefList: VarDefList ',' VarDef •
 
     $default  reduce using rule 20 (VarDefList)
 
 
 State 38
 
-   10 ConstDef: IDENT ConstDefDimensionList '=' . ConstInitVal
+   10 ConstDef: IDENT ConstDefDimensionList '=' • ConstInitVal
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -800,7 +800,7 @@ State 38
 
 State 39
 
-   12 ConstDefDimensionList: ConstDefDimensionList '[' . ConstExp ']'
+   12 ConstDefDimensionList: ConstDefDimensionList '[' • ConstExp ']'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -828,14 +828,14 @@ State 39
 
 State 40
 
-    9 ConstDefList: ConstDefList ',' ConstDef .
+    9 ConstDefList: ConstDefList ',' ConstDef •
 
     $default  reduce using rule 9 (ConstDefList)
 
 
 State 41
 
-  104 FuncDef: DEF FuncType IDENT '(' ')' . Block
+  104 FuncDef: DEF FuncType IDENT '(' ')' • Block
 
     '{'  shift, and go to state 74
 
@@ -844,16 +844,16 @@ State 41
 
 State 42
 
-  107 FuncFParam: BType . IDENT
-  108           | BType . IDENT '[' ']' FuncFParamIndexList
+  107 FuncFParam: BType • IDENT
+  108           | BType • IDENT '[' ']' FuncFParamIndexList
 
     IDENT  shift, and go to state 76
 
 
 State 43
 
-  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList . ')' Block
-  106 FuncFParamList: FuncFParamList . ',' FuncFParam
+  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList • ')' Block
+  106 FuncFParamList: FuncFParamList • ',' FuncFParam
 
     ','  shift, and go to state 77
     ')'  shift, and go to state 78
@@ -861,17 +861,17 @@ State 43
 
 State 44
 
-  105 FuncFParamList: FuncFParam .
+  105 FuncFParamList: FuncFParam •
 
     $default  reduce using rule 105 (FuncFParamList)
 
 
 State 45
 
-   52 LVal: IDENT . IndexList
-   53     | IDENT .
-   67 UnaryExp: IDENT . '(' FuncRParamList ')'
-   68         | IDENT . '(' ')'
+   52 LVal: IDENT • IndexList
+   53     | IDENT •
+   67 UnaryExp: IDENT • '(' FuncRParamList ')'
+   68         | IDENT • '(' ')'
 
     '['  shift, and go to state 79
     '('  shift, and go to state 80
@@ -883,36 +883,36 @@ State 45
 
 State 46
 
-   62 IntNumber: INT_CONST .
+   62 IntNumber: INT_CONST •
 
     $default  reduce using rule 62 (IntNumber)
 
 
 State 47
 
-   63 FloatNumber: FLOAT_CONST .
+   63 FloatNumber: FLOAT_CONST •
 
     $default  reduce using rule 63 (FloatNumber)
 
 
 State 48
 
-   64 character: CHAR_CONST .
+   64 character: CHAR_CONST •
 
     $default  reduce using rule 64 (character)
 
 
 State 49
 
-   65 String: STRING_CONST .
+   65 String: STRING_CONST •
 
     $default  reduce using rule 65 (String)
 
 
 State 50
 
-   25 VarInitVal: '{' . VarInitValList '}'
-   26           | '{' . '}'
+   25 VarInitVal: '{' • VarInitValList '}'
+   26           | '{' • '}'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -944,7 +944,7 @@ State 50
 
 State 51
 
-   56 PrimaryExp: '(' . LOrExp ')'
+   56 PrimaryExp: '(' • LOrExp ')'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -975,91 +975,91 @@ State 51
 
 State 52
 
-   72 UnaryOp: '+' .
+   72 UnaryOp: '+' •
 
     $default  reduce using rule 72 (UnaryOp)
 
 
 State 53
 
-   73 UnaryOp: '-' .
+   73 UnaryOp: '-' •
 
     $default  reduce using rule 73 (UnaryOp)
 
 
 State 54
 
-   74 UnaryOp: '!' .
+   74 UnaryOp: '!' •
 
     $default  reduce using rule 74 (UnaryOp)
 
 
 State 55
 
-   75 UnaryOp: '&' .
+   75 UnaryOp: '&' •
 
     $default  reduce using rule 75 (UnaryOp)
 
 
 State 56
 
-   21 VarDef: IDENT VarDefDimensionList '=' VarInitVal .
+   21 VarDef: IDENT VarDefDimensionList '=' VarInitVal •
 
     $default  reduce using rule 21 (VarDef)
 
 
 State 57
 
-   57 PrimaryExp: LVal .
+   57 PrimaryExp: LVal •
 
     $default  reduce using rule 57 (PrimaryExp)
 
 
 State 58
 
-   66 UnaryExp: PrimaryExp .
+   66 UnaryExp: PrimaryExp •
 
     $default  reduce using rule 66 (UnaryExp)
 
 
 State 59
 
-   58 PrimaryExp: IntNumber .
+   58 PrimaryExp: IntNumber •
 
     $default  reduce using rule 58 (PrimaryExp)
 
 
 State 60
 
-   59 PrimaryExp: FloatNumber .
+   59 PrimaryExp: FloatNumber •
 
     $default  reduce using rule 59 (PrimaryExp)
 
 
 State 61
 
-   60 PrimaryExp: character .
+   60 PrimaryExp: character •
 
     $default  reduce using rule 60 (PrimaryExp)
 
 
 State 62
 
-   61 PrimaryExp: String .
+   61 PrimaryExp: String •
 
     $default  reduce using rule 61 (PrimaryExp)
 
 
 State 63
 
-   76 MulExp: UnaryExp .
+   76 MulExp: UnaryExp •
 
     $default  reduce using rule 76 (MulExp)
 
 
 State 64
 
-   69 UnaryExp: UnaryOp . UnaryExp
+   69 UnaryExp: UnaryOp • UnaryExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1084,8 +1084,8 @@ State 64
 
 State 65
 
-   77 MulExp: MulExp . MulOp UnaryExp
-   81 AddExp: MulExp .
+   77 MulExp: MulExp • MulOp UnaryExp
+   81 AddExp: MulExp •
 
     '*'  shift, and go to state 91
     '/'  shift, and go to state 92
@@ -1098,8 +1098,8 @@ State 65
 
 State 66
 
-   82 AddExp: AddExp . AddOp MulExp
-  102 VarExp: AddExp .
+   82 AddExp: AddExp • AddOp MulExp
+  102 VarExp: AddExp •
 
     '+'  shift, and go to state 95
     '-'  shift, and go to state 96
@@ -1111,22 +1111,22 @@ State 66
 
 State 67
 
-   24 VarInitVal: VarExp .
+   24 VarInitVal: VarExp •
 
     $default  reduce using rule 24 (VarInitVal)
 
 
 State 68
 
-   23 VarDefDimensionList: VarDefDimensionList '[' VarExp . ']'
+   23 VarDefDimensionList: VarDefDimensionList '[' VarExp • ']'
 
     ']'  shift, and go to state 98
 
 
 State 69
 
-   14 ConstInitVal: '{' . ConstInitValList '}'
-   15             | '{' . '}'
+   14 ConstInitVal: '{' • ConstInitValList '}'
+   15             | '{' • '}'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1158,15 +1158,15 @@ State 69
 
 State 70
 
-   10 ConstDef: IDENT ConstDefDimensionList '=' ConstInitVal .
+   10 ConstDef: IDENT ConstDefDimensionList '=' ConstInitVal •
 
     $default  reduce using rule 10 (ConstDef)
 
 
 State 71
 
-   82 AddExp: AddExp . AddOp MulExp
-  101 ConstExp: AddExp .
+   82 AddExp: AddExp • AddOp MulExp
+  101 ConstExp: AddExp •
 
     '+'  shift, and go to state 95
     '-'  shift, and go to state 96
@@ -1178,21 +1178,21 @@ State 71
 
 State 72
 
-   13 ConstInitVal: ConstExp .
+   13 ConstInitVal: ConstExp •
 
     $default  reduce using rule 13 (ConstInitVal)
 
 
 State 73
 
-   12 ConstDefDimensionList: ConstDefDimensionList '[' ConstExp . ']'
+   12 ConstDefDimensionList: ConstDefDimensionList '[' ConstExp • ']'
 
     ']'  shift, and go to state 102
 
 
 State 74
 
-   33 Block: '{' . BlockItemList '}'
+   33 Block: '{' • BlockItemList '}'
 
     $default  reduce using rule 34 (BlockItemList)
 
@@ -1201,15 +1201,15 @@ State 74
 
 State 75
 
-  104 FuncDef: DEF FuncType IDENT '(' ')' Block .
+  104 FuncDef: DEF FuncType IDENT '(' ')' Block •
 
     $default  reduce using rule 104 (FuncDef)
 
 
 State 76
 
-  107 FuncFParam: BType IDENT .
-  108           | BType IDENT . '[' ']' FuncFParamIndexList
+  107 FuncFParam: BType IDENT •
+  108           | BType IDENT • '[' ']' FuncFParamIndexList
 
     '['  shift, and go to state 104
 
@@ -1218,7 +1218,7 @@ State 76
 
 State 77
 
-  106 FuncFParamList: FuncFParamList ',' . FuncFParam
+  106 FuncFParamList: FuncFParamList ',' • FuncFParam
 
     INT    shift, and go to state 2
     FLOAT  shift, and go to state 3
@@ -1230,7 +1230,7 @@ State 77
 
 State 78
 
-  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList ')' . Block
+  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList ')' • Block
 
     '{'  shift, and go to state 74
 
@@ -1239,7 +1239,7 @@ State 78
 
 State 79
 
-   54 IndexList: '[' . Exp ']'
+   54 IndexList: '[' • Exp ']'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1267,8 +1267,8 @@ State 79
 
 State 80
 
-   67 UnaryExp: IDENT '(' . FuncRParamList ')'
-   68         | IDENT '(' . ')'
+   67 UnaryExp: IDENT '(' • FuncRParamList ')'
+   68         | IDENT '(' • ')'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1298,8 +1298,8 @@ State 80
 
 State 81
 
-   52 LVal: IDENT IndexList .
-   55 IndexList: IndexList . '[' Exp ']'
+   52 LVal: IDENT IndexList •
+   55 IndexList: IndexList • '[' Exp ']'
 
     '['  shift, and go to state 112
 
@@ -1308,22 +1308,22 @@ State 81
 
 State 82
 
-   26 VarInitVal: '{' '}' .
+   26 VarInitVal: '{' '}' •
 
     $default  reduce using rule 26 (VarInitVal)
 
 
 State 83
 
-   28 VarInitValList: VarInitVal .
+   28 VarInitValList: VarInitVal •
 
     $default  reduce using rule 28 (VarInitValList)
 
 
 State 84
 
-   25 VarInitVal: '{' VarInitValList . '}'
-   27 VarInitValList: VarInitValList . ',' VarInitVal
+   25 VarInitVal: '{' VarInitValList • '}'
+   27 VarInitValList: VarInitValList • ',' VarInitVal
 
     ','  shift, and go to state 113
     '}'  shift, and go to state 114
@@ -1331,8 +1331,8 @@ State 84
 
 State 85
 
-   82 AddExp: AddExp . AddOp MulExp
-   86 RelExp: AddExp .
+   82 AddExp: AddExp • AddOp MulExp
+   86 RelExp: AddExp •
 
     '+'  shift, and go to state 95
     '-'  shift, and go to state 96
@@ -1344,8 +1344,8 @@ State 85
 
 State 86
 
-   85 RelExp: RelExp . RelOp AddExp
-   91 EqExp: RelExp .
+   85 RelExp: RelExp • RelOp AddExp
+   91 EqExp: RelExp •
 
     LEEQ  shift, and go to state 115
     GEEQ  shift, and go to state 116
@@ -1359,8 +1359,8 @@ State 86
 
 State 87
 
-   92 EqExp: EqExp . EqOp RelExp
-   95 LAndExp: EqExp .
+   92 EqExp: EqExp • EqOp RelExp
+   95 LAndExp: EqExp •
 
     EQ    shift, and go to state 120
     UNEQ  shift, and go to state 121
@@ -1372,8 +1372,8 @@ State 87
 
 State 88
 
-   96 LAndExp: LAndExp . LAndOp EqExp
-   98 LOrExp: LAndExp .
+   96 LAndExp: LAndExp • LAndOp EqExp
+   98 LOrExp: LAndExp •
 
     AND  shift, and go to state 123
 
@@ -1384,8 +1384,8 @@ State 88
 
 State 89
 
-   56 PrimaryExp: '(' LOrExp . ')'
-   99 LOrExp: LOrExp . LOrOp LAndExp
+   56 PrimaryExp: '(' LOrExp • ')'
+   99 LOrExp: LOrExp • LOrOp LAndExp
 
     OR   shift, and go to state 125
     ')'  shift, and go to state 126
@@ -1395,35 +1395,35 @@ State 89
 
 State 90
 
-   69 UnaryExp: UnaryOp UnaryExp .
+   69 UnaryExp: UnaryOp UnaryExp •
 
     $default  reduce using rule 69 (UnaryExp)
 
 
 State 91
 
-   78 MulOp: '*' .
+   78 MulOp: '*' •
 
     $default  reduce using rule 78 (MulOp)
 
 
 State 92
 
-   79 MulOp: '/' .
+   79 MulOp: '/' •
 
     $default  reduce using rule 79 (MulOp)
 
 
 State 93
 
-   80 MulOp: '%' .
+   80 MulOp: '%' •
 
     $default  reduce using rule 80 (MulOp)
 
 
 State 94
 
-   77 MulExp: MulExp MulOp . UnaryExp
+   77 MulExp: MulExp MulOp • UnaryExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1448,21 +1448,21 @@ State 94
 
 State 95
 
-   83 AddOp: '+' .
+   83 AddOp: '+' •
 
     $default  reduce using rule 83 (AddOp)
 
 
 State 96
 
-   84 AddOp: '-' .
+   84 AddOp: '-' •
 
     $default  reduce using rule 84 (AddOp)
 
 
 State 97
 
-   82 AddExp: AddExp AddOp . MulExp
+   82 AddExp: AddExp AddOp • MulExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1488,29 +1488,29 @@ State 97
 
 State 98
 
-   23 VarDefDimensionList: VarDefDimensionList '[' VarExp ']' .
+   23 VarDefDimensionList: VarDefDimensionList '[' VarExp ']' •
 
     $default  reduce using rule 23 (VarDefDimensionList)
 
 
 State 99
 
-   15 ConstInitVal: '{' '}' .
+   15 ConstInitVal: '{' '}' •
 
     $default  reduce using rule 15 (ConstInitVal)
 
 
 State 100
 
-   17 ConstInitValList: ConstInitVal .
+   17 ConstInitValList: ConstInitVal •
 
     $default  reduce using rule 17 (ConstInitValList)
 
 
 State 101
 
-   14 ConstInitVal: '{' ConstInitValList . '}'
-   16 ConstInitValList: ConstInitValList . ',' ConstInitVal
+   14 ConstInitVal: '{' ConstInitValList • '}'
+   16 ConstInitValList: ConstInitValList • ',' ConstInitVal
 
     ','  shift, and go to state 130
     '}'  shift, and go to state 131
@@ -1518,15 +1518,15 @@ State 101
 
 State 102
 
-   12 ConstDefDimensionList: ConstDefDimensionList '[' ConstExp ']' .
+   12 ConstDefDimensionList: ConstDefDimensionList '[' ConstExp ']' •
 
     $default  reduce using rule 12 (ConstDefDimensionList)
 
 
 State 103
 
-   33 Block: '{' BlockItemList . '}'
-   35 BlockItemList: BlockItemList . BlockItem
+   33 Block: '{' BlockItemList • '}'
+   35 BlockItemList: BlockItemList • BlockItem
 
     CONST         shift, and go to state 1
     INT           shift, and go to state 2
@@ -1575,36 +1575,36 @@ State 103
 
 State 104
 
-  108 FuncFParam: BType IDENT '[' . ']' FuncFParamIndexList
+  108 FuncFParam: BType IDENT '[' • ']' FuncFParamIndexList
 
     ']'  shift, and go to state 145
 
 
 State 105
 
-  106 FuncFParamList: FuncFParamList ',' FuncFParam .
+  106 FuncFParamList: FuncFParamList ',' FuncFParam •
 
     $default  reduce using rule 106 (FuncFParamList)
 
 
 State 106
 
-  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList ')' Block .
+  103 FuncDef: DEF FuncType IDENT '(' FuncFParamList ')' Block •
 
     $default  reduce using rule 103 (FuncDef)
 
 
 State 107
 
-   54 IndexList: '[' Exp . ']'
+   54 IndexList: '[' Exp • ']'
 
     ']'  shift, and go to state 146
 
 
 State 108
 
-   51 Exp: AddExp .
-   82 AddExp: AddExp . AddOp MulExp
+   51 Exp: AddExp •
+   82 AddExp: AddExp • AddOp MulExp
 
     '+'  shift, and go to state 95
     '-'  shift, and go to state 96
@@ -1616,22 +1616,22 @@ State 108
 
 State 109
 
-   68 UnaryExp: IDENT '(' ')' .
+   68 UnaryExp: IDENT '(' ')' •
 
     $default  reduce using rule 68 (UnaryExp)
 
 
 State 110
 
-   70 FuncRParamList: Exp .
+   70 FuncRParamList: Exp •
 
     $default  reduce using rule 70 (FuncRParamList)
 
 
 State 111
 
-   67 UnaryExp: IDENT '(' FuncRParamList . ')'
-   71 FuncRParamList: FuncRParamList . ',' Exp
+   67 UnaryExp: IDENT '(' FuncRParamList • ')'
+   71 FuncRParamList: FuncRParamList • ',' Exp
 
     ','  shift, and go to state 147
     ')'  shift, and go to state 148
@@ -1639,7 +1639,7 @@ State 111
 
 State 112
 
-   55 IndexList: IndexList '[' . Exp ']'
+   55 IndexList: IndexList '[' • Exp ']'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1667,7 +1667,7 @@ State 112
 
 State 113
 
-   27 VarInitValList: VarInitValList ',' . VarInitVal
+   27 VarInitValList: VarInitValList ',' • VarInitVal
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1697,42 +1697,42 @@ State 113
 
 State 114
 
-   25 VarInitVal: '{' VarInitValList '}' .
+   25 VarInitVal: '{' VarInitValList '}' •
 
     $default  reduce using rule 25 (VarInitVal)
 
 
 State 115
 
-   89 RelOp: LEEQ .
+   89 RelOp: LEEQ •
 
     $default  reduce using rule 89 (RelOp)
 
 
 State 116
 
-   90 RelOp: GEEQ .
+   90 RelOp: GEEQ •
 
     $default  reduce using rule 90 (RelOp)
 
 
 State 117
 
-   87 RelOp: '<' .
+   87 RelOp: '<' •
 
     $default  reduce using rule 87 (RelOp)
 
 
 State 118
 
-   88 RelOp: '>' .
+   88 RelOp: '>' •
 
     $default  reduce using rule 88 (RelOp)
 
 
 State 119
 
-   85 RelExp: RelExp RelOp . AddExp
+   85 RelExp: RelExp RelOp • AddExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1759,21 +1759,21 @@ State 119
 
 State 120
 
-   93 EqOp: EQ .
+   93 EqOp: EQ •
 
     $default  reduce using rule 93 (EqOp)
 
 
 State 121
 
-   94 EqOp: UNEQ .
+   94 EqOp: UNEQ •
 
     $default  reduce using rule 94 (EqOp)
 
 
 State 122
 
-   92 EqExp: EqExp EqOp . RelExp
+   92 EqExp: EqExp EqOp • RelExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1801,14 +1801,14 @@ State 122
 
 State 123
 
-   97 LAndOp: AND .
+   97 LAndOp: AND •
 
     $default  reduce using rule 97 (LAndOp)
 
 
 State 124
 
-   96 LAndExp: LAndExp LAndOp . EqExp
+   96 LAndExp: LAndExp LAndOp • EqExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1837,21 +1837,21 @@ State 124
 
 State 125
 
-  100 LOrOp: OR .
+  100 LOrOp: OR •
 
     $default  reduce using rule 100 (LOrOp)
 
 
 State 126
 
-   56 PrimaryExp: '(' LOrExp ')' .
+   56 PrimaryExp: '(' LOrExp ')' •
 
     $default  reduce using rule 56 (PrimaryExp)
 
 
 State 127
 
-   99 LOrExp: LOrExp LOrOp . LAndExp
+   99 LOrExp: LOrExp LOrOp • LAndExp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1881,15 +1881,15 @@ State 127
 
 State 128
 
-   77 MulExp: MulExp MulOp UnaryExp .
+   77 MulExp: MulExp MulOp UnaryExp •
 
     $default  reduce using rule 77 (MulExp)
 
 
 State 129
 
-   77 MulExp: MulExp . MulOp UnaryExp
-   82 AddExp: AddExp AddOp MulExp .
+   77 MulExp: MulExp • MulOp UnaryExp
+   82 AddExp: AddExp AddOp MulExp •
 
     '*'  shift, and go to state 91
     '/'  shift, and go to state 92
@@ -1902,7 +1902,7 @@ State 129
 
 State 130
 
-   16 ConstInitValList: ConstInitValList ',' . ConstInitVal
+   16 ConstInitValList: ConstInitValList ',' • ConstInitVal
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1932,42 +1932,42 @@ State 130
 
 State 131
 
-   14 ConstInitVal: '{' ConstInitValList '}' .
+   14 ConstInitVal: '{' ConstInitValList '}' •
 
     $default  reduce using rule 14 (ConstInitVal)
 
 
 State 132
 
-   42 Stmt: IF . '(' Cond ')' Stmt ElseChoice
+   42 Stmt: IF • '(' Cond ')' Stmt ElseChoice
 
     '('  shift, and go to state 156
 
 
 State 133
 
-   41 Stmt: WHILE . '(' Cond ')' Stmt
+   41 Stmt: WHILE • '(' Cond ')' Stmt
 
     '('  shift, and go to state 157
 
 
 State 134
 
-   40 Stmt: BREAK . ';'
+   40 Stmt: BREAK • ';'
 
     ';'  shift, and go to state 158
 
 
 State 135
 
-   39 Stmt: CONTINUE . ';'
+   39 Stmt: CONTINUE • ';'
 
     ';'  shift, and go to state 159
 
 
 State 136
 
-   38 Stmt: RETURN . ExpChoice ';'
+   38 Stmt: RETURN • ExpChoice ';'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -1998,57 +1998,57 @@ State 136
 
 State 137
 
-   33 Block: '{' BlockItemList '}' .
+   33 Block: '{' BlockItemList '}' •
 
     $default  reduce using rule 33 (Block)
 
 
 State 138
 
-   36 BlockItem: Decl .
+   36 BlockItem: Decl •
 
     $default  reduce using rule 36 (BlockItem)
 
 
 State 139
 
-   43 Stmt: Block .
+   43 Stmt: Block •
 
     $default  reduce using rule 43 (Stmt)
 
 
 State 140
 
-   35 BlockItemList: BlockItemList BlockItem .
+   35 BlockItemList: BlockItemList BlockItem •
 
     $default  reduce using rule 35 (BlockItemList)
 
 
 State 141
 
-   37 BlockItem: Stmt .
+   37 BlockItem: Stmt •
 
     $default  reduce using rule 37 (BlockItem)
 
 
 State 142
 
-   44 Stmt: ExpChoice . ';'
+   44 Stmt: ExpChoice • ';'
 
     ';'  shift, and go to state 161
 
 
 State 143
 
-   47 ExpChoice: Exp .
+   47 ExpChoice: Exp •
 
     $default  reduce using rule 47 (ExpChoice)
 
 
 State 144
 
-   45 Stmt: LVal . '=' Exp ';'
-   57 PrimaryExp: LVal .
+   45 Stmt: LVal • '=' Exp ';'
+   57 PrimaryExp: LVal •
 
     '='  shift, and go to state 162
 
@@ -2057,7 +2057,7 @@ State 144
 
 State 145
 
-  108 FuncFParam: BType IDENT '[' ']' . FuncFParamIndexList
+  108 FuncFParam: BType IDENT '[' ']' • FuncFParamIndexList
 
     $default  reduce using rule 109 (FuncFParamIndexList)
 
@@ -2066,14 +2066,14 @@ State 145
 
 State 146
 
-   54 IndexList: '[' Exp ']' .
+   54 IndexList: '[' Exp ']' •
 
     $default  reduce using rule 54 (IndexList)
 
 
 State 147
 
-   71 FuncRParamList: FuncRParamList ',' . Exp
+   71 FuncRParamList: FuncRParamList ',' • Exp
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -2101,29 +2101,29 @@ State 147
 
 State 148
 
-   67 UnaryExp: IDENT '(' FuncRParamList ')' .
+   67 UnaryExp: IDENT '(' FuncRParamList ')' •
 
     $default  reduce using rule 67 (UnaryExp)
 
 
 State 149
 
-   55 IndexList: IndexList '[' Exp . ']'
+   55 IndexList: IndexList '[' Exp • ']'
 
     ']'  shift, and go to state 165
 
 
 State 150
 
-   27 VarInitValList: VarInitValList ',' VarInitVal .
+   27 VarInitValList: VarInitValList ',' VarInitVal •
 
     $default  reduce using rule 27 (VarInitValList)
 
 
 State 151
 
-   82 AddExp: AddExp . AddOp MulExp
-   85 RelExp: RelExp RelOp AddExp .
+   82 AddExp: AddExp • AddOp MulExp
+   85 RelExp: RelExp RelOp AddExp •
 
     '+'  shift, and go to state 95
     '-'  shift, and go to state 96
@@ -2135,8 +2135,8 @@ State 151
 
 State 152
 
-   85 RelExp: RelExp . RelOp AddExp
-   92 EqExp: EqExp EqOp RelExp .
+   85 RelExp: RelExp • RelOp AddExp
+   92 EqExp: EqExp EqOp RelExp •
 
     LEEQ  shift, and go to state 115
     GEEQ  shift, and go to state 116
@@ -2150,8 +2150,8 @@ State 152
 
 State 153
 
-   92 EqExp: EqExp . EqOp RelExp
-   96 LAndExp: LAndExp LAndOp EqExp .
+   92 EqExp: EqExp • EqOp RelExp
+   96 LAndExp: LAndExp LAndOp EqExp •
 
     EQ    shift, and go to state 120
     UNEQ  shift, and go to state 121
@@ -2163,8 +2163,8 @@ State 153
 
 State 154
 
-   96 LAndExp: LAndExp . LAndOp EqExp
-   99 LOrExp: LOrExp LOrOp LAndExp .
+   96 LAndExp: LAndExp • LAndOp EqExp
+   99 LOrExp: LOrExp LOrOp LAndExp •
 
     AND  shift, and go to state 123
 
@@ -2175,14 +2175,14 @@ State 154
 
 State 155
 
-   16 ConstInitValList: ConstInitValList ',' ConstInitVal .
+   16 ConstInitValList: ConstInitValList ',' ConstInitVal •
 
     $default  reduce using rule 16 (ConstInitValList)
 
 
 State 156
 
-   42 Stmt: IF '(' . Cond ')' Stmt ElseChoice
+   42 Stmt: IF '(' • Cond ')' Stmt ElseChoice
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -2214,7 +2214,7 @@ State 156
 
 State 157
 
-   41 Stmt: WHILE '(' . Cond ')' Stmt
+   41 Stmt: WHILE '(' • Cond ')' Stmt
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -2246,35 +2246,35 @@ State 157
 
 State 158
 
-   40 Stmt: BREAK ';' .
+   40 Stmt: BREAK ';' •
 
     $default  reduce using rule 40 (Stmt)
 
 
 State 159
 
-   39 Stmt: CONTINUE ';' .
+   39 Stmt: CONTINUE ';' •
 
     $default  reduce using rule 39 (Stmt)
 
 
 State 160
 
-   38 Stmt: RETURN ExpChoice . ';'
+   38 Stmt: RETURN ExpChoice • ';'
 
     ';'  shift, and go to state 169
 
 
 State 161
 
-   44 Stmt: ExpChoice ';' .
+   44 Stmt: ExpChoice ';' •
 
     $default  reduce using rule 44 (Stmt)
 
 
 State 162
 
-   45 Stmt: LVal '=' . Exp ';'
+   45 Stmt: LVal '=' • Exp ';'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -2302,8 +2302,8 @@ State 162
 
 State 163
 
-  108 FuncFParam: BType IDENT '[' ']' FuncFParamIndexList .
-  110 FuncFParamIndexList: FuncFParamIndexList . '[' Exp ']'
+  108 FuncFParam: BType IDENT '[' ']' FuncFParamIndexList •
+  110 FuncFParamIndexList: FuncFParamIndexList • '[' Exp ']'
 
     '['  shift, and go to state 171
 
@@ -2312,29 +2312,29 @@ State 163
 
 State 164
 
-   71 FuncRParamList: FuncRParamList ',' Exp .
+   71 FuncRParamList: FuncRParamList ',' Exp •
 
     $default  reduce using rule 71 (FuncRParamList)
 
 
 State 165
 
-   55 IndexList: IndexList '[' Exp ']' .
+   55 IndexList: IndexList '[' Exp ']' •
 
     $default  reduce using rule 55 (IndexList)
 
 
 State 166
 
-   42 Stmt: IF '(' Cond . ')' Stmt ElseChoice
+   42 Stmt: IF '(' Cond • ')' Stmt ElseChoice
 
     ')'  shift, and go to state 172
 
 
 State 167
 
-   48 Cond: LOrExp .
-   99 LOrExp: LOrExp . LOrOp LAndExp
+   48 Cond: LOrExp •
+   99 LOrExp: LOrExp • LOrOp LAndExp
 
     OR  shift, and go to state 125
 
@@ -2345,28 +2345,28 @@ State 167
 
 State 168
 
-   41 Stmt: WHILE '(' Cond . ')' Stmt
+   41 Stmt: WHILE '(' Cond • ')' Stmt
 
     ')'  shift, and go to state 173
 
 
 State 169
 
-   38 Stmt: RETURN ExpChoice ';' .
+   38 Stmt: RETURN ExpChoice ';' •
 
     $default  reduce using rule 38 (Stmt)
 
 
 State 170
 
-   45 Stmt: LVal '=' Exp . ';'
+   45 Stmt: LVal '=' Exp • ';'
 
     ';'  shift, and go to state 174
 
 
 State 171
 
-  110 FuncFParamIndexList: FuncFParamIndexList '[' . Exp ']'
+  110 FuncFParamIndexList: FuncFParamIndexList '[' • Exp ']'
 
     IDENT         shift, and go to state 45
     INT_CONST     shift, and go to state 46
@@ -2394,7 +2394,7 @@ State 171
 
 State 172
 
-   42 Stmt: IF '(' Cond ')' . Stmt ElseChoice
+   42 Stmt: IF '(' Cond ')' • Stmt ElseChoice
 
     IF            shift, and go to state 132
     WHILE         shift, and go to state 133
@@ -2433,7 +2433,7 @@ State 172
 
 State 173
 
-   41 Stmt: WHILE '(' Cond ')' . Stmt
+   41 Stmt: WHILE '(' Cond ')' • Stmt
 
     IF            shift, and go to state 132
     WHILE         shift, and go to state 133
@@ -2472,21 +2472,21 @@ State 173
 
 State 174
 
-   45 Stmt: LVal '=' Exp ';' .
+   45 Stmt: LVal '=' Exp ';' •
 
     $default  reduce using rule 45 (Stmt)
 
 
 State 175
 
-  110 FuncFParamIndexList: FuncFParamIndexList '[' Exp . ']'
+  110 FuncFParamIndexList: FuncFParamIndexList '[' Exp • ']'
 
     ']'  shift, and go to state 178
 
 
 State 176
 
-   42 Stmt: IF '(' Cond ')' Stmt . ElseChoice
+   42 Stmt: IF '(' Cond ')' Stmt • ElseChoice
 
     ELSE  shift, and go to state 179
 
@@ -2498,21 +2498,21 @@ State 176
 
 State 177
 
-   41 Stmt: WHILE '(' Cond ')' Stmt .
+   41 Stmt: WHILE '(' Cond ')' Stmt •
 
     $default  reduce using rule 41 (Stmt)
 
 
 State 178
 
-  110 FuncFParamIndexList: FuncFParamIndexList '[' Exp ']' .
+  110 FuncFParamIndexList: FuncFParamIndexList '[' Exp ']' •
 
     $default  reduce using rule 110 (FuncFParamIndexList)
 
 
 State 179
 
-   50 ElseChoice: ELSE . Stmt
+   50 ElseChoice: ELSE • Stmt
 
     IF            shift, and go to state 132
     WHILE         shift, and go to state 133
@@ -2551,13 +2551,13 @@ State 179
 
 State 180
 
-   42 Stmt: IF '(' Cond ')' Stmt ElseChoice .
+   42 Stmt: IF '(' Cond ')' Stmt ElseChoice •
 
     $default  reduce using rule 42 (Stmt)
 
 
 State 181
 
-   50 ElseChoice: ELSE Stmt .
+   50 ElseChoice: ELSE Stmt •
 
     $default  reduce using rule 50 (ElseChoice)
