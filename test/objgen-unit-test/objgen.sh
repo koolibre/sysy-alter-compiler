@@ -1,7 +1,7 @@
 #!bin/bash
 
-in_file="input.txt"
+in_file="test1.c"
 
 ./objgen-unit-test.out < ${in_file}
-clang output.o -o test
-./test
+clang output.o -o qs
+./qs
