@@ -1,0 +1,124 @@
+int arr[10000];
+int len;
+def void printNL(){
+    char nl = 10;
+    printf("%c",nl);
+    return;
+}
+
+def void quickSort(int low_, int high_)
+{
+    int first = low_;
+    int last  = high_;
+    int low = low_;
+    int high = high_;
+    int key = arr[first];
+    int temp;
+    if(low >= high){
+        return;
+    }
+    int i = 0;
+    while(i<len){
+        temp = arr[i];
+        printf("<%d>",temp);
+        i = i+1;
+    }
+    printf("  ->  ");
+    
+    while(first < last)
+    {
+        temp = arr[last];
+        int control = 1;
+        while(control != 0)
+        {
+            if (first < last){
+                if (temp >= key){
+            	    last = last-1;
+                    temp = arr[last];
+		}
+                else{
+                    control = 0;
+		}
+            }
+            else{
+	        control = 0;	
+	    }
+        }
+        temp = arr[last];
+        arr[first] = temp;
+
+        temp = arr[first];
+        
+        control = 1;
+        while(control != 0)
+        {
+            if (first < last){
+                if (temp <= key){
+            	    first = first+1;
+                    temp = arr[first];
+		}
+                else{
+                    control = 0;
+		}
+            }
+            else{
+	        control = 0;	
+	    }
+        }
+
+        temp = arr[first];
+        arr[last] = temp;
+    }
+    arr[first] = key;
+
+
+    i = 0;
+    while(i<len){
+        temp = arr[i];
+        printf("<%d>",temp);
+        i = i+1;
+    }
+    printNL();
+
+    temp = first-1;
+    quickSort(low, temp);
+    temp = first+1;
+    quickSort(temp, high);
+    return;
+}
+
+def void main()
+{
+    int i = 0;
+
+    int temp;
+    scanf("%d",&len);
+    while(i<len){
+        int x = 0;
+        scanf("%d",&x);
+        arr[i] = x;
+        i = i+1;
+    }
+
+    i = 0;
+    while(i<len){
+        temp = arr[i];
+        printf("<%d>",temp);
+        i = i+1;
+    }
+    printNL();
+
+    temp = len-1;
+    quickSort(0, temp);
+
+    i = 0;
+    while(i<len){
+        temp = arr[i];
+        printf("<%d>",temp);
+        i = i+1;
+    }
+    printNL();
+
+    return;
+}
+

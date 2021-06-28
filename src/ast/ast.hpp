@@ -7,7 +7,7 @@
   #undef NDEBUG
 #endif
 
-#include <cassert>            // use assert()
+#include <cassert>            // use assYrt()
 
 #include <iostream>           // use std::cout
 #include <string>             // use std::string
@@ -17,51 +17,51 @@
 // node type
 enum class NodeType {
     // root node
-    ROOT,
+    ROOT,//0
     // declaration and definition node
-    VAR_DECL, CONST_DECL, FUNC_DEF,
+    VAR_DECL, CONST_DECL, FUNC_DEF,//1,2,3
     // block node
-    BLOCK,
+    BLOCK,//4
     // statement node
-    ASSIGN_STMT, IF_STMT, WHILE_STMT, BREAK_STMT,
-    CONTINUE_STMT, RETURN_STMT,
+    ASSIGN_STMT, IF_STMT, WHILE_STMT, BREAK_STMT,//5 6 7 8
+    CONTINUE_STMT, RETURN_STMT,//9 10
     // expression node
-    FUNC_CALL_EXP, BINARY_EXP, UNARY_EXP,
-    LVAL_PRIMARY_EXP, INT_PRIMARY_EXP, FLOAT_PRIMARY_EXP,
-    CHAR_PRIMARY_EXP, STRING_PRIMARY_EXP,
+    FUNC_CALL_EXP, BINARY_EXP, UNARY_EXP,//11 12 13
+    LVAL_PRIMARY_EXP, INT_PRIMARY_EXP, FLOAT_PRIMARY_EXP, // 14 15 16
+    CHAR_PRIMARY_EXP, STRING_PRIMARY_EXP,//17 18
     // initialization value node
-    INIT_VAL,
+    INIT_VAL,// 19
     // identifier node
-    IDENT,
+    IDENT,//20
     // for error check
-    ERROR,
+    ERROR,//21
     // for I/O
-    READ, WRITE
+    READ, WRITE//22 23
 };
 
 // unary operation type
 enum class UnaryOpType {
     // + - !
-    POSITIVE, NEGATIVE, NOT
+    POSITIVE, NEGATIVE, NOT, GETPTR
 };
 
 // binary operation type
 enum class BinaryOpType {
     // multiplication
-    MUL, DIV, MOD,
+    MUL, DIV, MOD,//0 1 2
     // addition
-    ADD, SUB,
+    ADD, SUB,//3 4
     // relation
-    LE, GE, LEEQ, GEEQ,
+    LE, GE, LEEQ, GEEQ,//5 6 7 8
     // equation
-    EQ, UNEQ,
+    EQ, UNEQ,//9 10
     // logic
-    AND, OR
+    AND, OR// 11 12
 };
 
 // basic type
 enum class BasicType {
-  INT, FLOAT, CHAR, VOID
+  INT, FLOAT, CHAR, VOID, UNKNOWN
 };
 
 // all the nodes below are use as pure data storage,
@@ -76,20 +76,30 @@ class NodeVisitor;
 struct Node {
  public:
   // ctor
-  Node(NodeType node_type) : node_type_(node_type) {}
+  Node(NodeType node_type, int line_no) : node_type_(node_type),line_no(line_no) {}
   // dtor
-  virtual ~Node() {}
+  virtual ~Node() {
+    for (auto itr : error_list_)
+      delete itr;
+  }
   // other
   inline bool CheckNodeType(NodeType node_type) const {
     return node_type_ == node_type;
   }
   virtual void Accept(NodeVisitor *visitor) = 0;
+  void AddError(Node*);
+  inline bool CheckError() {
+    return !(error_list_.empty());
+  }
 #ifdef DEBUG
 #ifdef AST_DEBUG
   virtual void Print(int indentation) const = 0;
 #endif
 #endif
+public:
   // member
+  int line_no;
+  std::vector<Node*> error_list_;
   NodeType node_type_;
 };
 
@@ -98,8 +108,8 @@ struct Node {
 struct RootNode : public Node {
  public:
   // ctor
-  RootNode() :
-      Node(NodeType::ROOT) {}
+  RootNode(int line_no) :
+      Node(NodeType::ROOT, line_no) {}
       // default ctor: decl_funcdef_list_(0)
   // dtor
   ~RootNode() {
@@ -141,8 +151,8 @@ extern BasicType declnode_tmp_basic_type;
 struct DeclNode : public Node {
  public:
   // ctor
-  DeclNode(NodeType node_type) :
-      Node(node_type),
+  DeclNode(NodeType node_type, int line_no) :
+      Node(node_type,line_no),
       basic_type_(BasicType::VOID) {}
       // create empty list
   // dtor
@@ -178,8 +188,8 @@ struct DeclNode : public Node {
 struct IdentNode : public Node {
  public:
   // ctor
-  IdentNode(const std::string &ident) :
-      Node(NodeType::IDENT),
+  IdentNode(const std::string &ident, int line_no) :
+      Node(NodeType::IDENT, line_no),
       ident_(ident) {}
   // dtor : default
   // other
@@ -207,8 +217,8 @@ extern std::vector<Node*> funcdefnode_tmp_fparam_index_list;
 struct FuncDefNode : public Node {
  public:
   // ctor
-  FuncDefNode(BasicType func_type) :
-      Node(NodeType::FUNC_DEF),
+  FuncDefNode(BasicType func_type, int line_no) :
+      Node(NodeType::FUNC_DEF, line_no),
       func_type_(func_type),
       block_(nullptr) {}
   // dtor
@@ -229,6 +239,10 @@ struct FuncDefNode : public Node {
     block_ = block;
   }
   void AddParam(IdentNode *ident);
+  BasicType GetType()
+  {
+    return func_type_;
+  }
   void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
@@ -250,8 +264,8 @@ extern FuncDefNode* funcdefnode_tmp_func_def_node;
 struct BlockNode : public Node {
  public:
   // ctor
-  BlockNode() :
-      Node(NodeType::BLOCK) {}
+  BlockNode(int line_no) :
+      Node(NodeType::BLOCK, line_no) {}
   // dtor
   ~BlockNode() {
     for (auto itr : decl_stmt_list_)
@@ -274,14 +288,44 @@ struct BlockNode : public Node {
 
 };
 
+// ErrorNode
+// support error check
+struct ErrorNode : public Node {
+ public:
+  //ctor
+  ErrorNode(std::string err_msg, int line_no) :
+      Node(NodeType::ERROR, line_no), err_msg(err_msg) {}
+  // dtor
+  ~ErrorNode() {
+    for (auto itr : sub_stmt_list_)
+      delete itr;
+  }
+  // other
+  inline void AddNode(Node *new_node) {
+    // TODO(kolibre) : error check
+    assert(new_node != nullptr);
+	  sub_stmt_list_.push_back(new_node);
+  }
+  void Accept(NodeVisitor *visitor) override;
+#ifdef DEBUG
+#ifdef AST_DEBUG
+  void Print(int indentation) const override;
+#endif
+#endif
+ public:
+  std::string err_msg;
+  std::list<Node*> sub_stmt_list_;
+
+};
+
 // InitValNode
 // initialization value for declaration
 // pure expression or initialization list "{ }"
 struct InitValNode : public Node {
  public:
   // ctor
-  InitValNode() :
-      Node(NodeType::INIT_VAL) {}
+  InitValNode(int line_no) :
+      Node(NodeType::INIT_VAL, line_no) {}
   // dtor
   ~InitValNode() {
     for (auto itr : init_val_list_)
@@ -307,8 +351,8 @@ struct InitValNode : public Node {
 struct AssignStmtNode : public Node {
  public:
   // ctor
-  AssignStmtNode(Node *lval, Node *rexp) :
-      Node(NodeType::ASSIGN_STMT),
+  AssignStmtNode(Node *lval, Node *rexp, int line_no) :
+      Node(NodeType::ASSIGN_STMT, line_no),
       lval_(lval),
       rexp_(rexp) {}
   // dtor
@@ -334,8 +378,9 @@ struct IfStmtNode : public Node {
   IfStmtNode(
       Node *cond,
       Node *if_stmt,
-      Node *else_stmt) :
-      Node(NodeType::IF_STMT),
+      Node *else_stmt,
+      int line_no) :
+      Node(NodeType::IF_STMT, line_no),
       cond_(cond),
       if_stmt_(if_stmt),
       else_stmt_(else_stmt) {}  
@@ -360,8 +405,8 @@ struct IfStmtNode : public Node {
 struct WhileStmtNode : public Node {
  public:
   // ctor
-  WhileStmtNode(Node *cond, Node *stmt) :
-      Node(NodeType::WHILE_STMT),
+  WhileStmtNode(Node *cond, Node *stmt, int line_no) :
+      Node(NodeType::WHILE_STMT,line_no),
       cond_(cond),
       stmt_(stmt) {}
   // dtor
@@ -384,8 +429,8 @@ struct WhileStmtNode : public Node {
 struct BreakStmtNode : public Node {
  public:
   // ctor
-  BreakStmtNode() :
-      Node(NodeType::BREAK_STMT) {}
+  BreakStmtNode(int line_no) :
+      Node(NodeType::BREAK_STMT, line_no) {}
   // default dtor
   // other
   void Accept(NodeVisitor *visitor) override;
@@ -400,8 +445,8 @@ struct BreakStmtNode : public Node {
 struct ContinueStmtNode : public Node {
  public:
   // ctor
-  ContinueStmtNode() :
-      Node(NodeType::CONTINUE_STMT) {}
+  ContinueStmtNode(int line_no) :
+      Node(NodeType::CONTINUE_STMT, line_no) {}
   // default dtor
   // other
   void Accept(NodeVisitor *visitor) override;
@@ -416,8 +461,8 @@ struct ContinueStmtNode : public Node {
 struct ReturnStmtNode : public Node {
  public:
   // ctor
-  ReturnStmtNode(Node *exp) :
-      Node(NodeType::RETURN_STMT),
+  ReturnStmtNode(Node *exp, int line_no) :
+      Node(NodeType::RETURN_STMT, line_no),
       exp_(exp) {}
   // default dtor
   // other
@@ -435,8 +480,8 @@ struct ReturnStmtNode : public Node {
 struct FuncCallExpNode : public Node {
  public:
   // ctor
-  FuncCallExpNode() :
-      Node(NodeType::FUNC_CALL_EXP) {}
+  FuncCallExpNode(int line_no) :
+      Node(NodeType::FUNC_CALL_EXP,line_no) {}
   // dtor
   ~FuncCallExpNode() {
     for (auto itr : rparam_array_)
@@ -469,8 +514,8 @@ struct FuncCallExpNode : public Node {
 struct BinaryExpNode : public Node {
  public:
   // ctor
-  BinaryExpNode(BinaryOpType binary_op_type) :
-      Node(NodeType::BINARY_EXP),
+  BinaryExpNode(BinaryOpType binary_op_type,int line_no) :
+      Node(NodeType::BINARY_EXP,line_no),
       binary_op_type_(binary_op_type),
       lexp_(nullptr),
       rexp_(nullptr) {}
@@ -506,8 +551,8 @@ struct BinaryExpNode : public Node {
 class UnaryExpNode : public Node {
  public:
   // ctor
-  UnaryExpNode(UnaryOpType unary_op_type) :
-      Node(NodeType::UNARY_EXP),
+  UnaryExpNode(UnaryOpType unary_op_type,int line_no) :
+      Node(NodeType::UNARY_EXP,line_no),
       exp_(nullptr),
       unary_op_type_(unary_op_type) {}
   // dtor
@@ -538,8 +583,8 @@ extern std::vector<Node*> lvalprimaryexpnode_tmp_index_array;
 class LValPrimaryExpNode : public Node {
  public:
   // ctor
-  LValPrimaryExpNode(IdentNode *ident) :
-      Node(NodeType::LVAL_PRIMARY_EXP),
+  LValPrimaryExpNode(IdentNode *ident, int line_no) :
+      Node(NodeType::LVAL_PRIMARY_EXP,line_no),
       ident_(ident->GetIdent()) {}
   // dtor
   ~LValPrimaryExpNode() {
@@ -570,21 +615,21 @@ class LValPrimaryExpNode : public Node {
 struct ValuePrimaryExpNode : public Node {
  public:
   // ctor
-  ValuePrimaryExpNode(int int_value) :
-      Node(NodeType::INT_PRIMARY_EXP),
+  ValuePrimaryExpNode(int int_value,int line_no) :
+      Node(NodeType::INT_PRIMARY_EXP,line_no),
       int_value_(int_value) {}
-  ValuePrimaryExpNode(float float_value) :
-      Node(NodeType::FLOAT_PRIMARY_EXP),
+  ValuePrimaryExpNode(float float_value,int line_no) :
+      Node(NodeType::FLOAT_PRIMARY_EXP,line_no),
       float_value_(float_value) {}
-  ValuePrimaryExpNode(char char_value) :
-      Node(NodeType::CHAR_PRIMARY_EXP),
+  ValuePrimaryExpNode(char char_value,int line_no) :
+      Node(NodeType::CHAR_PRIMARY_EXP,line_no),
       char_value_(char_value) {}
-  ValuePrimaryExpNode(std::string &string_value) :
-      Node(NodeType::STRING_PRIMARY_EXP),
+  ValuePrimaryExpNode(std::string &string_value,int line_no) :
+      Node(NodeType::STRING_PRIMARY_EXP,line_no),
       string_value_(string_value) {}  
   // default dtor
   // other
-  
+void Accept(NodeVisitor *visitor) override;
 #ifdef DEBUG
 #ifdef AST_DEBUG
   void Print(int indentation) const override {
@@ -624,13 +669,5 @@ struct ValuePrimaryExpNode : public Node {
   char char_value_;
   float float_value_;
   std::string string_value_;
-};
-
-// ErrorNode
-// support error check
-struct ErrorNode : public Node {
- public:
-  ErrorNode() :
-      Node(NodeType::ERROR) {}
 };
 #endif

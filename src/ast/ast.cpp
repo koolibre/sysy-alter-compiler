@@ -22,7 +22,7 @@ FuncDefNode* funcdefnode_tmp_func_def_node = nullptr;
 // LValPrimaryExpNode
 std::vector<Node*> lvalprimaryexpnode_tmp_index_array; // empty by default
 // RootNode
-RootNode *root = new RootNode;
+RootNode *root = new RootNode(0);
 
 // all nodes' Print()
 #ifdef DEBUG
@@ -136,6 +136,10 @@ auto PrintUnaryOp = [](UnaryOpType unary_op_type) {
       std::cout << "!" << std::endl;
       break;
     }
+    case UnaryOpType::GETPTR : {
+      std::cout << "&" << std::endl;
+      break;
+    }
     default : {
       assert(0);
     }
@@ -237,6 +241,20 @@ void BlockNode::Print(int indentation) const {
     assert(itr != nullptr);
     itr->Print(indentation+1);
   }
+}
+
+void ErrorNode::Print(int indentation) const {
+  // print node name
+  PrintIndentation(indentation);
+  std::cout << "[ErrorNode]" << std::endl;
+  // print all component
+  for (auto itr : sub_stmt_list_) {
+    assert(itr != nullptr);
+    itr->Print(indentation+1);
+  }
+}
+void ErrorNode::Accept(NodeVisitor *visitor) {
+  visitor->VisitImplicit(this);
 }
 
 void InitValNode::Print(int indentation) const {
@@ -395,7 +413,7 @@ void LValPrimaryExpNode::Print(int indentation) const {
 
 // RootNode
 void RootNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // DeclNode
@@ -414,12 +432,12 @@ void DeclNode::AddDecl() {
   init_val_list_.push_back(declnode_tmp_init_val);
 }
 void DeclNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // IdentNode
 void IdentNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // FuncDefNode
@@ -427,6 +445,7 @@ void IdentNode::Accept(NodeVisitor *visitor) {
 void FuncDefNode::AddParam(IdentNode *ident) {
   // TODO(kolibre) : error check
   assert(ident != nullptr);
+  assert(this!=nullptr);
   fparam_ident_array_.push_back(ident->GetIdent());
   std::list<Node*> *new_list = new std::list<Node*>;
   assert(new_list != nullptr);
@@ -444,57 +463,62 @@ void FuncDefNode::Accept(NodeVisitor *visitor) {
 
 // BlockNode
 void BlockNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // InitValNode
 void InitValNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // AssignStmtNode
 void AssignStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // IfStmtNode
 void IfStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // WhileStmtNode
 void WhileStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // BreakStmtNode
 void BreakStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ContinueStmtNode
 void ContinueStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ReturnStmtNode
 void ReturnStmtNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // FuncCallExpNode
 void FuncCallExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // BinaryExpNode
 void BinaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // UnaryExpNode
 void UnaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
+}
+
+void Node::AddError(Node* error){
+  assert(error!=nullptr);
+  error_list_.push_back(error);
 }
 
 // LvalPrimaryExpNode
@@ -504,10 +528,10 @@ void LValPrimaryExpNode::AddLVal() {
     index_list_.push_back(itr);
 }
 void LValPrimaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }
 
 // ValuePrimaryExpNode
 void ValuePrimaryExpNode::Accept(NodeVisitor *visitor) {
-  visitor->Visit(this);
+  visitor->VisitImplicit(this);
 }

@@ -1,0 +1,4 @@
+def void printf(){}
+def int main() {
+    printf("hello,world");
+}

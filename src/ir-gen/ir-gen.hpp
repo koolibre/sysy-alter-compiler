@@ -7,6 +7,12 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar.h>
+#include <llvm/Transforms/Scalar/GVN.h>
+#include <llvm/Transforms/Utils.h>
+#include <sstream>
 
 #include "ast/ast.hpp"
 #include "ir-gen/type-system.hpp"
@@ -16,7 +22,7 @@
 class NodeVisitor {
  public:
   // default ctor
-  // virtual dtor
+  // virtual dtor 
   virtual ~NodeVisitor() {}
   // other
   void Visit(Node *node) {
@@ -50,9 +56,24 @@ class IrGenVisitor : public NodeVisitor {
     builder_(llvm_context_),
     type_system_(llvm_context_),
     current_type_(TypeCheckBasicType::VOID),
-    symbol_table_(llvm_context_) {}
+    symbol_table_(llvm_context_) {
+      module_ = new llvm::Module("test.ll", llvm_context);
+      fpm_ = std::make_unique<llvm::legacy::FunctionPassManager>(module_);
+      fpm_->add(llvm::createPromoteMemoryToRegisterPass());
+      // Do simple "peephole" optimizations and bit-twiddling optzns.
+      // fpm_->add(llvm::createInstructionCombiningPass());
+      // Reassociate expressions.
+      // fpm_->add(llvm::createReassociatePass());
+      // Eliminate Common SubExpressions.
+      // fpm_->add(llvm::createGVNPass());
+      // Simplify the control flow graph (deleting unreachable blocks, etc).
+      //fpm_->add(llvm::createCFGSimplificationPass());
+
+      fpm_->doInitialization();
+    }
   // default dtor
   // other
+  llvm::Module * GetModule();
   void VisitImplicit(RootNode *root_node) override;                         // finish
   void VisitImplicit(DeclNode *decl_node) override;
   void VisitImplicit(IdentNode *ident_node) override;                       // finish
@@ -77,14 +98,20 @@ class IrGenVisitor : public NodeVisitor {
   // info-component for ir generation
   llvm::LLVMContext &llvm_context_;
   llvm::IRBuilder<> builder_;
-  std::unique_ptr<llvm::Module> module_;
+  //std::unique_ptr<llvm::Module> module_;
+  llvm::Module *module_;
   SymbolTable symbol_table_;
   TypeSystem type_system_;
+  std::unique_ptr<llvm::legacy::FunctionPassManager> fpm_;
   // retern value
   bool current_if_const_;
+  double current_const_value_;
   TypeCheckType current_type_;
   llvm::Value *current_value_;
+  llvm::Value *current_arr_tgt_;
   bool current_if_error_;
+  bool current_if_array_ref_;
+  std::stringstream record_param_name_;
   // record for "break" and "continue"
   std::list<llvm::BasicBlock*> current_cond_block_list_;
   std::list<llvm::BasicBlock*> current_cont_block_list_;

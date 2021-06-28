@@ -61,6 +61,7 @@ llvm::Value* TypeSystem::Cast(llvm::Value *from, llvm::Type *to_type, llvm::Basi
   assert(to_type != nullptr);
   assert(insert_block != nullptr);
   llvm::Type *from_type = from->getType();
+  
   // same type
   if (from_type == to_type)
     return from;

@@ -36,12 +36,14 @@ class SymbolTable{
   bool IfExistFunction(std::string &name) const;
   void AddFunction(std::string &name, llvm::Function *function);
   llvm::Function* GetFunction(std::string &name) const;
+  llvm::Function* GetPreDefinedFunction(std::string &name) const;
+  bool IsInGlobalScope();
 
  private:
   // member
   llvm::LLVMContext &llvm_context_;
   std::list<Scope> scope_stack_;
   std::map<std::string, llvm::Function*> function_;
-  llvm::Function *fprintf_, *fscanf_, *main_;
+  llvm::Function *printf_, *scanf_, *main_;
 };
 #endif
