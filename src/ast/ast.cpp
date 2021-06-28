@@ -22,7 +22,7 @@ FuncDefNode* funcdefnode_tmp_func_def_node = nullptr;
 // LValPrimaryExpNode
 std::vector<Node*> lvalprimaryexpnode_tmp_index_array; // empty by default
 // RootNode
-RootNode *root = new RootNode;
+RootNode *root = new RootNode(0);
 
 // all nodes' Print()
 #ifdef DEBUG
@@ -243,6 +243,20 @@ void BlockNode::Print(int indentation) const {
   }
 }
 
+void ErrorNode::Print(int indentation) const {
+  // print node name
+  PrintIndentation(indentation);
+  std::cout << "[ErrorNode]" << std::endl;
+  // print all component
+  for (auto itr : sub_stmt_list_) {
+    assert(itr != nullptr);
+    itr->Print(indentation+1);
+  }
+}
+void ErrorNode::Accept(NodeVisitor *visitor) {
+  visitor->VisitImplicit(this);
+}
+
 void InitValNode::Print(int indentation) const {
   // print node name
   PrintIndentation(indentation);
@@ -431,6 +445,7 @@ void IdentNode::Accept(NodeVisitor *visitor) {
 void FuncDefNode::AddParam(IdentNode *ident) {
   // TODO(kolibre) : error check
   assert(ident != nullptr);
+  assert(this!=nullptr);
   fparam_ident_array_.push_back(ident->GetIdent());
   std::list<Node*> *new_list = new std::list<Node*>;
   assert(new_list != nullptr);
@@ -499,6 +514,11 @@ void BinaryExpNode::Accept(NodeVisitor *visitor) {
 // UnaryExpNode
 void UnaryExpNode::Accept(NodeVisitor *visitor) {
   visitor->VisitImplicit(this);
+}
+
+void Node::AddError(Node* error){
+  assert(error!=nullptr);
+  error_list_.push_back(error);
 }
 
 // LvalPrimaryExpNode

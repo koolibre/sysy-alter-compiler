@@ -25,21 +25,6 @@ llvm::Module *IrGenVisitor::GetModule()
 void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
 {
   cout << "[DeclNode]" << endl;
-  // for (auto itr : decl_node->init_val_list_){
-  //   Visit(itr);
-  //   switch (decl_node->basic_type_) {
-  //     case (BasicType::INT) : {
-  //       TypeCheckType type(TypeCheckBasicType::INT);
-  //       symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), current_value_, type);
-  //       break;
-  //     }
-  //     case (BasicType::FLOAT) : {
-  //       TypeCheckType type(TypeCheckBasicType::FLOAT);
-  //       symbol_table_.AddLocalVariable(decl_node->ident_list_.front(), current_value_, type);
-  //       break;
-  //     }
-  //   }
-  // }
   auto iter_dim = decl_node->array_dimension_list_list_.begin();
   auto iter_id = decl_node->ident_list_.begin();
   auto iter_init = decl_node->init_val_list_.begin();
@@ -62,7 +47,7 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       is_array = true;
       // this block won't be executed if the decl isnot array, and thus the param_full_dims will be 1
       Visit(iter_param_dims);
-      llvm::Value *v_param_dim = current_value_;
+      // llvm::Value *v_param_dim = current_value_;
       cout << "b>-";
       // param_full_dims = 4;
       // param_dims.push_back(4);
@@ -82,11 +67,9 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       }
       else
       {
-        // ! v_param_dim is not actually a ConstantInt
+        // ! not constant
         // TODO: raise error
-        // here, there's 2 kinds of error:
-        //  1. the v_param_dim is a constant, but not int. eg. int a[3.1];
-        //  2. the v_param_dim is not a constant. eg. int a[random()];
+        cout << "non-constant value in array decl" << endl;
       }
     } //end of deciding dims
 
@@ -110,10 +93,10 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       param_type = llvm::Type::getInt8Ty(llvm_context_);
       break;
     }
-    default:
-    {
-      //TODO: raise error
-    }
+      // default:
+      // {
+      //   //TODO: raise error
+      // }
     }
     TypeCheckType *param_type_check_type = nullptr;
     llvm::Value *param_inst = nullptr;
@@ -124,12 +107,14 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       // llvm::Value *param_dim_Value = llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), param_full_dims, true);
       if (use_global)
       {
+        record_param_name_.str(std::string());
+        record_param_name_ << "global_arr_" << param_name;
         llvm::GlobalVariable *global_var_value = new GlobalVariable(/*Module=*/*module_,
                                                                     /*Type=*/param_arr_type,
                                                                     /*isConstant=*/false,
                                                                     /*Linkage=*/GlobalValue::CommonLinkage,
                                                                     /*Initializer=*/nullptr,
-                                                                    /*Name=*/"global_var");
+                                                                    /*Name=*/record_param_name_.str());
         global_var_value->setAlignment(llvm::MaybeAlign(2));
         llvm::Constant *init_val = nullptr;
         switch (basic_type)
@@ -156,7 +141,9 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       }
       else
       {
-        param_inst = builder_.CreateAlloca(param_arr_type, llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), 1, true), "decl_arr");
+        record_param_name_.str(std::string());
+        record_param_name_ << "decl_arr_" << param_name;
+        param_inst = builder_.CreateAlloca(param_arr_type, llvm::ConstantInt::get(Type::getInt32Ty(llvm_context_), 1, true), record_param_name_.str());
       }
       std::list<int> param_dims_list(param_dims.begin(), param_dims.end());
       switch (basic_type)
@@ -183,12 +170,14 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
     {
       if (use_global)
       {
+        record_param_name_.str(std::string());
+        record_param_name_ << "global_var_" << param_name;
         llvm::GlobalVariable *global_var_value = new GlobalVariable(/*Module=*/*module_,
                                                                     /*Type=*/param_type,
                                                                     /*isConstant=*/false,
                                                                     /*Linkage=*/GlobalValue::CommonLinkage,
                                                                     /*Initializer=*/nullptr,
-                                                                    /*Name=*/"global_var");
+                                                                    /*Name=*/record_param_name_.str());
         global_var_value->setAlignment(llvm::MaybeAlign(2));
 
         // if (*iter_init != nullptr and not(*iter_init)->CheckNodeType(NodeType::INIT_VAL))
@@ -225,7 +214,9 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       }
       else
       {
-        param_inst = builder_.CreateAlloca(param_type);
+        record_param_name_.str(std::string());
+        record_param_name_ << "decl_var_" << param_name;
+        param_inst = builder_.CreateAlloca(param_type, nullptr, record_param_name_.str());
       }
       // VOID and ERROR type shall not appear as the type of a declared var
       // // ? what is the different from **STRING** and CHAR_ARRAY type?
@@ -271,10 +262,44 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
         return; // ?
         // TODO: raise error
       }
+      TypeCheckBasicType ele_check_tcbt_type = TypeCheckBasicType::VOID;
+      switch (current_type_.basic_type_)
+      {
+      case TypeCheckBasicType::INT:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::INT;
+        break;
+      }
+      case TypeCheckBasicType::CHAR:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::CHAR;
+        break;
+      }
+      case TypeCheckBasicType::FLOAT:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::FLOAT;
+        break;
+      }
+      case TypeCheckBasicType::INT_ARRAY:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::INT;
+        break;
+      }
+      case TypeCheckBasicType::CHAR_ARRAY:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::CHAR;
+        break;
+      }
+      case TypeCheckBasicType::FLOAT_ARRAY:
+      {
+        ele_check_tcbt_type = TypeCheckBasicType::FLOAT;
+        break;
+      }
+      }
       // do type check
       // no such type conversion
       TypeCheckBasicType lval_type = param_type_check_type->basic_type_;
-      if (type_system_.GetAssignTypeResult(lval_type, current_type_.basic_type_) == TypeCheckBasicType::ERROR)
+      if (type_system_.GetAssignTypeResult(lval_type, ele_check_tcbt_type) == TypeCheckBasicType::ERROR)
       {
         cout << "no type conversion for "
              << TypeSystem::BasicTypeToString(lval_type)
@@ -284,13 +309,27 @@ void IrGenVisitor::VisitImplicit(DeclNode *decl_node)
       }
       else
       {
+        cout << "rexp type:" << int((*iter_init)->node_type_) << endl;
+        if ((*iter_init)->node_type_ == NodeType::BINARY_EXP or (*iter_init)->node_type_ == NodeType::UNARY_EXP)
+        {
+          cout << "rexp returns an value thrown out from binary/unary exp" << endl;
+        }
+        else if ((*iter_init)->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(rexp_value->getName()), regex("__arr_ele_ref_value.*")))
+        {
+          cout << "rexp returns an array ref as a value" << endl;
+        }
+        else
+        {
+          cout << "rexp returns pointer." << endl;
+          rexp_value = builder_.CreateLoad(rexp_value);
+        }
         rexp_value = type_system_.Cast(rexp_value,
                                        param_inst->getType(),
                                        builder_.GetInsertBlock());
       }
       // do assignment
-      auto load_value_ = builder_.CreateLoad(rexp_value);
-      builder_.CreateStore(load_value_, param_inst);
+      // auto load_value_ = builder_.CreateLoad(rexp_value);
+      builder_.CreateStore(rexp_value, param_inst);
       cout << "d" << endl;
     }
 
@@ -318,7 +357,11 @@ void IrGenVisitor::VisitImplicit(FuncCallExpNode *func_call_exp_node)
   for (auto itr : func_call_exp_node->rparam_array_)
   {
     Visit(itr);
-    if ((int)current_type_.basic_type_ == (int)TypeCheckBasicType::STRING)
+    if(itr->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(current_value_->getName()), regex("__arr_ele_ref_value.*"))){
+      cout << "using array ele ref as param in function call" << endl;
+      callArgs.push_back(current_value_);
+    }
+    else if ((int)current_type_.basic_type_ == (int)TypeCheckBasicType::STRING)
     {
       callArgs.push_back(current_value_);
     }
@@ -367,59 +410,62 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node)
   cout << "[FuncDefNode]" << func_def_node->func_ident_ << endl;
 
   std::vector<llvm::Type *> args_of_func;
-  for (auto itr: func_def_node->fparam_basic_type_array_){
-      switch (itr){
-      case BasicType::INT:
-      {
-	args_of_func.push_back(llvm::Type::getInt32Ty(llvm_context_));
-        break;
-      }
-      case BasicType::FLOAT:
-      {
-	args_of_func.push_back(llvm::Type::getFloatTy(llvm_context_));
-        break;
-      }
-      case BasicType::CHAR:
-      {
-	args_of_func.push_back(llvm::Type::getInt8Ty(llvm_context_));
-        break;
-      }
-      }
+  for (auto itr : func_def_node->fparam_basic_type_array_)
+  {
+    switch (itr)
+    {
+    case BasicType::INT:
+    {
+      args_of_func.push_back(llvm::Type::getInt32Ty(llvm_context_));
+      break;
+    }
+    case BasicType::FLOAT:
+    {
+      args_of_func.push_back(llvm::Type::getFloatTy(llvm_context_));
+      break;
+    }
+    case BasicType::CHAR:
+    {
+      args_of_func.push_back(llvm::Type::getInt8Ty(llvm_context_));
+      break;
+    }
+    }
   }
 
-  llvm::FunctionType * type_of_func;
-  switch (func_def_node->func_type_){
+  llvm::FunctionType *type_of_func;
+  switch (func_def_node->func_type_)
+  {
   case BasicType::VOID:
   {
-  type_of_func = llvm::FunctionType::get(
-      llvm::Type::getVoidTy(llvm_context_),
-      llvm::makeArrayRef(args_of_func),
-      false);
-  break;
+    type_of_func = llvm::FunctionType::get(
+        llvm::Type::getVoidTy(llvm_context_),
+        llvm::makeArrayRef(args_of_func),
+        false);
+    break;
   }
   case BasicType::INT:
   {
-  type_of_func = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(llvm_context_),
-      llvm::makeArrayRef(args_of_func),
-      false);
-  break;
+    type_of_func = llvm::FunctionType::get(
+        llvm::Type::getInt32Ty(llvm_context_),
+        llvm::makeArrayRef(args_of_func),
+        false);
+    break;
   }
   case BasicType::FLOAT:
   {
-  type_of_func = llvm::FunctionType::get(
-      llvm::Type::getFloatTy(llvm_context_),
-      llvm::makeArrayRef(args_of_func),
-      false);
-  break;
+    type_of_func = llvm::FunctionType::get(
+        llvm::Type::getFloatTy(llvm_context_),
+        llvm::makeArrayRef(args_of_func),
+        false);
+    break;
   }
   case BasicType::CHAR:
   {
-  type_of_func = llvm::FunctionType::get(
-      llvm::Type::getInt8Ty(llvm_context_),
-      llvm::makeArrayRef(args_of_func),
-      false);
-  break;
+    type_of_func = llvm::FunctionType::get(
+        llvm::Type::getInt8Ty(llvm_context_),
+        llvm::makeArrayRef(args_of_func),
+        false);
+    break;
   }
   }
 
@@ -437,17 +483,38 @@ void IrGenVisitor::VisitImplicit(FuncDefNode *func_def_node)
   int cnt = 0;
   for (auto AI = func_->arg_begin(), AE = func_->arg_end(); AI != AE; ++AI)
   {
-    Value* v = &*AI;
-    TypeCheckType * type_ = new TypeCheckType(TypeCheckBasicType::INT);
-    current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+    Value *v = &*AI;
+    TypeCheckType *type_;
+    switch (func_def_node->fparam_basic_type_array_[cnt])
+    {
+    case BasicType::INT:
+    {
+      type_ = new TypeCheckType(TypeCheckBasicType::INT);
+      break;
+    }
+    case BasicType::FLOAT:
+    {
+      type_ = new TypeCheckType(TypeCheckBasicType::FLOAT);
+      break;
+    }
+    case BasicType::CHAR:
+    {
+      type_ = new TypeCheckType(TypeCheckBasicType::CHAR);
+      break;
+    }
+    }
+    record_param_name_.str(std::string());
+    record_param_name_ << "decl_func_" << func_def_node->fparam_ident_array_[cnt];
+    current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1),record_param_name_.str());
     builder_.CreateStore(v, current_value_);
     symbol_table_.AddLocalVariable(func_def_node->fparam_ident_array_[cnt], current_value_, *type_);
-    cout << symbol_table_.IfExistLocal(func_def_node->fparam_ident_array_[cnt]) << func_def_node->fparam_ident_array_[cnt] << endl;
-    cnt ++;
-  } 
+    //cout << symbol_table_.IfExistLocal(func_def_node->fparam_ident_array_[cnt]) << func_def_node->fparam_ident_array_[cnt] << endl;
+    cnt++;
+  }
 
   Visit(func_def_node->block_);
   symbol_table_.PopScope();
+  fpm_->run(*func_);
 }
 
 void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
@@ -487,10 +554,12 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     }
     }
   }
-  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  // else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  else if (binary_exp_node->lexp_->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(current_value_->getName()), regex("__arr_ele_ref_value.*")))
   {
     cout << "loading array ref for left" << endl;
-    leftVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    // leftVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    leftVariable = current_value_;
     switch (current_type_.basic_type_)
     {
     case TypeCheckBasicType::INT_ARRAY:
@@ -544,10 +613,12 @@ void IrGenVisitor::VisitImplicit(BinaryExpNode *binary_exp_node)
     }
     }
   }
-  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  // else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  else if (binary_exp_node->rexp_->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(current_value_->getName()), regex("__arr_ele_ref_value.*")))
   {
     cout << "loading array ref for right" << endl;
-    rightVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    // rightVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    rightVariable = current_value_;
     switch (current_type_.basic_type_)
     {
     case TypeCheckBasicType::INT_ARRAY:
@@ -824,10 +895,12 @@ void IrGenVisitor::VisitImplicit(UnaryExpNode *unary_exp_node)
     }
     }
   }
-  else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  // else if (((int)(current_type_.basic_type_) == (int)TypeCheckBasicType::INT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::FLOAT_ARRAY or (int)(current_type_.basic_type_) == (int)TypeCheckBasicType::CHAR_ARRAY))
+  else if (unary_exp_node->exp_->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(current_value_->getName()), regex("__arr_ele_ref_value.*")))
   {
     cout << "loading array ref for unary" << endl;
-    unaryVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    // unaryVariable = builder_.CreateAlignedLoad(current_value_, 2);
+    unaryVariable = current_value_;
     switch (current_type_.basic_type_)
     {
     case TypeCheckBasicType::INT_ARRAY:
@@ -946,14 +1019,14 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node)
     {
     case (NodeType::STRING_PRIMARY_EXP):
     {
-      current_value_ = builder_.CreateGlobalStringPtr(node->string_value_);
+      current_value_ = builder_.CreateGlobalStringPtr(node->string_value_,"str_literal");
       current_type_.basic_type_ = TypeCheckBasicType::STRING;
       current_const_value_ = 0.0;
       break;
     }
     case (NodeType::INT_PRIMARY_EXP):
     {
-      current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1),"int_literal");
       builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), node->int_value_), current_value_);
       current_type_.basic_type_ = TypeCheckBasicType::INT;
       current_const_value_ = double(node->int_value_);
@@ -961,7 +1034,7 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node)
     }
     case (NodeType::FLOAT_PRIMARY_EXP):
     {
-      current_value_ = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      current_value_ = builder_.CreateAlloca(llvm::Type::getFloatTy(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1),"float_literal");
       builder_.CreateStore(llvm::ConstantFP::get(llvm::Type::getFloatTy(llvm_context_), node->float_value_), current_value_);
       current_type_.basic_type_ = TypeCheckBasicType::FLOAT;
       current_const_value_ = double(node->float_value_);
@@ -969,7 +1042,7 @@ void IrGenVisitor::VisitImplicit(ValuePrimaryExpNode *node)
     }
     case (NodeType::CHAR_PRIMARY_EXP):
     {
-      current_value_ = builder_.CreateAlloca(llvm::Type::getInt8Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1));
+      current_value_ = builder_.CreateAlloca(llvm::Type::getInt8Ty(llvm_context_), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 1),"char_literal");
       builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt8Ty(llvm_context_), node->char_value_), current_value_);
       current_type_.basic_type_ = TypeCheckBasicType::CHAR;
       current_const_value_ = double(node->char_value_);
@@ -1038,30 +1111,37 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node)
   int index_list_size = node->index_list_.size();
   if (var_type_dimension_list_size == index_list_size and index_list_size > 0)
   {
-    llvm::Value *index_temp = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_));
-    builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0), index_temp);
+    llvm::Value *index_temp = builder_.CreateAdd(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0));
     std::vector<int> dim_vec(var_type.array_dimension_list_.begin(), var_type.array_dimension_list_.end());
     int dim_cur = 0;
     for (auto iter_index : node->index_list_)
     {
       dim_cur++;
       int post_dims = 1;
-      // if(dim_cur == dim_vec.size()-1){post_dims = 0;}else{
       for (int i = dim_cur; i < dim_vec.size(); i++)
       {
         post_dims *= dim_vec[dim_cur];
       }
-      // }
       cout << "array index: " << dim_cur << " , " << post_dims << endl;
       Visit(iter_index);
-      llvm::Value *arr_dim = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_));
-      builder_.CreateStore(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), post_dims), arr_dim);
-      llvm::Value *mulVal = builder_.CreateMul(builder_.CreateLoad(current_value_), builder_.CreateLoad(arr_dim));
-      llvm::Value *index_temp_value = builder_.CreateLoad(index_temp);
-      llvm::Value *addVal = builder_.CreateAdd(mulVal, index_temp_value);
-      builder_.CreateStore(addVal, index_temp);
+      if (iter_index->node_type_ == NodeType::LVAL_PRIMARY_EXP)
+      {
+        if (!regex_match(std::string(current_value_->getName()), regex("__arr_ele_ref_value.*")))
+        {
+          cout << "load when parsing array subscript" << endl;
+          current_value_ = builder_.CreateLoad(current_value_);
+        }
+      }
+      else if(iter_index->node_type_ == NodeType::INT_PRIMARY_EXP or iter_index->node_type_ == NodeType::FLOAT_PRIMARY_EXP or iter_index->node_type_ == NodeType::CHAR_PRIMARY_EXP){
+        cout << "load when parsing array subscript for val primary exp" << endl;
+        current_value_ = builder_.CreateLoad(current_value_);
+      }
+      llvm::Value *arr_dim = builder_.CreateAdd(llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), post_dims), llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context_), 0));
+      llvm::Value *mulVal = builder_.CreateMul(current_value_, arr_dim);
+      llvm::Value *addVal = builder_.CreateAdd(mulVal, index_temp);
+      index_temp = addVal;
     }
-    llvm::Value *index_temp_value = builder_.CreateLoad(index_temp);
+    llvm::Value *index_temp_value = index_temp;
     ArrayRef<Value *> arr_index({ConstantInt::get(Type::getInt32Ty(llvm_context_), 0), index_temp_value});
     // ArrayRef<Value *> arr_index({ ConstantInt::get(Type::getInt32Ty(llvm_context_), 0), ConstantInt::get(Type::getInt32Ty(llvm_context_), 0)});
     llvm::Value *arr_start = symbol_table_.GetLocalVariableInstance(node->ident_);
@@ -1089,10 +1169,10 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node)
       break;
     }
     }
-    llvm::Value *new_value_refs_tgt_ele = builder_.CreateAlloca(ele_type, nullptr, "arr_ele_ref_var");
-    auto tgt_ele_value = builder_.CreateAlignedLoad(tgt_ele, 2);
-    builder_.CreateStore(tgt_ele_value, new_value_refs_tgt_ele);
-    current_value_ = new_value_refs_tgt_ele;
+    // llvm::Value *new_value_refs_tgt_ele = builder_.CreateAlloca(ele_type, nullptr, "__arr_ele_ref_value");
+    auto tgt_ele_value = builder_.CreateAlignedLoad(tgt_ele, 2, "__arr_ele_ref_value");
+    // builder_.CreateStore(tgt_ele_value, new_value_refs_tgt_ele);
+    current_value_ = tgt_ele_value;
     current_type_ = var_type.basic_type_;
     current_arr_tgt_ = tgt_ele;
     // cout << "defined name: " << std::string(tgt_ele->getName()) << endl;
@@ -1111,8 +1191,7 @@ void IrGenVisitor::VisitImplicit(LValPrimaryExpNode *node)
     llvm::Value *arr_start = symbol_table_.GetLocalVariableInstance(node->ident_);
     std::vector<Value *> indices;
     ArrayRef<Value *> arr_index({ConstantInt::get(Type::getInt32Ty(llvm_context_), 0), ConstantInt::get(Type::getInt32Ty(llvm_context_), 0)});
-  llvm:;
-    Value *ptr = builder_.CreateInBoundsGEP(arr_start, arr_index, "arrayPtr");
+    llvm::Value *ptr = builder_.CreateInBoundsGEP(arr_start, arr_index, "arrayPtr");
     // current_value_ = builder_.CreateAlloca(llvm::Type::getInt32Ty(llvm_context_));
     // builder_.CreateStore(ptr,current_value_);
     current_value_ = ptr;
@@ -1218,7 +1297,7 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
   Value *lval_value = current_value_;
   // cout << "name: " << std::string(lval_value->getName()) << endl;
   TypeCheckBasicType lval_type = current_type_.basic_type_;
-  if (regex_match(std::string(lval_value->getName()), regex("arr_ele_ref_var.*")))
+  if (regex_match(std::string(lval_value->getName()), regex("__arr_ele_ref_value.*")))
   {
     is_arr_ref = true;
     cout << "it's arr ref as assign left value!" << endl;
@@ -1243,9 +1322,10 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
     }
     }
     cout << "b";
-    lval_value = builder_.CreateAlloca(ele_type);
+    // lval_value = builder_.CreateAlloca(ele_type);
     auto tgt_ele_value = builder_.CreateAlignedLoad(current_arr_tgt_, 2);
-    builder_.CreateStore(tgt_ele_value, lval_value);
+    lval_value = tgt_ele_value;
+    // builder_.CreateStore(tgt_ele_value, lval_value);
     cout << "c";
     switch (current_type_.basic_type_)
     {
@@ -1330,10 +1410,18 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
          << endl;
     //TODO: raise error
   }
-  else
+  // else
   {
     cout << "rexp type:" << int(node->rexp_->node_type_) << endl;
-    if (not(node->rexp_->node_type_ == NodeType::BINARY_EXP or node->rexp_->node_type_ == NodeType::UNARY_EXP))
+    if (node->rexp_->node_type_ == NodeType::BINARY_EXP or node->rexp_->node_type_ == NodeType::UNARY_EXP)
+    {
+      cout << "rexp returns an value thrown out from binary/unary exp" << endl;
+    }
+    else if (node->rexp_->node_type_ == NodeType::LVAL_PRIMARY_EXP and regex_match(std::string(rexp_value->getName()), regex("__arr_ele_ref_value.*")))
+    {
+      cout << "rexp returns an array ref as a value" << endl;
+    }
+    else
     {
       cout << "rexp returns pointer." << endl;
       rexp_value = builder_.CreateLoad(rexp_value);
@@ -1342,6 +1430,11 @@ void IrGenVisitor::VisitImplicit(AssignStmtNode *node)
                                    lval_value->getType(),
                                    builder_.GetInsertBlock());
   }
+  if(lval_type == TypeCheckBasicType::CHAR and ele_check_tcbt_type == TypeCheckBasicType::INT){
+    cout << "Casting int to char" << endl;
+    rexp_value = CastInst::Create(CastInst::Trunc, rexp_value, Type::getInt8Ty(llvm_context_), "cast", builder_.GetInsertBlock());
+  }
+  
   // do assignment
   if (is_arr_ref)
   {

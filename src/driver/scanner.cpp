@@ -1054,7 +1054,7 @@ YY_RULE_SETUP
 #line 174 "../../src/driver/scanner.l"
 {
   test_output("Ident");
-  Node *new_node = new IdentNode(std::string(yytext));
+  Node *new_node = new IdentNode(std::string(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return IDENT;
@@ -1071,7 +1071,7 @@ YY_RULE_SETUP
 #line 184 "../../src/driver/scanner.l"
 {
   test_output("IntConst");
-  Node* new_node = new ValuePrimaryExpNode(atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode(atoi(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return INT_CONST;
@@ -1082,7 +1082,7 @@ YY_RULE_SETUP
 #line 192 "../../src/driver/scanner.l"
 {
   test_output("floatConst");
-  Node* new_node = new ValuePrimaryExpNode((float)atof(yytext));
+  Node* new_node = new ValuePrimaryExpNode(((float)(atof(yytext))),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return FLOAT_CONST;
@@ -1093,7 +1093,7 @@ YY_RULE_SETUP
 #line 200 "../../src/driver/scanner.l"
 {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1));
+  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;
@@ -1123,16 +1123,18 @@ YY_RULE_SETUP
       }
     }
     tmp_str = new_str.str();
-    Node* new_node = new ValuePrimaryExpNode(tmp_str);
+    Node* new_node = new ValuePrimaryExpNode(tmp_str,yylineno);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
+    
+    
   }
 } /* string literal */
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 235 "../../src/driver/scanner.l"
+#line 237 "../../src/driver/scanner.l"
 {
 #ifdef DEBUG
 #ifdef SCANNER_DEBUG
@@ -1144,10 +1146,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 244 "../../src/driver/scanner.l"
+#line 246 "../../src/driver/scanner.l"
 ECHO;
 	YY_BREAK
-#line 1151 "../../src/driver/scanner.cpp"
+#line 1153 "../../src/driver/scanner.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2162,7 +2164,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 244 "../../src/driver/scanner.l"
+#line 246 "../../src/driver/scanner.l"
 
 
 int yywrap() {
@@ -2171,5 +2173,6 @@ int yywrap() {
 
 void yyerror(const char *str) {
   assert(str != nullptr);
-  fprintf(yyout,"%s", str);
+  fprintf(yyout,"//line %d: ",yylineno);
+  fprintf(yyout,"%s\n", str);
 }

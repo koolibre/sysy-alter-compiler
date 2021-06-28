@@ -173,7 +173,7 @@ inline void test_output(const char *type) {
 
 {Ident} {
   test_output("Ident");
-  Node *new_node = new IdentNode(std::string(yytext));
+  Node *new_node = new IdentNode(std::string(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return IDENT;
@@ -183,7 +183,7 @@ inline void test_output(const char *type) {
 
 {IntConst} {
   test_output("IntConst");
-  Node* new_node = new ValuePrimaryExpNode(atoi(yytext));
+  Node* new_node = new ValuePrimaryExpNode(atoi(yytext),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return INT_CONST;
@@ -191,7 +191,7 @@ inline void test_output(const char *type) {
 
 {floatConst} {
   test_output("floatConst");
-  Node* new_node = new ValuePrimaryExpNode((float)atof(yytext));
+  Node* new_node = new ValuePrimaryExpNode(((float)(atof(yytext))),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return FLOAT_CONST;
@@ -199,7 +199,7 @@ inline void test_output(const char *type) {
 
 {CharConst} {
   test_output("CharConst");
-  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1));
+  Node* new_node = new ValuePrimaryExpNode(*((char*)yytext + 1),yylineno);
   assert(new_node != nullptr);
   yylval = new_node;
   return CHAR_CONST;
@@ -225,10 +225,12 @@ inline void test_output(const char *type) {
       }
     }
     tmp_str = new_str.str();
-    Node* new_node = new ValuePrimaryExpNode(tmp_str);
+    Node* new_node = new ValuePrimaryExpNode(tmp_str,yylineno);
     assert(new_node != nullptr);
     yylval = new_node;
     return STRING_CONST;
+    
+    
   }
 } /* string literal */
 
@@ -249,5 +251,6 @@ int yywrap() {
 
 void yyerror(const char *str) {
   assert(str != nullptr);
-  fprintf(yyout,"%s", str);
+  fprintf(yyout,"//line %d: ",yylineno);
+  fprintf(yyout,"%s\n", str);
 }
